@@ -5,6 +5,19 @@
 
 **Carpool** is a ride-sharing platform that allows users to book rides, offer rides, and connect with other users to reduce commute costs and environmental impact. The platform includes features like ride tracking, vehicle management, and user authentication. It is built with modern web technologies and offers a polished user experience across both desktop and mobile devices.
 
+## Current Product Direction
+
+- The frontend is transitioning to an admin-first model.
+- Primary application surface is `/admin/*`.
+- Existing user-flow pages are in transition to `/legacy/*` and are deprecated for one release cycle.
+- New feature work targets admin modules only; legacy area is bugfix-only.
+
+Planning and migration docs:
+- `ADMIN_FRONTEND_FINDINGS.md`
+- `LEGACY_FEATURES_DEPRECATION.md`
+- `ADMIN_EXECUTION_TASKBOARD.md`
+- `CLAUDE_CRITICAL_REVIEW_PROMPT.md`
+
 ---
 
 ## Key Features
