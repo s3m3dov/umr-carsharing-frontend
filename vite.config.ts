@@ -7,9 +7,18 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 3000,
-    // Add this fallback to serve index.html for all requests
     fs: {
       strict: false,
+    },
+    // Dev proxy: forwards service-prefixed paths to the local API gateway.
+    // Use this when VITE_API_BASE_URL is empty (same-origin requests, no CORS needed).
+    // Target the gateway port — default is 8081 based on local dev setup.
+    proxy: {
+      '/auth-service':         { target: 'http://35.186.208.67', changeOrigin: true },
+      '/user-service':         { target: 'http://35.186.208.67', changeOrigin: true },
+      '/trip-service':         { target: 'http://35.186.208.67', changeOrigin: true },
+      '/review-service':       { target: 'http://35.186.208.67', changeOrigin: true },
+      '/notification-service': { target: 'http://35.186.208.67', changeOrigin: true },
     },
   },
   plugins: [
