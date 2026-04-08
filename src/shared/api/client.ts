@@ -1,18 +1,47 @@
 import { getToken } from '@/shared/auth/session';
 import { parseResponse } from './error-parser';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
+const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? '';
+const BASE_URL = RAW_BASE_URL.replace(/\/+$/, '');
+
+function buildRequestUrl(path: string): string {
+  return `${BASE_URL}${path}`;
+}
+
+function mixedContentHint(): string | null {
+  if (!BASE_URL || typeof window === 'undefined') {
+    return null;
+  }
+
+  if (window.location.protocol !== 'https:') {
+    return null;
+  }
+
+  if (!BASE_URL.startsWith('http://')) {
+    return null;
+  }
+
+  return 'Cannot connect: app is loaded over HTTPS but API is HTTP. Open the app with http:// or enable HTTPS on the backend.';
+}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers ?? {}),
-    },
-  });
+  let res: Response;
+
+  try {
+    res = await fetch(buildRequestUrl(path), {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch {
+    const hint = mixedContentHint();
+    throw new Error(hint ?? 'Failed to reach the API server. Check API URL and network connectivity.');
+  }
+
   return parseResponse<T>(res);
 }
 
