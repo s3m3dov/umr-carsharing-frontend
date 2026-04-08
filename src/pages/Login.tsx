@@ -36,7 +36,11 @@ export default function Login() {
       navigate(data.role === 'ADMIN' ? '/admin' : '/dashboard', { replace: true });
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : 'Failed to connect to server.';
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Failed to connect to server.';
       toast({ title: 'Login failed', description: message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
