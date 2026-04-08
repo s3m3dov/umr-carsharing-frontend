@@ -23,6 +23,14 @@ import AdminRouteGuard from './admin/guards/AdminRouteGuard';
 import AdminLayout from './admin/layout/AdminLayout';
 import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminStatus from './admin/pages/AdminStatus';
+import AdminDrivers from './admin/pages/AdminDrivers';
+import AdminPassengers from './admin/pages/AdminPassengers';
+import AdminVehicles from './admin/pages/AdminVehicles';
+import AdminTrips from './admin/pages/AdminTrips';
+import AdminBookings from './admin/pages/AdminBookings';
+import AdminReviews from './admin/pages/AdminReviews';
+import AdminReports from './admin/pages/AdminReports';
+import AdminAuditLogs from './admin/pages/AdminAuditLogs';
 
 import './App.css';
 
@@ -34,16 +42,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Placeholder for admin module pages not yet implemented (R4*)
-function ComingSoon({ label }: { label: string }) {
-  return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold">{label}</h2>
-      <p className="text-muted-foreground mt-1 text-sm">This module is coming soon.</p>
-    </div>
-  );
-}
 
 // Feature flag: set VITE_ADMIN_DEFAULT_ROUTE=true to land admins on /admin by default.
 const adminDefault = import.meta.env.VITE_ADMIN_DEFAULT_ROUTE === 'true';
@@ -76,14 +74,14 @@ function App() {
                 }
               >
                 <Route index element={<AdminDashboard />} />
-                <Route path="drivers"    element={<ComingSoon label="Drivers" />} />
-                <Route path="passengers" element={<ComingSoon label="Passengers" />} />
-                <Route path="vehicles"   element={<ComingSoon label="Vehicles" />} />
-                <Route path="trips"      element={<ComingSoon label="Trips" />} />
-                <Route path="bookings"   element={<ComingSoon label="Bookings" />} />
-                <Route path="reviews"    element={<ComingSoon label="Reviews" />} />
-                <Route path="reports"    element={<ComingSoon label="Reports" />} />
-                <Route path="audit-logs" element={<ComingSoon label="Audit Logs" />} />
+                <Route path="drivers"    element={<AdminDrivers />} />
+                <Route path="passengers" element={<AdminPassengers />} />
+                <Route path="vehicles"   element={<AdminVehicles />} />
+                <Route path="trips"      element={<AdminTrips />} />
+                <Route path="bookings"   element={<AdminBookings />} />
+                <Route path="reviews"    element={<AdminReviews />} />
+                <Route path="reports"    element={<AdminReports />} />
+                <Route path="audit-logs" element={<AdminAuditLogs />} />
                 <Route path="status"     element={<AdminStatus />} />
               </Route>
 
