@@ -83,16 +83,18 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.3.0] – Core User Features (2025-06-13 to 2025-06-16)
+## [v0.3.0] – Core User Features & Driver Dashboard (2025-06-13 to 2025-06-16)
 
-**Author:** s3m3dov (Hikmat Samadov)
+**Author:** VipulSingh-10
 
 ### Added
 
-- Separate pages for core user flows: Dashboard, Find Rides, Book Ride, Offer Ride / Create Trip, Track Ride, My Rides, Vehicles, Profile
+- Minimal driver/passenger dashboard (`Dashboard.tsx`) with upcoming rides and vehicle overview
+- Separate pages for core user flows: Find Rides, Book Ride, Offer Ride / Create Trip, Track Ride, My Rides, Vehicles, Profile
 - Google Maps Autocomplete integration (`PlacesAutocomplete` component, `@googlemaps/js-api-loader`)
 - Mobile app scaffold with React Native / Capacitor (`MobileApp.tsx`, `MobileDashboard`)
 - Persisted form input values in `RideOffering` and `FindRides` across re-renders
+- `.env` added to `.gitignore`
 
 ### Fixed
 
@@ -105,7 +107,7 @@ and this project adheres to **Semantic Versioning**
 
 ## [v0.2.0] – Backend Integration & Styling (2025-06-12 to 2025-06-13)
 
-**Author:** s3m3dov (Hikmat Samadov)
+**Author:** gpt-engineer-app[bot] (Lovable)
 
 ### Added
 
@@ -117,7 +119,6 @@ and this project adheres to **Semantic Versioning**
 
 - Frontend DTOs updated to match backend response shapes
 - UI/UX and overall styling improvements
-- `.env` added to `.gitignore`
 
 ### Fixed
 
@@ -127,7 +128,7 @@ and this project adheres to **Semantic Versioning**
 
 ## [v0.1.0] – Initial Setup (2025-06-12)
 
-**Author:** s3m3dov (Hikmat Samadov)
+**Author:** gpt-engineer-app[bot] (Lovable)
 
 ### Added
 
