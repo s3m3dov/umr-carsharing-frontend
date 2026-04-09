@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
@@ -153,23 +154,29 @@ export default function AdminPassengers() {
       </div>
 
       {/* Table */}
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      ) : isError ? (
-        <p className="text-sm text-destructive">Failed to load passengers.</p>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Age</TableHead>
+              <TableHead>Joined</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          {isLoading ? (
+            <TableSkeleton columns={6} />
+          ) : isError ? (
+            <TableBody>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Age</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableCell colSpan={6} className="text-center text-destructive py-8">
+                  Failed to load passengers.
+                </TableCell>
               </TableRow>
-            </TableHeader>
+            </TableBody>
+          ) : (
             <TableBody>
               {passengers.length === 0 ? (
                 <TableRow>
@@ -213,9 +220,9 @@ export default function AdminPassengers() {
                 ))
               )}
             </TableBody>
-          </Table>
-        </div>
-      )}
+          )}
+        </Table>
+      </div>
 
       {/* Pagination */}
       {!isLoading && !isError && totalPages > 0 && (

@@ -44,6 +44,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
@@ -253,119 +254,124 @@ export default function AdminReviews() {
           </div>
         </div>
 
-        {/* States */}
-        {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-        {isError && <p className="text-sm text-destructive">Failed to load reviews.</p>}
-
-        {data && (
-          <>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
+        {/* Table */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Review ID</TableHead>
+                <TableHead>Reviewer ID</TableHead>
+                <TableHead>Reviewee ID</TableHead>
+                <TableHead>Reviewer Type</TableHead>
+                <TableHead>Rating</TableHead>
+                <TableHead>Comment</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            {isLoading ? (
+              <TableSkeleton columns={9} />
+            ) : isError ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center text-destructive py-8">
+                    Failed to load reviews.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <TableBody>
+                {data!.content.length === 0 && (
                   <TableRow>
-                    <TableHead>Review ID</TableHead>
-                    <TableHead>Reviewer ID</TableHead>
-                    <TableHead>Reviewee ID</TableHead>
-                    <TableHead>Reviewer Type</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Comment</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableCell
+                      colSpan={9}
+                      className="text-center text-muted-foreground py-8"
+                    >
+                      No reviews found.
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.content.length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={9}
-                        className="text-center text-muted-foreground py-8"
-                      >
-                        No reviews found.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {data.content.map((review: ReviewResponse) => (
-                    <TableRow key={review.reviewId}>
-                      <TableCell className="font-mono text-xs">
-                        {review.reviewId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {review.reviewerId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {review.revieweeId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-xs">
-                          {review.reviewerType}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <StarRating rating={review.rating} />
-                      </TableCell>
-                      <TableCell className="max-w-[180px]">
-                        {review.comment.length > 60 ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-default text-sm">
-                                {truncate(review.comment, 60)}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs whitespace-pre-wrap">
-                              {review.comment}
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="text-sm">{review.comment}</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{reviewStatusBadge(review.status)}</TableCell>
-                      <TableCell className="text-sm">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <ReviewRowActions review={review} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                      aria-disabled={page === 0}
-                      className={
-                        page === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
-                      }
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <span className="px-4 py-2 text-sm">
-                      Page {page + 1} of {totalPages}
-                    </span>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                      aria-disabled={page >= totalPages - 1}
-                      className={
-                        page >= totalPages - 1
-                          ? 'pointer-events-none opacity-50'
-                          : 'cursor-pointer'
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                )}
+                {data!.content.map((review: ReviewResponse) => (
+                  <TableRow key={review.reviewId}>
+                    <TableCell className="font-mono text-xs">
+                      {review.reviewId.slice(0, 8)}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {review.reviewerId.slice(0, 8)}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {review.revieweeId.slice(0, 8)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="text-xs">
+                        {review.reviewerType}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <StarRating rating={review.rating} />
+                    </TableCell>
+                    <TableCell className="max-w-[180px]">
+                      {review.comment.length > 60 ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-default text-sm">
+                              {truncate(review.comment, 60)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs whitespace-pre-wrap">
+                            {review.comment}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <span className="text-sm">{review.comment}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{reviewStatusBadge(review.status)}</TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <ReviewRowActions review={review} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
             )}
-          </>
+          </Table>
+        </div>
+
+        {/* Pagination */}
+        {data && totalPages > 1 && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  aria-disabled={page === 0}
+                  className={
+                    page === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                  }
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <span className="px-4 py-2 text-sm">
+                  Page {page + 1} of {totalPages}
+                </span>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  aria-disabled={page >= totalPages - 1}
+                  className={
+                    page >= totalPages - 1
+                      ? 'pointer-events-none opacity-50'
+                      : 'cursor-pointer'
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     </TooltipProvider>
