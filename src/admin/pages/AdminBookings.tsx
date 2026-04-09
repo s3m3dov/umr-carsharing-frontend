@@ -48,6 +48,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { TableSkeleton } from '@/admin/shared';
 
 const BOOKING_STATUSES: BookingStatus[] = [
   'REQUESTED',
@@ -224,142 +225,147 @@ export default function AdminBookings() {
       </div>
 
       {/* Table */}
-      {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-      {isError && <p className="text-sm text-destructive">Failed to load bookings.</p>}
-
-      {data && (
-        <>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Booking ID</TableHead>
+              <TableHead>Passenger ID</TableHead>
+              <TableHead>Trip ID</TableHead>
+              <TableHead>Vehicle #</TableHead>
+              <TableHead>Seats</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Ride Time</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          {isLoading ? (
+            <TableSkeleton columns={10} />
+          ) : isError ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={10} className="text-center text-destructive py-8">
+                  Failed to load bookings.
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : (
+            <TableBody>
+              {data!.content.length === 0 && (
                 <TableRow>
-                  <TableHead>Booking ID</TableHead>
-                  <TableHead>Passenger ID</TableHead>
-                  <TableHead>Trip ID</TableHead>
-                  <TableHead>Vehicle #</TableHead>
-                  <TableHead>Seats</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Ride Time</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
+                    No bookings found.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.content.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
-                      No bookings found.
+              )}
+              {data!.content.map((booking) => {
+                const isFinal =
+                  booking.status === 'CANCELLED' || booking.status === 'COMPLETED';
+                return (
+                  <TableRow key={booking.bookingId}>
+                    <TableCell className="font-mono text-xs">
+                      {booking.bookingId.slice(0, 8)}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {booking.passengerId.slice(0, 8)}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {booking.tripId.slice(0, 8)}
+                    </TableCell>
+                    <TableCell className="text-sm">{booking.vehicleNumber}</TableCell>
+                    <TableCell className="text-sm">{booking.requestedSeats}</TableCell>
+                    <TableCell>{bookingStatusBadge(booking.status)}</TableCell>
+                    <TableCell className="text-sm tabular-nums">
+                      €{booking.estimatedPrice.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(booking.rideStartTimeUTC).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {new Date(booking.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingBooking(booking)}
+                        >
+                          Update
+                        </Button>
+                        {!isFinal && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                disabled={cancelMutation.isPending}
+                              >
+                                Cancel
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to cancel booking{' '}
+                                  <span className="font-mono">
+                                    {booking.bookingId.slice(0, 8)}
+                                  </span>
+                                  ? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Keep</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => cancelMutation.mutate(booking.bookingId)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Cancel Booking
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
-                )}
-                {data.content.map((booking) => {
-                  const isFinal =
-                    booking.status === 'CANCELLED' || booking.status === 'COMPLETED';
-                  return (
-                    <TableRow key={booking.bookingId}>
-                      <TableCell className="font-mono text-xs">
-                        {booking.bookingId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {booking.passengerId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {booking.tripId.slice(0, 8)}
-                      </TableCell>
-                      <TableCell className="text-sm">{booking.vehicleNumber}</TableCell>
-                      <TableCell className="text-sm">{booking.requestedSeats}</TableCell>
-                      <TableCell>{bookingStatusBadge(booking.status)}</TableCell>
-                      <TableCell className="text-sm tabular-nums">
-                        €{booking.estimatedPrice.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {new Date(booking.rideStartTimeUTC).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {new Date(booking.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingBooking(booking)}
-                          >
-                            Update
-                          </Button>
-                          {!isFinal && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  disabled={cancelMutation.isPending}
-                                >
-                                  Cancel
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to cancel booking{' '}
-                                    <span className="font-mono">
-                                      {booking.bookingId.slice(0, 8)}
-                                    </span>
-                                    ? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Keep</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => cancelMutation.mutate(booking.bookingId)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Cancel Booking
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    aria-disabled={page === 0}
-                    className={page === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <span className="px-4 py-2 text-sm">
-                    Page {page + 1} of {totalPages}
-                  </span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    aria-disabled={page >= totalPages - 1}
-                    className={
-                      page >= totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                );
+              })}
+            </TableBody>
           )}
-        </>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      {data && totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                aria-disabled={page === 0}
+                className={page === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <span className="px-4 py-2 text-sm">
+                Page {page + 1} of {totalPages}
+              </span>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                aria-disabled={page >= totalPages - 1}
+                className={
+                  page >= totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       {/* Update Dialog */}

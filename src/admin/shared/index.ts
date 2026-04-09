@@ -1,4 +1,5 @@
 export { DataTable } from './DataTable';
+export { TableSkeleton } from './TableSkeleton';
 export { FilterBar } from './FilterBar';
 export { Pagination } from './Pagination';
 export { ActionButton } from './ActionButton';

@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
@@ -367,37 +368,39 @@ export default function AdminVehicles() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {isLoading && (
-            <p className="p-6 text-sm text-muted-foreground">Loading...</p>
-          )}
-          {isError && (
-            <p className="p-6 text-sm text-destructive">
-              Failed to load vehicles. Please try again.
-            </p>
-          )}
-          {data && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Vehicle #</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Color</TableHead>
-                  <TableHead>Seats</TableHead>
-                  <TableHead>Owner ID</TableHead>
-                  <TableHead>Registered</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vehicle #</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Color</TableHead>
+                <TableHead>Seats</TableHead>
+                <TableHead>Owner ID</TableHead>
+                <TableHead>Registered</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            {isLoading ? (
+              <TableSkeleton columns={8} />
+            ) : isError ? (
               <TableBody>
-                {data.content.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-destructive py-8">
+                    Failed to load vehicles.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <TableBody>
+                {data?.content.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       No vehicles found.
                     </TableCell>
                   </TableRow>
                 )}
-                {data.content.map((vehicle) => (
+                {data?.content.map((vehicle) => (
                   <TableRow key={vehicle.id}>
                     <TableCell className="font-mono text-sm font-medium">
                       {vehicle.vehicleNumber}
@@ -441,8 +444,8 @@ export default function AdminVehicles() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          )}
+            )}
+          </Table>
         </CardContent>
       </Card>
 
