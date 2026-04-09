@@ -2,21 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import AuthProvider from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
 
 // Auth pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Forbidden from './pages/Forbidden';
 
-// Legacy user pages (kept at original paths; moved to /legacy/* in R5)
-import Dashboard from './pages/Dashboard';
-import RideBooking from './pages/RideBooking';
-import RideOffering from './pages/RideOffering';
-import RideTracking from './pages/RideTracking';
-import MyRides from './pages/MyRides';
-import Vehicles from './pages/Vehicles';
-import Profile from './pages/Profile';
+// Legacy routes (moved to /legacy/* in R5; old paths now redirect)
+import { legacyRoutes } from './legacy/routes';
 
 // Admin shell
 import AdminRouteGuard from './admin/guards/AdminRouteGuard';
@@ -61,7 +54,7 @@ function App() {
               {/* Root redirect — controlled by feature flag */}
               <Route
                 path="/"
-                element={<Navigate to={adminDefault ? '/admin' : '/dashboard'} replace />}
+                element={<Navigate to={adminDefault ? '/admin' : '/legacy/dashboard'} replace />}
               />
 
               {/* Admin routes — role-guarded */}
@@ -85,16 +78,19 @@ function App() {
                 <Route path="status"     element={<AdminStatus />} />
               </Route>
 
-              {/* Legacy user routes (kept at original paths; deprecated; moved in R5) */}
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/book-ride"  element={<ProtectedRoute><RideBooking /></ProtectedRoute>} />
-              <Route path="/find-rides" element={<ProtectedRoute><RideBooking /></ProtectedRoute>} />
-              <Route path="/offer-ride" element={<ProtectedRoute><RideOffering /></ProtectedRoute>} />
-              <Route path="/create-trip" element={<ProtectedRoute><RideOffering /></ProtectedRoute>} />
-              <Route path="/track-ride" element={<ProtectedRoute><RideTracking /></ProtectedRoute>} />
-              <Route path="/my-rides"   element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
-              <Route path="/vehicles"   element={<ProtectedRoute><Vehicles /></ProtectedRoute>} />
-              <Route path="/profile"    element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              {/* Legacy routes — canonical paths under /legacy/* */}
+              <Route path="/legacy">{legacyRoutes()}</Route>
+
+              {/* Short-path redirects → /legacy/* (kept for one release cycle) */}
+              <Route path="/dashboard"  element={<Navigate to="/legacy/dashboard"   replace />} />
+              <Route path="/book-ride"  element={<Navigate to="/legacy/book-ride"   replace />} />
+              <Route path="/find-rides" element={<Navigate to="/legacy/find-rides"  replace />} />
+              <Route path="/offer-ride" element={<Navigate to="/legacy/offer-ride"  replace />} />
+              <Route path="/create-trip"element={<Navigate to="/legacy/create-trip" replace />} />
+              <Route path="/track-ride" element={<Navigate to="/legacy/track-ride"  replace />} />
+              <Route path="/my-rides"   element={<Navigate to="/legacy/my-rides"    replace />} />
+              <Route path="/vehicles"   element={<Navigate to="/legacy/vehicles"    replace />} />
+              <Route path="/profile"    element={<Navigate to="/legacy/profile"     replace />} />
             </Routes>
             <Toaster />
           </div>
