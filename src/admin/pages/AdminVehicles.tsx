@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { vehiclesApi } from '@/admin/api';
 import type { AdminVehicleResponse, RegisterVehicleRequest, UpdateVehicleRequest } from '@/admin/types';
@@ -69,6 +69,12 @@ function RegisterDialog({ open, onOpenChange, onSubmit, isPending }: RegisterDia
     vehicleColor: '',
     seatingCapacity: '',
   });
+
+  useEffect(() => {
+    if (open) {
+      setForm({ userId: '', vehicleName: '', vehicleNumber: '', vehicleType: 'sedan', vehicleColor: '', seatingCapacity: '' });
+    }
+  }, [open]);
 
   function handleChange(field: keyof RegisterVehicleRequest, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -185,8 +191,7 @@ function EditDialog({ vehicle, onOpenChange, onSubmit, isPending }: EditDialogPr
     seatingCapacity: vehicle?.seatingCapacity ?? '',
   });
 
-  // Sync when vehicle changes
-  useState(() => {
+  useEffect(() => {
     if (vehicle) {
       setForm({
         vehicleName: vehicle.vehicleName,
@@ -195,7 +200,7 @@ function EditDialog({ vehicle, onOpenChange, onSubmit, isPending }: EditDialogPr
         seatingCapacity: vehicle.seatingCapacity,
       });
     }
-  });
+  }, [vehicle]);
 
   function handleChange(field: keyof UpdateVehicleRequest, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
