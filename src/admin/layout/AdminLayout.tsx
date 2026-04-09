@@ -1,7 +1,14 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -70,20 +77,35 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="p-3 border-t space-y-1">
-          <Separator className="mb-2" />
-          <p className="text-xs text-muted-foreground truncate px-1" title={email ?? ''}>
-            {email}
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+        <div className="p-3 border-t">
+          <TooltipProvider delayDuration={300}>
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8 shrink-0">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                  {email ? email[0].toUpperCase() : '?'}
+                </AvatarFallback>
+              </Avatar>
+
+              <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate" title={email ?? ''}>
+                {email}
+              </p>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                    onClick={handleLogout}
+                    aria-label="Logout"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Logout</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
       </aside>
 
