@@ -11,6 +11,15 @@ and this project adheres to **Semantic Versioning**
 
 ## [Unreleased]
 
+### Added
+
+- Added a full frontend documentation tree under `.docs/` (architecture, API integration, routing/guards, admin modules, environment, testing, roadmap, user flows, tasks, glossary, and backend integration matrix).
+
+### Changed
+
+- Rewrote `README.md` to match the admin-first frontend direction and link to the new `.docs/` documentation index and key reference pages.
+- Consolidated previous root-level AI planning documents into `.docs/` equivalents and removed obsolete planning files.
+
 ---
 
 ## [v0.5.0] – Admin Panel, Legacy Migration & UI Polish (2026-04-08 to 2026-04-09)
