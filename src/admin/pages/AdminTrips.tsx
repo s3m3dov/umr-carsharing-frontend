@@ -32,6 +32,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronLeft, ChevronRight, Eye, XCircle } from 'lucide-react';
+import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
@@ -251,38 +252,40 @@ export default function AdminTrips() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {isLoading && (
-            <p className="p-6 text-sm text-muted-foreground">Loading...</p>
-          )}
-          {isError && (
-            <p className="p-6 text-sm text-destructive">
-              Failed to load trips. Please try again.
-            </p>
-          )}
-          {data && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Trip ID</TableHead>
-                  <TableHead>Driver ID</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Seats</TableHead>
-                  <TableHead>Price/Seat</TableHead>
-                  <TableHead>Departure</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Trip ID</TableHead>
+                <TableHead>Driver ID</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Seats</TableHead>
+                <TableHead>Price/Seat</TableHead>
+                <TableHead>Departure</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            {isLoading ? (
+              <TableSkeleton columns={9} />
+            ) : isError ? (
               <TableBody>
-                {data.content.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center text-destructive py-8">
+                    Failed to load trips.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <TableBody>
+                {data?.content.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                       No trips found.
                     </TableCell>
                   </TableRow>
                 )}
-                {data.content.map((trip) => {
+                {data?.content.map((trip) => {
                   const canCancel = CANCELLABLE.includes(trip.tripStatus);
                   return (
                     <TableRow key={trip.tripId}>
@@ -344,8 +347,8 @@ export default function AdminTrips() {
                   );
                 })}
               </TableBody>
-            </Table>
-          )}
+            )}
+          </Table>
         </CardContent>
       </Card>
 

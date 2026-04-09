@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/table';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { auditLogsApi } from '@/admin/api';
+import { TableSkeleton } from '@/admin/shared';
 import type { AuditAction, EntityType } from '@/admin/types';
 
 const AUDIT_ACTIONS: AuditAction[] = [
@@ -179,34 +180,38 @@ export default function AdminAuditLogs() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {isLoading && (
-            <p className="text-sm text-muted-foreground p-6">Loading...</p>
-          )}
-          {isError && (
-            <p className="text-sm text-destructive p-6">Failed to load audit logs.</p>
-          )}
-          {data && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Entity Type</TableHead>
-                  <TableHead>Entity ID</TableHead>
-                  <TableHead>Performed By</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Details</TableHead>
-                </TableRow>
-              </TableHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Timestamp</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Entity Type</TableHead>
+                <TableHead>Entity ID</TableHead>
+                <TableHead>Performed By</TableHead>
+                <TableHead>Service</TableHead>
+                <TableHead>Details</TableHead>
+              </TableRow>
+            </TableHeader>
+            {isLoading ? (
+              <TableSkeleton columns={7} />
+            ) : isError ? (
               <TableBody>
-                {data.content.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-destructive py-8">
+                    Failed to load audit logs.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <TableBody>
+                {data!.content.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       No audit logs found.
                     </TableCell>
                   </TableRow>
                 )}
-                {data.content.map((log) => (
+                {data!.content.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell className="text-xs whitespace-nowrap">
                       {new Date(log.timestamp).toLocaleString()}
@@ -237,8 +242,8 @@ export default function AdminAuditLogs() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          )}
+            )}
+          </Table>
         </CardContent>
       </Card>
 

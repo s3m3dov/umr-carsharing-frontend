@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronLeft, ChevronRight, CheckCheck, XCircle } from 'lucide-react';
+import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
@@ -239,32 +240,38 @@ export default function AdminDrivers() {
       </div>
 
       {/* Table */}
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      ) : isError ? (
-        <p className="text-sm text-destructive">Failed to load drivers.</p>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allOnPageSelected}
+                  onCheckedChange={toggleAll}
+                  aria-label="Select all"
+                />
+              </TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>License #</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Age</TableHead>
+              <TableHead>Joined</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          {isLoading ? (
+            <TableSkeleton columns={9} />
+          ) : isError ? (
+            <TableBody>
               <TableRow>
-                <TableHead className="w-10">
-                  <Checkbox
-                    checked={allOnPageSelected}
-                    onCheckedChange={toggleAll}
-                    aria-label="Select all"
-                  />
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>License #</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Age</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableCell colSpan={9} className="text-center text-destructive py-8">
+                  Failed to load drivers.
+                </TableCell>
               </TableRow>
-            </TableHeader>
+            </TableBody>
+          ) : (
             <TableBody>
               {drivers.length === 0 ? (
                 <TableRow>
@@ -339,9 +346,9 @@ export default function AdminDrivers() {
                 ))
               )}
             </TableBody>
-          </Table>
-        </div>
-      )}
+          )}
+        </Table>
+      </div>
 
       {/* Pagination */}
       {!isLoading && !isError && totalPages > 0 && (
