@@ -130,6 +130,10 @@ function UpdateBookingDialog({ booking, open, onOpenChange }: UpdateDialogProps)
     if (!isNaN(parsedSeats) && parsedSeats !== booking.requestedSeats) {
       body.requestedSeats = parsedSeats;
     }
+    if (!body.status && !body.requestedSeats) {
+      onOpenChange(false);
+      return;
+    }
     mutation.mutate(body);
   };
 
