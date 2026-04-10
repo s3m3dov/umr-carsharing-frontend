@@ -65,7 +65,9 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
             <BrandIcon className="h-8 w-8 rounded-lg" />
-            <h1 className="text-xl font-bold text-primary">Kamilli Ride</h1>
+            <h1 className="text-xl font-bold text-primary">
+              {role === 'DRIVER' ? 'Driver Panel' : 'Passenger Panel'}
+            </h1>
           </div>
           <Button
             variant="ghost"
@@ -92,7 +94,9 @@ export default function Layout({ children }: LayoutProps) {
                 <BrandIcon className="h-10 w-10" />
                 <div>
                   <h1 className="text-2xl font-bold text-primary">Kamilli Ride</h1>
-                  <p className="text-xs text-muted-foreground">Share every journey</p>
+                  <p className="text-xs text-muted-foreground">
+                    {role === 'DRIVER' ? 'Driver Panel' : 'Passenger Panel'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -133,24 +137,24 @@ export default function Layout({ children }: LayoutProps) {
                       {email?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-sm font-semibold text-foreground truncate cursor-default">
-                          {email || 'User'}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">{email || 'User'}</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-xs text-muted-foreground truncate cursor-default">
-                          {email || ''}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">{email || ''}</TooltipContent>
-                    </Tooltip>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm font-semibold text-foreground truncate cursor-pointer">
+                              {email || 'User'}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">{email || 'User'}</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-xs text-muted-foreground truncate cursor-pointer">
+                              {email || ''}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">{email || ''}</TooltipContent>
+                        </Tooltip>
+                      </div>
                 </div>
                 <Button 
                   variant="outline" 

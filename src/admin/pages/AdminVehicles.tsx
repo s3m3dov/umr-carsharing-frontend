@@ -39,6 +39,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { PlusCircle, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -347,7 +353,8 @@ export default function AdminVehicles() {
   const totalElements = data?.totalElements ?? 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <TooltipProvider>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -417,8 +424,13 @@ export default function AdminVehicles() {
                     </TableCell>
                     <TableCell>{vehicle.vehicleColor || '—'}</TableCell>
                     <TableCell>{vehicle.seatingCapacity || '—'}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground" title={vehicle.userId}>
-                      {truncate(vehicle.userId, 8)}
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-pointer">{truncate(vehicle.userId, 8)}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{vehicle.userId}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(vehicle.createdAt).toLocaleDateString()}
@@ -523,6 +535,7 @@ export default function AdminVehicles() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

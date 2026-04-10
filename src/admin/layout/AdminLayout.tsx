@@ -92,14 +92,14 @@ export default function AdminLayout() {
                 </AvatarFallback>
               </Avatar>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate cursor-default">
-                    {email}
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent side="top">{email}</TooltipContent>
-              </Tooltip>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate cursor-pointer">
+                     {email}
+                   </p>
+                 </TooltipTrigger>
+                 <TooltipContent side="top">{email}</TooltipContent>
+               </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>

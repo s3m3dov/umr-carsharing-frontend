@@ -111,24 +111,24 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                       {email?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-base font-semibold text-foreground truncate cursor-default">
-                          {email || 'User'}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">{email || 'User'}</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-sm text-muted-foreground truncate cursor-default">
-                          {email || ''}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">{email || ''}</TooltipContent>
-                    </Tooltip>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-base font-semibold text-foreground truncate cursor-pointer">
+                              {email || 'User'}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">{email || 'User'}</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm text-muted-foreground truncate cursor-pointer">
+                              {email || ''}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">{email || ''}</TooltipContent>
+                        </Tooltip>
+                      </div>
                 </div>
                 <Button 
                   variant="outline" 

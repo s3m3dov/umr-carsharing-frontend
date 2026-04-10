@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { RefreshCw, CheckCircle2, XCircle, Minus } from 'lucide-react';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -82,7 +88,8 @@ export default function AdminStatus() {
   const refreshAll = () => results.forEach((r) => r.refetch());
 
   return (
-    <div className="p-6 space-y-6">
+    <TooltipProvider>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -136,9 +143,14 @@ export default function AdminStatus() {
                   <StatusIcon status={data?.status} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{svc.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono truncate">
-                      {BASE_URL}{svc.path}
-                    </p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground font-mono truncate cursor-pointer">
+                          {BASE_URL}{svc.path}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs break-all">{BASE_URL}{svc.path}</TooltipContent>
+                    </Tooltip>
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     {data && (
@@ -159,6 +171,7 @@ export default function AdminStatus() {
           })}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

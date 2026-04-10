@@ -186,8 +186,13 @@ function ReviewRowActions({ review }: ReviewRowActionsProps) {
             <AlertDialogTitle>Delete Review</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete review{' '}
-              <span className="font-mono">{review.reviewId.slice(0, 8)}</span>? This action cannot
-              be undone.
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="font-mono cursor-default">{review.reviewId.slice(0, 8)}</span>
+                </TooltipTrigger>
+                <TooltipContent>{review.reviewId}</TooltipContent>
+              </Tooltip>
+              ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -299,13 +304,28 @@ export default function AdminReviews() {
                 {data!.content.map((review: ReviewResponse) => (
                   <TableRow key={review.reviewId}>
                     <TableCell className="font-mono text-xs">
-                      {review.reviewId.slice(0, 8)}
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <span className="cursor-pointer">{review.reviewId.slice(0, 8)}</span>
+                         </TooltipTrigger>
+                         <TooltipContent>{review.reviewId}</TooltipContent>
+                       </Tooltip>
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {review.reviewerId.slice(0, 8)}
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <span className="cursor-pointer">{review.reviewerId.slice(0, 8)}</span>
+                         </TooltipTrigger>
+                         <TooltipContent>{review.reviewerId}</TooltipContent>
+                       </Tooltip>
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {review.revieweeId.slice(0, 8)}
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <span className="cursor-pointer">{review.revieweeId.slice(0, 8)}</span>
+                         </TooltipTrigger>
+                         <TooltipContent>{review.revieweeId}</TooltipContent>
+                       </Tooltip>
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="text-xs">
@@ -319,9 +339,9 @@ export default function AdminReviews() {
                       {review.comment.length > 60 ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-default text-sm">
-                              {truncate(review.comment, 60)}
-                            </span>
+                             <span className="cursor-pointer text-sm">
+                               {truncate(review.comment, 60)}
+                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs whitespace-pre-wrap">
                             {review.comment}
