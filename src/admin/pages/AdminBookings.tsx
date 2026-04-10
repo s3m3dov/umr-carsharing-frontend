@@ -55,6 +55,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { TooltipIcon } from '@/components/ui/tooltip-icon';
 import { TableSkeleton } from '@/admin/shared';
 
 const BOOKING_STATUSES: BookingStatus[] = [
@@ -278,7 +279,10 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{booking.bookingId.slice(0, 8)}...</span>
+                            <span className="inline-flex items-center gap-1">
+                              {booking.bookingId.slice(0, 8)}...
+                              <TooltipIcon className="shrink-0" />
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.bookingId}</TooltipContent>
                         </Tooltip>
@@ -286,7 +290,10 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{booking.passengerId.slice(0, 8)}...</span>
+                            <span className="inline-flex items-center gap-1">
+                              {booking.passengerId.slice(0, 8)}...
+                              <TooltipIcon className="shrink-0" />
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.passengerId}</TooltipContent>
                         </Tooltip>
@@ -294,7 +301,10 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{booking.tripId.slice(0, 8)}...</span>
+                            <span className="inline-flex items-center gap-1">
+                              {booking.tripId.slice(0, 8)}...
+                              <TooltipIcon className="shrink-0" />
+                            </span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.tripId}</TooltipContent>
                         </Tooltip>
