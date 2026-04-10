@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import BrandIcon from '@/components/BrandIcon';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -121,7 +122,9 @@ export default function AdminLayout() {
       </aside>
 
       <main className="flex-1 overflow-auto">
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );
