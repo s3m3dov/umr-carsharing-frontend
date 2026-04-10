@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
@@ -56,6 +57,21 @@ function StatusIcon({ status }: { status: ServiceStatus | undefined }) {
   return <XCircle className="h-5 w-5 text-destructive" />;
 }
 
+function ServiceDot({ status }: { status: ServiceStatus | undefined }) {
+  return (
+    <span
+      className={cn(
+        'inline-block h-2.5 w-2.5 rounded-full',
+        !status
+          ? 'bg-muted-foreground/40 animate-pulse'
+          : status === 'UP'
+          ? 'bg-green-500'
+          : 'bg-destructive',
+      )}
+    />
+  );
+}
+
 function StatusBadge({ status }: { status: ServiceStatus | undefined }) {
   if (!status)
     return <Badge variant="secondary" className="text-[11px] font-medium">Checking</Badge>;
@@ -85,6 +101,13 @@ export default function AdminStatus() {
   const downCount = results.filter((r) => r.data?.status !== 'UP' && r.data).length;
 
   const overallOk = allDone && downCount === 0;
+  const avgResponseMs = (() => {
+    const samples = results
+      .map((r) => r.data)
+      .filter((d): d is HealthResult => !!d && d.status === 'UP');
+    if (samples.length === 0) return null;
+    return Math.round(samples.reduce((sum, s) => sum + s.responseMs, 0) / samples.length);
+  })();
   const refreshAll = () => results.forEach((r) => r.refetch());
 
   return (
@@ -105,22 +128,50 @@ export default function AdminStatus() {
       </div>
 
       {/* Summary banner */}
-      <Card className={overallOk ? 'border-green-200 bg-green-500/5' : 'border-destructive/30 bg-destructive/5'}>
-        <CardContent className="py-4 flex items-center gap-3">
-          <StatusIcon status={allDone ? (overallOk ? 'UP' : 'DOWN') : undefined} />
-          <div>
-            <p className="font-semibold text-sm">
-              {!allDone
-                ? 'Checking services…'
-                : overallOk
-                ? 'All systems operational'
-                : `${downCount} service${downCount !== 1 ? 's' : ''} degraded`}
-            </p>
-            {allDone && (
-              <p className="text-xs text-muted-foreground">
-                {upCount} of {SERVICES.length} services up
-              </p>
+      <Card className={cn(
+        'border shadow-sm',
+        !allDone
+          ? ''
+          : overallOk
+          ? 'border-green-200/80 bg-green-500/[0.04]'
+          : 'border-destructive/30 bg-destructive/[0.04]',
+      )}>
+        <CardContent className="py-3">
+          <div className="min-w-0 flex items-center gap-2.5">
+            {!allDone ? (
+              <Minus className="h-4 w-4 text-muted-foreground animate-pulse" />
+            ) : overallOk ? (
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+            ) : (
+              <XCircle className="h-4 w-4 text-destructive" />
             )}
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-5">
+                {!allDone
+                  ? 'Checking services…'
+                  : overallOk
+                  ? 'All systems operational'
+                  : `${downCount} service${downCount !== 1 ? 's' : ''} degraded`}
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <div
+                  className="inline-flex items-center gap-1 rounded-full border bg-background/70 px-2 py-1"
+                  aria-label="Service status dots"
+                >
+                  {SERVICES.map((svc, i) => (
+                    <ServiceDot key={svc.path} status={results[i].data?.status} />
+                  ))}
+                </div>
+                <Badge variant="secondary" className="text-[11px] font-medium">
+                  {allDone ? `${upCount}/${SERVICES.length} up` : 'Checking'}
+                </Badge>
+                {avgResponseMs != null && (
+                  <Badge variant="outline" className="text-[11px] font-medium">
+                    Avg {avgResponseMs} ms
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
