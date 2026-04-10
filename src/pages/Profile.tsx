@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { passengerApi as userApi } from '@/shared/api/passenger-api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +17,11 @@ export default function Profile() {
 
   const { data: userInfo, isLoading } = useQuery({
     queryKey: ['userInfo', userId],
-    queryFn: () => apiService.getUserInfo(userId!),
+    queryFn: () => userApi.getProfile(userId!),
     enabled: !!userId,
   });
 
-  const userData = userInfo?.responseContent;
+  const userData = userInfo;
 
   if (isLoading) {
     return (

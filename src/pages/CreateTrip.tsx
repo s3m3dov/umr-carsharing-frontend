@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,41 +36,25 @@ export default function CreateTrip() {
 
   const { data: vehicles } = useQuery({
     queryKey: ['vehicles', userId],
-    queryFn: () => apiService.getUserVehicles(userId!),
+    queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
   const createTripMutation = useMutation({
-    mutationFn: (data: OfferRideDTO) => apiService.createTrip(userId!, data),
-    onSuccess: (response) => {
-      if (response.success && response.responseContent?.tripCreated) {
-        toast({
-          title: 'Trip created successfully!',
-          description: 'Your trip has been posted and is now available for others to join.',
-        });
-        setTripData({
-          vehicleNumber: '',
-          pickupPoint: {
-            latitude: 0,
-            longitude: 0,
-            placeAddress: '',
-          },
-          destinationPoint: {
-            latitude: 0,
-            longitude: 0,
-            placeAddress: '',
-          },
-          tripStartTime: '',
-          offeredSeats: 1,
-        });
-        queryClient.invalidateQueries({ queryKey: ['upcomingRides'] });
-      } else {
-        toast({
-          title: 'Failed to create trip',
-          description: response.responseContent?.errMsg || 'Could not create trip',
-          variant: 'destructive',
-        });
-      }
+    mutationFn: (data: OfferRideDTO) => userApi.createTrip(userId!, data),
+    onSuccess: () => {
+      toast({
+        title: 'Trip created successfully!',
+        description: 'Your trip has been posted and is now available for others to join.',
+      });
+      setTripData({
+        vehicleNumber: '',
+        pickupPoint: { latitude: 0, longitude: 0, placeAddress: '' },
+        destinationPoint: { latitude: 0, longitude: 0, placeAddress: '' },
+        tripStartTime: '',
+        offeredSeats: 1,
+      });
+      queryClient.invalidateQueries({ queryKey: ['upcomingRides'] });
     },
     onError: () => {
       toast({
@@ -122,7 +106,7 @@ export default function CreateTrip() {
     }));
   };
 
-  const vehiclesData = vehicles?.responseContent || [];
+  const vehiclesData = vehicles || [];
 
   // Prepare map markers
   const mapMarkers = [];

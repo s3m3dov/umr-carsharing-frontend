@@ -11,6 +11,8 @@ interface AuthContextType {
   token: string | null;
   role: UserRole | null;
   email: string | null;
+  /** Alias for email — used by API methods expecting userId. */
+  userId: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (token: string, role: string, email: string) => void;
@@ -45,6 +47,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         token: session?.token ?? null,
         role: session?.role ?? null,
         email: session?.email ?? null,
+        userId: session?.email ?? null,
         isAuthenticated: !!session?.token,
         isAdmin: session?.role === 'ADMIN',
         login,

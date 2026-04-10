@@ -4,12 +4,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { 
-  Car, 
-  Search, 
-  Plus, 
-  Calendar, 
-  User, 
+import {
+  Car,
+  Search,
+  Plus,
+  Calendar,
+  User,
   LogOut,
   Menu,
   X,
@@ -22,8 +22,24 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+const passengerNav = [
+  { name: 'Dashboard', href: '/passenger', icon: Home },
+  { name: 'Find Ride',  href: '/find-rides', icon: Search },
+  { name: 'My Rides',  href: '/my-rides',   icon: Calendar },
+  { name: 'Profile',   href: '/profile',    icon: User },
+];
+
+const driverNav = [
+  { name: 'Dashboard',  href: '/driver',              icon: Home },
+  { name: 'Offer Ride', href: '/offer-ride',   icon: Plus },
+  { name: 'My Rides',   href: '/my-rides',     icon: Calendar },
+  { name: 'Vehicles',   href: '/vehicles',     icon: Car },
+  { name: 'Track Ride', href: '/track-ride',   icon: Navigation },
+  { name: 'Profile',    href: '/profile',      icon: User },
+];
+
 export default function Layout({ children }: LayoutProps) {
-  const { userInfo, logout } = useAuth();
+  const { email, role, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,15 +49,7 @@ export default function Layout({ children }: LayoutProps) {
     navigate('/login');
   };
 
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Book Ride', href: '/book-ride', icon: Search },
-    { name: 'Offer Ride', href: '/offer-ride', icon: Plus },
-    { name: 'Track Ride', href: '/track-ride', icon: Navigation },
-    { name: 'My Rides', href: '/my-rides', icon: Calendar },
-    { name: 'Vehicles', href: '/vehicles', icon: Car },
-    { name: 'Profile', href: '/profile', icon: User },
-  ];
+  const navigation = role === 'DRIVER' ? driverNav : passengerNav;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
@@ -118,15 +126,15 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-primary-foreground text-sm font-bold">
-                      {userInfo?.fullName?.charAt(0) || 'U'}
+                      {email?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">
-                      {userInfo?.fullName || 'User'}
+                      {email || 'User'}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {userInfo?.emailId || ''}
+                      {email || ''}
                     </p>
                   </div>
                 </div>

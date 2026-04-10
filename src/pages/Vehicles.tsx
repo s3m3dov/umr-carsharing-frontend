@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import { VehicleRegisterRequestDTO } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -28,35 +28,27 @@ export default function Vehicles() {
 
   const { data: vehicles, isLoading } = useQuery({
     queryKey: ['vehicles', userId],
-    queryFn: () => apiService.getUserVehicles(userId!),
+    queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
   const addVehicleMutation = useMutation({
-    mutationFn: (vehicleData: VehicleRegisterRequestDTO) => 
-      apiService.registerVehicle(userId!, vehicleData),
-    onSuccess: (data) => {
-      if (data.success) {
-        toast({
-          title: 'Vehicle added',
-          description: 'Your vehicle has been successfully registered.',
-        });
-        queryClient.invalidateQueries({ queryKey: ['vehicles', userId] });
-        setShowAddForm(false);
-        setNewVehicle({
-          vehicleName: '',
-          vehicleNumber: '',
-          vehicleType: '',
-          vehicleColor: '',
-          seatingCapacity: ''
-        });
-      } else {
-        toast({
-          title: 'Registration failed',
-          description: data.errorMessage || 'Failed to register vehicle',
-          variant: 'destructive',
-        });
-      }
+    mutationFn: (vehicleData: VehicleRegisterRequestDTO) =>
+      userApi.registerVehicle(userId!, vehicleData),
+    onSuccess: () => {
+      toast({
+        title: 'Vehicle added',
+        description: 'Your vehicle has been successfully registered.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['vehicles', userId] });
+      setShowAddForm(false);
+      setNewVehicle({
+        vehicleName: '',
+        vehicleNumber: '',
+        vehicleType: '',
+        vehicleColor: '',
+        seatingCapacity: ''
+      });
     },
     onError: () => {
       toast({
@@ -192,9 +184,9 @@ export default function Vehicles() {
           <h2 className="text-2xl font-semibold">Registered Vehicles</h2>
           {isLoading ? (
             <div className="text-center py-8">Loading vehicles...</div>
-          ) : vehicles?.responseContent && vehicles.responseContent.length > 0 ? (
+          ) : vehicles && vehicles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {vehicles.responseContent.map((vehicle) => (
+              {vehicles.map((vehicle) => (
                 <Card key={vehicle.value}>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">

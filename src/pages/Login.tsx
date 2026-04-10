@@ -7,8 +7,9 @@ import { ApiError } from '@/shared/api/error-parser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Car } from 'lucide-react';
+import { Car, AlertTriangle } from 'lucide-react';
 
 interface LoginResponse {
   token: string;
@@ -24,6 +25,13 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Consume the flash message set by the 401 handler before the hard redirect.
+  const [notice] = useState<string | null>(() => {
+    const msg = sessionStorage.getItem('login_notice');
+    sessionStorage.removeItem('login_notice');
+    return msg;
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -33,7 +41,18 @@ export default function Login() {
         password,
       });
       login(data.token, data.role, data.email);
-      navigate(data.role === 'ADMIN' ? '/admin' : '/dashboard', { replace: true });
+      if (data.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (data.role === 'DRIVER') {
+        navigate('/driver', { replace: true });
+      } else if (data.role === 'PASSENGER') {
+        navigate('/passenger', { replace: true });
+      } else {
+        navigate('/forbidden', {
+          state: { message: 'Only PASSENGER, DRIVER, and ADMIN roles are supported.' },
+          replace: true,
+        });
+      }
     } catch (err) {
       const message =
         err instanceof ApiError
@@ -57,6 +76,13 @@ export default function Login() {
           <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
+
+        {notice && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{notice}</AlertDescription>
+          </Alert>
+        )}
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
