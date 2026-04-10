@@ -49,6 +49,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { TableSkeleton } from '@/admin/shared';
 
 const BOOKING_STATUSES: BookingStatus[] = [
@@ -214,7 +220,8 @@ export default function AdminBookings() {
   const totalElements = data?.totalElements ?? 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <TooltipProvider>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -269,13 +276,28 @@ export default function AdminBookings() {
                 return (
                   <TableRow key={booking.bookingId}>
                     <TableCell className="font-mono text-xs">
-                      {booking.bookingId.slice(0, 8)}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                          <span className="cursor-pointer">{booking.bookingId.slice(0, 8)}...</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{booking.bookingId}</TooltipContent>
+                        </Tooltip>
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {booking.passengerId.slice(0, 8)}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                          <span className="cursor-pointer">{booking.passengerId.slice(0, 8)}...</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{booking.passengerId}</TooltipContent>
+                        </Tooltip>
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {booking.tripId.slice(0, 8)}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                          <span className="cursor-pointer">{booking.tripId.slice(0, 8)}...</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{booking.tripId}</TooltipContent>
+                        </Tooltip>
                     </TableCell>
                     <TableCell className="text-sm">{booking.vehicleNumber}</TableCell>
                     <TableCell className="text-sm">{booking.requestedSeats}</TableCell>
@@ -314,9 +336,14 @@ export default function AdminBookings() {
                                 <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
                                 <AlertDialogDescription>
                                   Are you sure you want to cancel booking{' '}
-                                  <span className="font-mono">
-                                    {booking.bookingId.slice(0, 8)}
-                                  </span>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="font-mono cursor-pointer">
+                                        {booking.bookingId.slice(0, 8)}...
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{booking.bookingId}</TooltipContent>
+                                  </Tooltip>
                                   ? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
@@ -381,6 +408,7 @@ export default function AdminBookings() {
           }}
         />
       )}
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

@@ -20,6 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { auditLogsApi } from '@/shared/api/admin-api';
 import { TableSkeleton } from '@/admin/shared';
@@ -106,7 +112,8 @@ export default function AdminAuditLogs() {
   const totalPages = data?.totalPages ?? 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <TooltipProvider>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <h1 className="text-2xl font-bold">Audit Logs</h1>
 
@@ -225,19 +232,33 @@ export default function AdminAuditLogs() {
                       <Badge variant="outline">{log.entityType}</Badge>
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {log.entityId.slice(0, 8)}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-default">{log.entityId.slice(0, 8)}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{log.entityId}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
-                    <TableCell className="text-sm max-w-[180px] truncate" title={log.performedBy}>
-                      {log.performedBy}
+                    <TableCell className="text-sm max-w-[180px] truncate">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="block truncate cursor-default">{log.performedBy}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{log.performedBy}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                     <TableCell className="text-sm">{log.serviceName}</TableCell>
-                    <TableCell
-                      className="text-sm text-muted-foreground max-w-[200px] truncate"
-                      title={log.details}
-                    >
-                      {log.details.length > 50
-                        ? `${log.details.slice(0, 50)}…`
-                        : log.details}
+                    <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="block truncate cursor-default">
+                            {log.details.length > 50
+                              ? `${log.details.slice(0, 50)}…`
+                              : log.details}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs whitespace-pre-wrap">{log.details}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -277,6 +298,7 @@ export default function AdminAuditLogs() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

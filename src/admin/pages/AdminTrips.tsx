@@ -29,6 +29,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
@@ -215,7 +221,8 @@ export default function AdminTrips() {
   const totalElements = data?.totalElements ?? 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <TooltipProvider>
+      <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -291,23 +298,37 @@ export default function AdminTrips() {
                   const canCancel = CANCELLABLE.includes(trip.tripStatus);
                   return (
                     <TableRow key={trip.tripId}>
-                      <TableCell
-                        className="font-mono text-xs text-muted-foreground"
-                        title={trip.tripId}
-                      >
-                        {truncate(trip.tripId, 8)}
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer">{truncate(trip.tripId, 8)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{trip.tripId}</TooltipContent>
+                        </Tooltip>
                       </TableCell>
-                      <TableCell
-                        className="font-mono text-xs text-muted-foreground"
-                        title={trip.driverId}
-                      >
-                        {truncate(trip.driverId, 8)}
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-pointer">{truncate(trip.driverId, 8)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{trip.driverId}</TooltipContent>
+                        </Tooltip>
                       </TableCell>
-                      <TableCell className="max-w-[160px] truncate text-sm" title={formatAddress(trip.sourceAddress)}>
-                        {formatAddress(trip.sourceAddress)}
+                      <TableCell className="max-w-[160px] truncate text-sm">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="block truncate cursor-pointer">{formatAddress(trip.sourceAddress)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs whitespace-pre-wrap">{formatAddress(trip.sourceAddress)}</TooltipContent>
+                        </Tooltip>
                       </TableCell>
-                      <TableCell className="max-w-[160px] truncate text-sm" title={formatAddress(trip.destinationAddress)}>
-                        {formatAddress(trip.destinationAddress)}
+                      <TableCell className="max-w-[160px] truncate text-sm">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="block truncate cursor-pointer">{formatAddress(trip.destinationAddress)}</span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs whitespace-pre-wrap">{formatAddress(trip.destinationAddress)}</TooltipContent>
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
                         <TripStatusBadge status={trip.tripStatus} />
@@ -399,9 +420,14 @@ export default function AdminTrips() {
             <AlertDialogTitle>Cancel Trip</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to cancel trip{' '}
-              <span className="font-mono font-semibold">
-                {truncate(cancelTrip?.tripId ?? '', 8)}
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="font-mono font-semibold cursor-pointer">
+                    {truncate(cancelTrip?.tripId ?? '', 8)}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{cancelTrip?.tripId ?? ''}</TooltipContent>
+              </Tooltip>
               ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -416,6 +442,7 @@ export default function AdminTrips() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
