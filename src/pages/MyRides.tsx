@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { MapPin, Clock, Car, Users, X } from 'lucide-react';
+import { MapPin, Clock, Car, Users, X, Map } from 'lucide-react';
+import GoogleMap from '@/components/GoogleMap';
 
 export default function MyRides() {
   const { userId } = useAuth();
@@ -61,61 +62,92 @@ export default function MyRides() {
     }
   };
 
-  const RideCard = ({ ride, showCancelButton = false }: { ride: RideBasicInfoDTO; showCancelButton?: boolean }) => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
-                {ride.pickupPoint.placeAddress} → {ride.destinationPoint.placeAddress}
-              </span>
-            </div>
-            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-              <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
-                <span>{new Date(ride.rideStartTime).toLocaleString()}</span>
+  const RideCard = ({ ride, showCancelButton = false }: { ride: RideBasicInfoDTO; showCancelButton?: boolean }) => {
+    const [showMap, setShowMap] = useState(false);
+    const mapMarkers = [
+      {
+        position: { lat: ride.pickupPoint.latitude, lng: ride.pickupPoint.longitude },
+        title: 'Pickup',
+        info: `<strong>Pickup</strong><br/>${ride.pickupPoint.placeAddress ?? ''}`,
+      },
+      {
+        position: { lat: ride.destinationPoint.latitude, lng: ride.destinationPoint.longitude },
+        title: 'Destination',
+        info: `<strong>Destination</strong><br/>${ride.destinationPoint.placeAddress ?? ''}`,
+      },
+    ];
+
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex justify-between items-start">
+            <div className="space-y-2 flex-1">
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">
+                  {ride.pickupPoint.placeAddress} → {ride.destinationPoint.placeAddress}
+                </span>
               </div>
-              {ride.vehicleNumber && (
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-1">
-                  <Car className="h-4 w-4" />
-                  <span>{ride.vehicleNumber}</span>
+                  <Clock className="h-4 w-4" />
+                  <span>{new Date(ride.rideStartTime).toLocaleString()}</span>
+                </div>
+                {ride.vehicleNumber && (
+                  <div className="flex items-center space-x-1">
+                    <Car className="h-4 w-4" />
+                    <span>{ride.vehicleNumber}</span>
+                  </div>
+                )}
+              </div>
+              {ride.seats && (
+                <div className="flex items-center space-x-1">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{ride.seats}</span>
                 </div>
               )}
-            </div>
-            {ride.seats && (
-              <div className="flex items-center space-x-1">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{ride.seats}</span>
+              <div className="inline-block">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  ride.tripStatus === 'ALLOTTED' ? 'bg-green-100 text-green-800' :
+                  ride.tripStatus === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                  ride.tripStatus === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {ride.tripStatus}
+                </span>
               </div>
-            )}
-            <div className="inline-block">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                ride.tripStatus === 'ALLOTTED' ? 'bg-green-100 text-green-800' :
-                ride.tripStatus === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                ride.tripStatus === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {ride.tripStatus}
-              </span>
+            </div>
+            <div className="flex items-center gap-2 ml-4 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowMap((v) => !v)}
+              >
+                <Map className="h-4 w-4 mr-1" />
+                {showMap ? 'Hide Map' : 'Map'}
+              </Button>
+              {showCancelButton && ride.tripStatus === 'ALLOTTED' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCancelRide(ride.tripId)}
+                  disabled={cancelRideMutation.isPending}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+              )}
             </div>
           </div>
-          {showCancelButton && ride.tripStatus === 'ALLOTTED' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleCancelRide(ride.tripId)}
-              disabled={cancelRideMutation.isPending}
-            >
-              <X className="h-4 w-4 mr-1" />
-              Cancel
-            </Button>
+          {showMap && (
+            <div className="mt-4">
+              <GoogleMap markers={mapMarkers} className="w-full h-52 rounded-md overflow-hidden" />
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <Layout>

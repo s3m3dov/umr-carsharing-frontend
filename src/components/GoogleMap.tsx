@@ -136,23 +136,19 @@ export default function GoogleMap({
     }
   }, [center, zoom, isLoaded]);
 
-  if (error) {
-    return (
-      <div className={`${className} flex items-center justify-center bg-gray-100 border border-gray-300 rounded`}>
-        <div className="text-red-500 text-sm text-center p-4">
-          {error}
+  return (
+    <div className={`${className} relative`}>
+      <div ref={mapRef} className="w-full h-full" />
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 border border-gray-300 rounded">
+          <div className="text-red-500 text-sm text-center p-4">{error}</div>
         </div>
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className={`${className} flex items-center justify-center bg-gray-100 border border-gray-300 rounded`}>
-        <div className="text-gray-500 text-sm">Loading map...</div>
-      </div>
-    );
-  }
-
-  return <div ref={mapRef} className={className} />;
+      )}
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 border border-gray-300 rounded">
+          <div className="text-gray-500 text-sm">Loading map...</div>
+        </div>
+      )}
+    </div>
+  );
 }

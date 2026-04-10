@@ -188,7 +188,7 @@ function ReviewRowActions({ review }: ReviewRowActionsProps) {
               Are you sure you want to delete review{' '}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="font-mono cursor-default">{review.reviewId.slice(0, 8)}</span>
+                  <span className="font-mono cursor-help">{review.reviewId.slice(0, 8)}</span>
                 </TooltipTrigger>
                 <TooltipContent>{review.reviewId}</TooltipContent>
               </Tooltip>
@@ -306,7 +306,7 @@ export default function AdminReviews() {
                     <TableCell className="font-mono text-xs">
                        <Tooltip>
                          <TooltipTrigger asChild>
-                           <span className="cursor-pointer">{review.reviewId.slice(0, 8)}</span>
+                           <span className="cursor-help">{review.reviewId.slice(0, 8)}</span>
                          </TooltipTrigger>
                          <TooltipContent>{review.reviewId}</TooltipContent>
                        </Tooltip>
@@ -314,7 +314,7 @@ export default function AdminReviews() {
                     <TableCell className="font-mono text-xs">
                        <Tooltip>
                          <TooltipTrigger asChild>
-                           <span className="cursor-pointer">{review.reviewerId.slice(0, 8)}</span>
+                           <span className="cursor-help">{review.reviewerId.slice(0, 8)}</span>
                          </TooltipTrigger>
                          <TooltipContent>{review.reviewerId}</TooltipContent>
                        </Tooltip>
@@ -322,7 +322,7 @@ export default function AdminReviews() {
                     <TableCell className="font-mono text-xs">
                        <Tooltip>
                          <TooltipTrigger asChild>
-                           <span className="cursor-pointer">{review.revieweeId.slice(0, 8)}</span>
+                           <span className="cursor-help">{review.revieweeId.slice(0, 8)}</span>
                          </TooltipTrigger>
                          <TooltipContent>{review.revieweeId}</TooltipContent>
                        </Tooltip>
@@ -339,7 +339,7 @@ export default function AdminReviews() {
                       {review.comment.length > 60 ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                             <span className="cursor-pointer text-sm">
+                             <span className="cursor-help text-sm">
                                {truncate(review.comment, 60)}
                              </span>
                           </TooltipTrigger>
