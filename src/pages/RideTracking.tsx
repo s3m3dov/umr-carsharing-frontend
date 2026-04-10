@@ -91,7 +91,7 @@ export default function RideTracking() {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="p-6 max-w-6xl mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Track Your Rides</h1>
           <p className="text-muted-foreground">Monitor your active and upcoming rides in real-time</p>
