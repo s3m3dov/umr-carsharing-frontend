@@ -3,6 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import {
   RefreshCw,
   UserCheck,
   CalendarCheck,
@@ -58,6 +73,85 @@ function CardSkeleton() {
         <Skeleton key={i} className="h-8 rounded" style={{ width: `${w}%` }} />
       ))}
     </div>
+  );
+}
+
+const tripChartConfig: ChartConfig = {
+  completed: { label: 'Completed', color: '#22c55e' },
+  inProgress: { label: 'In Progress', color: '#3b82f6' },
+  available: { label: 'Available', color: '#a855f7' },
+  cancelled: { label: 'Cancelled', color: '#ef4444' },
+};
+
+const bookingChartConfig: ChartConfig = {
+  confirmed: { label: 'Confirmed', color: '#22c55e' },
+  completed: { label: 'Completed', color: '#3b82f6' },
+  requested: { label: 'Requested', color: '#f59e0b' },
+  cancelled: { label: 'Cancelled', color: '#ef4444' },
+  rejected: { label: 'Rejected', color: '#6b7280' },
+};
+
+function TripDonut({ data }: { data: DriverPerformanceReport }) {
+  const pieData = [
+    { name: 'completed', value: data.totalTripsCompleted, fill: '#22c55e' },
+    { name: 'inProgress', value: data.totalTripsInProgress, fill: '#3b82f6' },
+    { name: 'available', value: data.totalTripsAvailable, fill: '#a855f7' },
+    { name: 'cancelled', value: data.totalTripsCancelled, fill: '#ef4444' },
+  ].filter((d) => d.value > 0);
+
+  if (pieData.length === 0) {
+    return <p className="text-xs text-muted-foreground text-center py-8">No trip data</p>;
+  }
+
+  return (
+    <ChartContainer config={tripChartConfig} className="h-[220px] w-full">
+      <PieChart>
+        <Pie
+          data={pieData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={92}
+          strokeWidth={2}
+        >
+          {pieData.map((entry) => (
+            <Cell key={entry.name} fill={entry.fill} />
+          ))}
+        </Pie>
+        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+      </PieChart>
+    </ChartContainer>
+  );
+}
+
+function BookingBar({ data }: { data: BookingSummaryReport }) {
+  const barData = [
+    { status: 'Confirmed', value: data.confirmedBookings, fill: '#22c55e' },
+    { status: 'Completed', value: data.completedBookings, fill: '#3b82f6' },
+    { status: 'Requested', value: data.requestedBookings, fill: '#f59e0b' },
+    { status: 'Cancelled', value: data.cancelledBookings, fill: '#ef4444' },
+    { status: 'Rejected', value: data.rejectedBookings, fill: '#6b7280' },
+  ].filter((d) => d.value > 0);
+
+  if (barData.length === 0) {
+    return <p className="text-xs text-muted-foreground text-center py-8">No booking data</p>;
+  }
+
+  return (
+    <ChartContainer config={bookingChartConfig} className="h-[220px] w-full">
+      <BarChart data={barData} margin={{ top: 8, right: 8, left: -16, bottom: 8 }}>
+        <XAxis dataKey="status" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+        <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+        <ChartTooltip content={<ChartTooltipContent hideLabel={false} />} />
+        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+          {barData.map((entry) => (
+            <Cell key={entry.status} fill={entry.fill} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   );
 }
 
@@ -187,6 +281,38 @@ export default function AdminReports() {
           </CardContent>
         </Card>
 
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Trip Status Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {driversQ.isLoading && <Skeleton className="h-[220px] w-full rounded" />}
+            {driversQ.isError && !driversQ.isLoading && (
+              <p className="text-xs text-destructive py-8 text-center">Failed to load</p>
+            )}
+            {drivers && <TripDonut data={drivers} />}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Booking Status Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {bookingsQ.isLoading && <Skeleton className="h-[220px] w-full rounded" />}
+            {bookingsQ.isError && !bookingsQ.isLoading && (
+              <p className="text-xs text-destructive py-8 text-center">Failed to load</p>
+            )}
+            {bookings && <BookingBar data={bookings} />}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
