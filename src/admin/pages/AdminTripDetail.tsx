@@ -46,6 +46,18 @@ function formatAddress(address: AdminTripResponse['sourceAddress'] | null | unde
   return address.placeAddress ?? `${address.latitude.toFixed(4)}, ${address.longitude.toFixed(4)}`;
 }
 
+function formatDistanceKm(distanceInMeters: number | null | undefined): string {
+  if (distanceInMeters == null || Number.isNaN(distanceInMeters)) return '—';
+  const km = distanceInMeters / 1000;
+  return `${km.toFixed(1)} km`;
+}
+
+function formatDurationMinutes(durationInSeconds: number | null | undefined): string {
+  if (durationInSeconds == null || Number.isNaN(durationInSeconds)) return '—';
+  const minutes = durationInSeconds / 60;
+  return `${minutes.toFixed(1)} min`;
+}
+
 // ─── Detail row ───────────────────────────────────────────────────────────────
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -171,11 +183,11 @@ export default function AdminTripDetail() {
             <Separator />
             <DetailRow
               label="Route Distance"
-              value={trip.routeDistance != null ? `${trip.routeDistance} km` : '—'}
+              value={formatDistanceKm(trip.routeDistance)}
             />
             <DetailRow
               label="Route Duration"
-              value={trip.routeDuration != null ? `${trip.routeDuration} min` : '—'}
+              value={formatDurationMinutes(trip.routeDuration)}
             />
             <Separator />
             <DetailRow
