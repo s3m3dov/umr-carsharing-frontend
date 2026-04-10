@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { TooltipIcon } from '@/components/ui/tooltip-icon';
 import BrandIcon from '@/components/BrandIcon';
 import { cn } from '@/lib/utils';
 import {
@@ -93,13 +94,16 @@ export default function AdminLayout() {
               </Avatar>
 
                <Tooltip>
-                 <TooltipTrigger asChild>
-                   <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate cursor-pointer">
-                     {email}
-                   </p>
-                 </TooltipTrigger>
-                 <TooltipContent side="top">{email}</TooltipContent>
-               </Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex-1 min-w-0 flex items-center gap-1">
+                      <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate">
+                        {email}
+                      </p>
+                      <TooltipIcon className="shrink-0" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{email}</TooltipContent>
+                </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
