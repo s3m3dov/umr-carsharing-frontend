@@ -58,12 +58,12 @@ function StatusIcon({ status }: { status: ServiceStatus | undefined }) {
 
 function StatusBadge({ status }: { status: ServiceStatus | undefined }) {
   if (!status)
-    return <Badge variant="secondary">Checking…</Badge>;
+    return <Badge variant="secondary" className="text-[11px] font-medium">Checking</Badge>;
   if (status === 'UP')
-    return <Badge className="bg-green-500/10 text-green-700 border-green-200 hover:bg-green-500/10">UP</Badge>;
+    return <Badge variant="secondary" className="text-[11px] font-medium">UP</Badge>;
   if (status === 'DOWN')
     return <Badge variant="destructive">DOWN</Badge>;
-  return <Badge variant="outline">{status}</Badge>;
+  return <Badge variant="outline" className="text-[11px] font-medium">{status}</Badge>;
 }
 
 function fmt(date: Date) {
