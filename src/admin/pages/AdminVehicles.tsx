@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { PlusCircle, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableSkeleton } from '@/admin/shared';
 
@@ -307,8 +308,9 @@ export default function AdminVehicles() {
       setRegisterOpen(false);
       toast({ title: 'Vehicle registered successfully.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to register vehicle.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to register vehicle.');
+      toast({ title: 'Failed to register vehicle.', description: message, variant: 'destructive' });
     },
   });
 
@@ -320,8 +322,9 @@ export default function AdminVehicles() {
       setEditVehicle(null);
       toast({ title: 'Vehicle updated successfully.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to update vehicle.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to update vehicle.');
+      toast({ title: 'Failed to update vehicle.', description: message, variant: 'destructive' });
     },
   });
 
@@ -332,8 +335,9 @@ export default function AdminVehicles() {
       setDeleteVehicle(null);
       toast({ title: 'Vehicle deleted successfully.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to delete vehicle.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to delete vehicle.');
+      toast({ title: 'Failed to delete vehicle.', description: message, variant: 'destructive' });
     },
   });
 

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { MapPin, Clock, Car, Users, X } from 'lucide-react';
 
 export default function MyRides() {
@@ -44,10 +45,11 @@ export default function MyRides() {
       queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
       queryClient.invalidateQueries({ queryKey: ['historyRides', userId] });
     },
-    onError: () => {
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to cancel ride');
       toast({
         title: 'Error',
-        description: 'Failed to cancel ride',
+        description: message,
         variant: 'destructive',
       });
     },

@@ -26,6 +26,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { ChevronLeft, ChevronRight, CheckCheck, XCircle } from 'lucide-react';
 import { TableSkeleton } from '@/admin/shared';
 
@@ -78,13 +79,19 @@ export default function AdminDrivers() {
   const approveMutation = useMutation({
     mutationFn: (id: string) => driversApi.approve(id),
     onSuccess: () => { toast({ title: 'Driver approved' }); invalidate(); },
-    onError: () => toast({ title: 'Failed to approve driver', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to approve driver');
+      toast({ title: 'Failed to approve driver', description: message, variant: 'destructive' });
+    },
   });
 
   const rejectMutation = useMutation({
     mutationFn: (id: string) => driversApi.reject(id),
     onSuccess: () => { toast({ title: 'Driver rejected' }); invalidate(); },
-    onError: () => toast({ title: 'Failed to reject driver', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to reject driver');
+      toast({ title: 'Failed to reject driver', description: message, variant: 'destructive' });
+    },
   });
 
   const bulkApproveMutation = useMutation({
@@ -94,7 +101,10 @@ export default function AdminDrivers() {
       setSelectedIds(new Set());
       invalidate();
     },
-    onError: () => toast({ title: 'Bulk approve failed', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Bulk approve failed');
+      toast({ title: 'Bulk approve failed', description: message, variant: 'destructive' });
+    },
   });
 
   const bulkRejectMutation = useMutation({
@@ -104,7 +114,10 @@ export default function AdminDrivers() {
       setSelectedIds(new Set());
       invalidate();
     },
-    onError: () => toast({ title: 'Bulk reject failed', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Bulk reject failed');
+      toast({ title: 'Bulk reject failed', description: message, variant: 'destructive' });
+    },
   });
 
   const updateMutation = useMutation({
@@ -115,7 +128,10 @@ export default function AdminDrivers() {
       setEditDriver(null);
       invalidate();
     },
-    onError: () => toast({ title: 'Failed to update driver', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to update driver');
+      toast({ title: 'Failed to update driver', description: message, variant: 'destructive' });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -125,7 +141,10 @@ export default function AdminDrivers() {
       setDeleteDriver(null);
       invalidate();
     },
-    onError: () => toast({ title: 'Failed to delete driver', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to delete driver');
+      toast({ title: 'Failed to delete driver', description: message, variant: 'destructive' });
+    },
   });
 
   const editForm = useForm<EditFormValues>({

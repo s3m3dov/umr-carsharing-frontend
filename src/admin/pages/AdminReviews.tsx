@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewsApi } from '@/shared/api/admin-api';
 import type { ReviewResponse, ReviewStatus } from '@/admin/types';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -118,8 +119,9 @@ function ReviewRowActions({ review }: ReviewRowActionsProps) {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
       toast({ title: 'Review published.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to publish review.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to publish review.');
+      toast({ title: 'Failed to publish review.', description: message, variant: 'destructive' });
     },
   });
 
@@ -129,8 +131,9 @@ function ReviewRowActions({ review }: ReviewRowActionsProps) {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
       toast({ title: 'Review flagged.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to flag review.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to flag review.');
+      toast({ title: 'Failed to flag review.', description: message, variant: 'destructive' });
     },
   });
 
@@ -140,8 +143,9 @@ function ReviewRowActions({ review }: ReviewRowActionsProps) {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
       toast({ title: 'Review deleted.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to delete review.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to delete review.');
+      toast({ title: 'Failed to delete review.', description: message, variant: 'destructive' });
     },
   });
 

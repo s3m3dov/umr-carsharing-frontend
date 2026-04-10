@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookingsApi } from '@/shared/api/admin-api';
 import type { BookingResponse, BookingStatus, UpdateBookingRequest } from '@/admin/types';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -119,8 +120,9 @@ function UpdateBookingDialog({ booking, open, onOpenChange }: UpdateDialogProps)
       toast({ title: 'Booking updated successfully.' });
       onOpenChange(false);
     },
-    onError: () => {
-      toast({ title: 'Failed to update booking.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to update booking.');
+      toast({ title: 'Failed to update booking.', description: message, variant: 'destructive' });
     },
   });
 
@@ -202,8 +204,9 @@ export default function AdminBookings() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
       toast({ title: 'Booking cancelled successfully.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to cancel booking.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to cancel booking.');
+      toast({ title: 'Failed to cancel booking.', description: message, variant: 'destructive' });
     },
   });
 

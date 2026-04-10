@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
 import { 
   MapPin, 
@@ -79,7 +80,7 @@ export default function RideTracking() {
       });
       refetch();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to cancel ride.';
+      const message = getBackendErrorMessage(error, 'Failed to cancel ride.');
       toast({
         title: 'Cancellation Failed',
         description: message,

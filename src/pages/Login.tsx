@@ -3,13 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/shared/api/client';
 import { ROUTES } from '@/shared/api/service-routes';
-import { ApiError } from '@/shared/api/error-parser';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Car, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import BrandIcon from '@/components/BrandIcon';
 
 interface LoginResponse {
   token: string;
@@ -54,12 +55,7 @@ export default function Login() {
         });
       }
     } catch (err) {
-      const message =
-        err instanceof ApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Failed to connect to server.';
+      const message = getBackendErrorMessage(err, 'Failed to connect to server.');
       toast({ title: 'Login failed', description: message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
@@ -71,9 +67,9 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8 p-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <Car className="h-12 w-12 text-primary" />
+            <BrandIcon className="h-12 w-12 rounded-2xl" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
+          <h2 className="text-3xl font-bold text-foreground">Welcome to Kamilli Ride</h2>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
