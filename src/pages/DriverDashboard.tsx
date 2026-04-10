@@ -56,7 +56,7 @@ export default function DriverDashboard() {
 
   return (
     <Layout>
-      <div className="space-y-8">
+      <div className="p-6 space-y-8">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">
             {new Date().toLocaleDateString(undefined, {
