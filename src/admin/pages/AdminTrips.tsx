@@ -35,7 +35,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { TooltipIcon } from '@/components/ui/tooltip-icon';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
@@ -302,10 +301,7 @@ export default function AdminTrips() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="inline-flex items-center gap-1">
-                              {truncate(trip.tripId, 8)}
-                              <TooltipIcon className="shrink-0" />
-                            </span>
+                            <span className="cursor-pointer">{truncate(trip.tripId, 8)}</span>
                           </TooltipTrigger>
                           <TooltipContent>{trip.tripId}</TooltipContent>
                         </Tooltip>
@@ -313,10 +309,7 @@ export default function AdminTrips() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="inline-flex items-center gap-1">
-                              {truncate(trip.driverId, 8)}
-                              <TooltipIcon className="shrink-0" />
-                            </span>
+                            <span className="cursor-pointer">{truncate(trip.driverId, 8)}</span>
                           </TooltipTrigger>
                           <TooltipContent>{trip.driverId}</TooltipContent>
                         </Tooltip>
@@ -324,10 +317,7 @@ export default function AdminTrips() {
                       <TableCell className="max-w-[160px] truncate text-sm">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="inline-flex items-center gap-1">
-                              <span className="truncate">{formatAddress(trip.sourceAddress)}</span>
-                              <TooltipIcon className="shrink-0" />
-                            </span>
+                            <span className="block truncate cursor-pointer">{formatAddress(trip.sourceAddress)}</span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs whitespace-pre-wrap">{formatAddress(trip.sourceAddress)}</TooltipContent>
                         </Tooltip>
@@ -335,10 +325,7 @@ export default function AdminTrips() {
                       <TableCell className="max-w-[160px] truncate text-sm">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="inline-flex items-center gap-1">
-                              <span className="truncate">{formatAddress(trip.destinationAddress)}</span>
-                              <TooltipIcon className="shrink-0" />
-                            </span>
+                            <span className="block truncate cursor-pointer">{formatAddress(trip.destinationAddress)}</span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs whitespace-pre-wrap">{formatAddress(trip.destinationAddress)}</TooltipContent>
                         </Tooltip>

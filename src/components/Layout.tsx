@@ -10,7 +10,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { TooltipIcon } from '@/components/ui/tooltip-icon';
 import {
   Car,
   Search,
@@ -85,19 +84,17 @@ export default function Layout({ children }: LayoutProps) {
         {/* Sidebar */}
         <div className={`
           ${isMobileMenuOpen ? 'block' : 'hidden'} lg:block
-          w-64 min-h-screen bg-white/80 backdrop-blur-sm border-r border-border/50
+          w-72 min-h-screen bg-white/80 backdrop-blur-sm border-r border-border/50
           fixed lg:static inset-y-0 left-0 z-40
         `}>
           <div className="flex flex-col h-full">
             {/* Logo */}
-            <div className="px-4 py-3 border-b border-border/50 hidden lg:block">
-              <div className="flex items-center gap-2">
-                <BrandIcon className="h-7 w-7 rounded-lg" />
+            <div className="p-6 border-b border-border/50 hidden lg:block">
+              <div className="flex items-center space-x-3">
+                <BrandIcon className="h-10 w-10" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Kamilli Ride
-                  </p>
-                  <p className="text-base font-bold">
+                  <h1 className="text-2xl font-bold text-primary">Kamilli Ride</h1>
+                  <p className="text-xs text-muted-foreground">
                     {role === 'DRIVER' ? 'Driver Panel' : 'Passenger Panel'}
                   </p>
                 </div>
@@ -105,7 +102,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+            <nav className="flex-1 p-4 space-y-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
@@ -116,14 +113,14 @@ export default function Layout({ children }: LayoutProps) {
                     to={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`
-                      group flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
+                      group flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
                       ${isActive 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:shadow-md'
                       }
                     `}
                   >
-                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-primary-foreground' : ''} transition-colors`} />
+                    <Icon className={`h-5 w-5 ${isActive ? 'text-primary-foreground' : 'group-hover:text-primary'} transition-colors`} />
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -142,12 +139,9 @@ export default function Layout({ children }: LayoutProps) {
 
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex-1 min-w-0 flex items-center gap-1">
-                        <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate">
-                          {email}
-                        </p>
-                        <TooltipIcon className="shrink-0" />
-                      </div>
+                      <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate cursor-pointer">
+                        {email}
+                      </p>
                     </TooltipTrigger>
                     <TooltipContent side="top">{email}</TooltipContent>
                   </Tooltip>
