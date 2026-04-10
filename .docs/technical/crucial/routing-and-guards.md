@@ -114,6 +114,21 @@ Purpose:
 - Explicit user feedback when role does not have access
 - Action path back to `/login`
 
+### 7.1 Unsupported Role Policy (Approved)
+
+If the frontend receives an authenticated user role that is not one of the supported
+application roles, the user must be redirected to `/forbidden`.
+
+Supported roles are:
+
+- `ADMIN`
+- `DRIVER`
+- `PASSENGER`
+
+Required message on forbidden screen for this case:
+
+- `Only PASSENGER, DRIVER, and ADMIN roles are supported.`
+
 ## 8. Deprecation Banner Variants
 
 File: `src/legacy/DeprecationBanner.tsx`
