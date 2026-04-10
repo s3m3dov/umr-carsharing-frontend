@@ -37,6 +37,7 @@ import AdminDrivers from './admin/pages/AdminDrivers';
 import AdminPassengers from './admin/pages/AdminPassengers';
 import AdminVehicles from './admin/pages/AdminVehicles';
 import AdminTrips from './admin/pages/AdminTrips';
+import AdminTripDetail from './admin/pages/AdminTripDetail';
 import AdminBookings from './admin/pages/AdminBookings';
 import AdminReviews from './admin/pages/AdminReviews';
 import AdminReports from './admin/pages/AdminReports';
@@ -98,6 +99,7 @@ function App() {
                 <Route path="passengers" element={<AdminPassengers />} />
                 <Route path="vehicles"   element={<AdminVehicles />} />
                 <Route path="trips"      element={<AdminTrips />} />
+                <Route path="trips/:tripId" element={<AdminTripDetail />} />
                 <Route path="bookings"   element={<AdminBookings />} />
                 <Route path="reviews"    element={<AdminReviews />} />
                 <Route path="reports"    element={<AdminReports />} />

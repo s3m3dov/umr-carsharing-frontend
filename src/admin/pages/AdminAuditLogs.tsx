@@ -234,7 +234,7 @@ export default function AdminAuditLogs() {
                     <TableCell className="font-mono text-xs">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="cursor-default">{log.entityId.slice(0, 8)}</span>
+                          <span className="cursor-help">{log.entityId.slice(0, 8)}</span>
                         </TooltipTrigger>
                         <TooltipContent>{log.entityId}</TooltipContent>
                       </Tooltip>
@@ -242,7 +242,7 @@ export default function AdminAuditLogs() {
                     <TableCell className="text-sm max-w-[180px] truncate">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="block truncate cursor-default">{log.performedBy}</span>
+                          <span className="block truncate cursor-help">{log.performedBy}</span>
                         </TooltipTrigger>
                         <TooltipContent>{log.performedBy}</TooltipContent>
                       </Tooltip>
@@ -251,7 +251,7 @@ export default function AdminAuditLogs() {
                     <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="block truncate cursor-default">
+                          <span className="block truncate cursor-help">
                             {log.details.length > 50
                               ? `${log.details.slice(0, 50)}…`
                               : log.details}

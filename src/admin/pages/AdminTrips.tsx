@@ -1,16 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tripsApi } from '@/shared/api/admin-api';
 import type { AdminTripResponse, TripStatus } from '@/admin/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +29,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { ChevronLeft, ChevronRight, Eye, XCircle } from 'lucide-react';
@@ -84,103 +77,17 @@ function formatAddress(address: AdminTripResponse['sourceAddress'] | null | unde
 
 const CANCELLABLE: TripStatus[] = ['AVAILABLE', 'CREATED'];
 
-// ─── Trip Details Dialog ──────────────────────────────────────────────────────
-
-interface TripDetailsDialogProps {
-  trip: AdminTripResponse | null;
-  onOpenChange: (open: boolean) => void;
-}
-
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-0.5 py-2">
-      <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-        {label}
-      </span>
-      <span className="text-sm break-all">{value ?? '—'}</span>
-    </div>
-  );
-}
-
-function TripDetailsDialog({ trip, onOpenChange }: TripDetailsDialogProps) {
-  if (!trip) return null;
-
-  return (
-    <Dialog open={!!trip} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Trip Details</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-1">
-          <DetailRow label="Trip ID" value={<span className="font-mono">{trip.tripId}</span>} />
-          <Separator />
-          <DetailRow label="Driver ID" value={<span className="font-mono">{trip.driverId}</span>} />
-          <DetailRow label="Vehicle Number" value={trip.vehicleNumber} />
-          <DetailRow label="Car Type" value={trip.carType} />
-          <Separator />
-          <DetailRow
-            label="Status"
-            value={<TripStatusBadge status={trip.tripStatus} />}
-          />
-          <Separator />
-          <DetailRow
-            label="From"
-            value={formatAddress(trip.sourceAddress)}
-          />
-          <DetailRow
-            label="To"
-            value={formatAddress(trip.destinationAddress)}
-          />
-          <Separator />
-          <DetailRow label="Total Seats" value={trip.totalSeats} />
-          <DetailRow label="Booked Seats" value={trip.bookedSeats} />
-          <DetailRow label="Available Seats" value={trip.availableSeats} />
-          <DetailRow
-            label="Price / Seat"
-            value={`$${trip.pricePerSeat.toFixed(2)}`}
-          />
-          <Separator />
-          <DetailRow
-            label="Route Distance"
-            value={trip.routeDistance != null ? `${trip.routeDistance} km` : '—'}
-          />
-          <DetailRow
-            label="Route Duration"
-            value={trip.routeDuration != null ? `${trip.routeDuration} min` : '—'}
-          />
-          <Separator />
-          <DetailRow
-            label="Departure (UTC)"
-            value={new Date(trip.tripStartDateTimeUTC).toLocaleString()}
-          />
-          <DetailRow label="Timezone" value={trip.tripTimezone} />
-          <Separator />
-          <DetailRow
-            label="Created At"
-            value={new Date(trip.createdAt).toLocaleString()}
-          />
-          <DetailRow
-            label="Updated At"
-            value={new Date(trip.updatedAt).toLocaleString()}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminTrips() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [tab, setTab] = useState<TabKey>('all');
   const [page, setPage] = useState(0);
-  const [viewTrip, setViewTrip] = useState<AdminTripResponse | null>(null);
   const [cancelTrip, setCancelTrip] = useState<AdminTripResponse | null>(null);
 
-  // Reset to page 0 when switching tabs
   function handleTabChange(key: TabKey) {
     setTab(key);
     setPage(0);
@@ -254,27 +161,21 @@ export default function AdminTrips() {
       </div>
 
       {/* Table */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            {TABS.find((t) => t.key === tab)?.label} Trips
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Trip ID</TableHead>
-                <TableHead>Driver ID</TableHead>
-                <TableHead>From</TableHead>
-                <TableHead>To</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Seats</TableHead>
-                <TableHead>Price/Seat</TableHead>
-                <TableHead>Departure</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Trip ID</TableHead>
+              <TableHead>Driver ID</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Seats</TableHead>
+              <TableHead>Price/Seat</TableHead>
+              <TableHead>Departure</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
             {isLoading ? (
               <TableSkeleton columns={9} />
             ) : isError ? (
@@ -297,7 +198,11 @@ export default function AdminTrips() {
                 {data?.content.map((trip) => {
                   const canCancel = CANCELLABLE.includes(trip.tripStatus);
                   return (
-                    <TableRow key={trip.tripId}>
+                    <TableRow
+                      key={trip.tripId}
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/admin/trips/${trip.tripId}`)}
+                    >
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -343,24 +248,24 @@ export default function AdminTrips() {
                         {new Date(trip.tripStartDateTimeUTC).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
-                            variant="ghost"
                             size="sm"
-                            onClick={() => setViewTrip(trip)}
-                            className="gap-1"
+                            variant="outline"
+                            className="h-7 px-2 text-xs gap-1"
+                            onClick={(e) => { e.stopPropagation(); navigate(`/admin/trips/${trip.tripId}`); }}
                           >
-                            <Eye className="h-3.5 w-3.5" />
+                            <Eye className="h-3 w-3" />
                             View
                           </Button>
                           {canCancel && (
                             <Button
-                              variant="ghost"
                               size="sm"
-                              onClick={() => setCancelTrip(trip)}
-                              className="gap-1 text-destructive hover:text-destructive"
+                              variant="outline"
+                              className="h-7 px-2 text-xs gap-1 text-destructive border-destructive/30 hover:bg-destructive/5"
+                              onClick={(e) => { e.stopPropagation(); setCancelTrip(trip); }}
                             >
-                              <XCircle className="h-3.5 w-3.5" />
+                              <XCircle className="h-3 w-3" />
                               Cancel
                             </Button>
                           )}
@@ -372,8 +277,7 @@ export default function AdminTrips() {
               </TableBody>
             )}
           </Table>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Pagination */}
       {data && totalPages > 1 && (
@@ -403,12 +307,6 @@ export default function AdminTrips() {
           </Button>
         </div>
       )}
-
-      {/* View Details Dialog */}
-      <TripDetailsDialog
-        trip={viewTrip}
-        onOpenChange={(open) => { if (!open) setViewTrip(null); }}
-      />
 
       {/* Cancel Confirmation */}
       <AlertDialog

@@ -427,7 +427,7 @@ export default function AdminVehicles() {
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{truncate(vehicle.userId, 8)}</span>
+                          <span className="cursor-help">{truncate(vehicle.userId, 8)}</span>
                         </TooltipTrigger>
                         <TooltipContent>{vehicle.userId}</TooltipContent>
                       </Tooltip>
