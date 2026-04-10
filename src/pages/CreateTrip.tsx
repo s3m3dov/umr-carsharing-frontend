@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Plus, Car } from 'lucide-react';
 import { OfferRideDTO } from '@/types/api';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
@@ -56,10 +57,11 @@ export default function CreateTrip() {
       });
       queryClient.invalidateQueries({ queryKey: ['upcomingRides'] });
     },
-    onError: () => {
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to create trip. Please try again.');
       toast({
         title: 'Error',
-        description: 'Failed to create trip. Please try again.',
+        description: message,
         variant: 'destructive',
       });
     },

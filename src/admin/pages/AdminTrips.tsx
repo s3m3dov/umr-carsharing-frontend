@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { ChevronLeft, ChevronRight, Eye, XCircle } from 'lucide-react';
 import { TableSkeleton } from '@/admin/shared';
 
@@ -202,8 +203,9 @@ export default function AdminTrips() {
       setCancelTrip(null);
       toast({ title: 'Trip cancelled successfully.' });
     },
-    onError: () => {
-      toast({ title: 'Failed to cancel trip.', variant: 'destructive' });
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to cancel trip.');
+      toast({ title: 'Failed to cancel trip.', description: message, variant: 'destructive' });
     },
   });
 

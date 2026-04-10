@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { 
@@ -94,7 +95,7 @@ export default function RideOffering() {
       });
       navigate('/my-rides');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create trip.';
+      const message = getBackendErrorMessage(error, 'Failed to create trip.');
       toast({
         title: 'Creation Failed',
         description: message,

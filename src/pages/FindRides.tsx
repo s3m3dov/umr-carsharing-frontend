@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Search, MapPin, Clock, Users, Car } from 'lucide-react';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import GoogleMap from '@/components/GoogleMap';
@@ -45,7 +46,7 @@ export default function FindRides() {
         toast({ title: 'No rides found', description: 'Try adjusting your search criteria.' });
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to search for rides.';
+      const message = getBackendErrorMessage(error, 'Failed to search for rides.');
       toast({ title: 'Search failed', description: message, variant: 'destructive' });
     } finally {
       setIsSearching(false);
@@ -65,7 +66,7 @@ export default function FindRides() {
       toast({ title: 'Success!', description: 'You have successfully joined the ride.' });
       handleSearch();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to join ride.';
+      const message = getBackendErrorMessage(error, 'Failed to join ride.');
       toast({ title: 'Failed to join ride', description: message, variant: 'destructive' });
     }
   };
