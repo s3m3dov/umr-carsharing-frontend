@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { 
@@ -84,7 +85,7 @@ export default function RideBooking() {
         toast({ title: 'No Rides Found', description: 'No available rides match your criteria.' });
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to search for rides.';
+      const message = getBackendErrorMessage(error, 'Failed to search for rides.');
       toast({ title: 'Search Failed', description: message, variant: 'destructive' });
     } finally {
       setIsSearching(false);
@@ -108,7 +109,7 @@ export default function RideBooking() {
       toast({ title: 'Ride Booked!', description: 'You have successfully joined the ride.' });
       navigate('/my-rides');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to book the ride.';
+      const message = getBackendErrorMessage(error, 'Failed to book the ride.');
       toast({ title: 'Booking Failed', description: message, variant: 'destructive' });
     } finally {
       setIsJoining(null);

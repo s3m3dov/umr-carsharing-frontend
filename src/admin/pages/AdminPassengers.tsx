@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableSkeleton } from '@/admin/shared';
 
@@ -69,7 +70,10 @@ export default function AdminPassengers() {
       setCreateOpen(false);
       invalidate();
     },
-    onError: () => toast({ title: 'Failed to create passenger', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to create passenger');
+      toast({ title: 'Failed to create passenger', description: message, variant: 'destructive' });
+    },
   });
 
   const updateMutation = useMutation({
@@ -80,7 +84,10 @@ export default function AdminPassengers() {
       setEditPassenger(null);
       invalidate();
     },
-    onError: () => toast({ title: 'Failed to update passenger', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to update passenger');
+      toast({ title: 'Failed to update passenger', description: message, variant: 'destructive' });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -90,7 +97,10 @@ export default function AdminPassengers() {
       setDeletePassenger(null);
       invalidate();
     },
-    onError: () => toast({ title: 'Failed to delete passenger', variant: 'destructive' }),
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to delete passenger');
+      toast({ title: 'Failed to delete passenger', description: message, variant: 'destructive' });
+    },
   });
 
   const createForm = useForm<CreateFormValues>({

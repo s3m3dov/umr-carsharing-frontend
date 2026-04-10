@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Car, Plus } from 'lucide-react';
 
 export default function Vehicles() {
@@ -50,10 +51,11 @@ export default function Vehicles() {
         seatingCapacity: ''
       });
     },
-    onError: () => {
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to register vehicle');
       toast({
         title: 'Error',
-        description: 'Failed to register vehicle',
+        description: message,
         variant: 'destructive',
       });
     },
