@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,11 +39,11 @@ export default function RideOffering() {
   // Fetch user vehicles
   const { data: vehiclesResponse } = useQuery({
     queryKey: ['vehicles', userId],
-    queryFn: () => apiService.getUserVehicles(userId!),
+    queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
-  const vehicles = vehiclesResponse?.responseContent || [];
+  const vehicles = vehiclesResponse || [];
 
   const handlePickupChange = (address: string, lat?: number, lng?: number) => {
     setPickupAddress(address);
@@ -87,25 +87,17 @@ export default function RideOffering() {
         offeredSeats,
       };
 
-      const response = await apiService.createTrip(userId!, tripData);
-      
-      if (response.success && response.responseContent?.tripCreated) {
-        toast({
-          title: 'Trip Created!',
-          description: 'Your ride has been successfully created and is now available for booking.',
-        });
-        navigate('/my-rides');
-      } else {
-        toast({
-          title: 'Creation Failed',
-          description: response.responseContent?.errMsg || response.errorMessage || 'Failed to create trip.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await userApi.createTrip(userId!, tripData);
       toast({
-        title: 'Error',
-        description: 'Failed to create trip. Please try again.',
+        title: 'Trip Created!',
+        description: 'Your ride has been successfully created and is now available for booking.',
+      });
+      navigate('/my-rides');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create trip.';
+      toast({
+        title: 'Creation Failed',
+        description: message,
         variant: 'destructive',
       });
     } finally {

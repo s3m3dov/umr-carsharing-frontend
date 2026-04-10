@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { passengerApi as userApi } from '@/shared/api/passenger-api';
 import { RideDTO, TripBasicInfoDTO } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -39,28 +39,14 @@ export default function FindRides() {
     
     setIsSearching(true);
     try {
-      const response = await apiService.findRides(userId, searchParams);
-      if (response.success && response.responseContent) {
-        setRides(response.responseContent);
-        if (response.responseContent.length === 0) {
-          toast({
-            title: 'No rides found',
-            description: 'Try adjusting your search criteria.',
-          });
-        }
-      } else {
-        toast({
-          title: 'Search failed',
-          description: response.errorMessage || 'Failed to find rides',
-          variant: 'destructive',
-        });
+      const result = await userApi.findRides(userId!, searchParams);
+      setRides(result);
+      if (result.length === 0) {
+        toast({ title: 'No rides found', description: 'Try adjusting your search criteria.' });
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to search for rides',
-        variant: 'destructive',
-      });
+      const message = error instanceof Error ? error.message : 'Failed to search for rides.';
+      toast({ title: 'Search failed', description: message, variant: 'destructive' });
     } finally {
       setIsSearching(false);
     }
@@ -75,27 +61,12 @@ export default function FindRides() {
         tripId
       };
       
-      const response = await apiService.joinTrip(userId, rideData);
-      if (response.success && response.responseContent?.rideJoined) {
-        toast({
-          title: 'Success!',
-          description: 'You have successfully joined the ride.',
-        });
-        // Refresh the search results
-        handleSearch();
-      } else {
-        toast({
-          title: 'Failed to join ride',
-          description: response.responseContent?.errMsg || response.errorMessage || 'Unknown error',
-          variant: 'destructive',
-        });
-      }
+      await userApi.joinTrip(userId!, rideData);
+      toast({ title: 'Success!', description: 'You have successfully joined the ride.' });
+      handleSearch();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to join ride',
-        variant: 'destructive',
-      });
+      const message = error instanceof Error ? error.message : 'Failed to join ride.';
+      toast({ title: 'Failed to join ride', description: message, variant: 'destructive' });
     }
   };
 

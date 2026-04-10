@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { passengerApi as userApi } from '@/shared/api/passenger-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,12 +29,12 @@ export default function RideTracking() {
   // Fetch upcoming rides
   const { data: upcomingRidesResponse, refetch } = useQuery({
     queryKey: ['upcoming-rides', userId],
-    queryFn: () => apiService.getUpcomingRides(userId!),
+    queryFn: () => userApi.getUpcomingRides(userId!),
     enabled: !!userId,
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
   });
 
-  const upcomingRides = upcomingRidesResponse?.responseContent || [];
+  const upcomingRides = upcomingRidesResponse || [];
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -72,28 +72,17 @@ export default function RideTracking() {
 
   const handleCancelRide = async (tripId: string) => {
     try {
-      const response = await apiService.cancelRide(userId!, {
-        tripId,
-        cancellationReason: 'User cancelled',
-      });
-
-      if (response.success && response.responseContent?.rideCancelled) {
-        toast({
-          title: 'Ride Cancelled',
-          description: 'Your ride has been successfully cancelled.',
-        });
-        refetch();
-      } else {
-        toast({
-          title: 'Cancellation Failed',
-          description: response.responseContent?.errMsg || 'Failed to cancel ride.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await userApi.cancelRide(userId!, { tripId, cancellationReason: 'User cancelled' });
       toast({
-        title: 'Error',
-        description: 'Failed to cancel ride. Please try again.',
+        title: 'Ride Cancelled',
+        description: 'Your ride has been successfully cancelled.',
+      });
+      refetch();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to cancel ride.';
+      toast({
+        title: 'Cancellation Failed',
+        description: message,
         variant: 'destructive',
       });
     }
