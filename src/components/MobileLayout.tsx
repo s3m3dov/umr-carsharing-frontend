@@ -10,7 +10,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { TooltipIcon } from '@/components/ui/tooltip-icon';
 import BrandIcon from '@/components/BrandIcon';
 import { 
   Car, 
@@ -115,23 +114,17 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                     <div className="flex-1 min-w-0">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1">
-                              <p className="text-base font-semibold text-foreground truncate">
-                                {email || 'User'}
-                              </p>
-                              <TooltipIcon className="shrink-0" />
-                            </div>
+                            <p className="text-base font-semibold text-foreground truncate cursor-pointer">
+                              {email || 'User'}
+                            </p>
                           </TooltipTrigger>
                           <TooltipContent side="top">{email || 'User'}</TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1">
-                              <p className="text-sm text-muted-foreground truncate">
-                                {email || ''}
-                              </p>
-                              <TooltipIcon className="shrink-0" />
-                            </div>
+                            <p className="text-sm text-muted-foreground truncate cursor-pointer">
+                              {email || ''}
+                            </p>
                           </TooltipTrigger>
                           <TooltipContent side="top">{email || ''}</TooltipContent>
                         </Tooltip>
