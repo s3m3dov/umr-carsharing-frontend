@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { passengerApi as userApi } from '@/shared/api/passenger-api';
 import { RideBasicInfoDTO, CancelRideRequestDTO } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -18,13 +18,13 @@ export default function MyRides() {
 
   const { data: upcomingRides, isLoading: loadingUpcoming } = useQuery({
     queryKey: ['upcomingRides', userId],
-    queryFn: () => apiService.getUpcomingRides(userId!),
+    queryFn: () => userApi.getUpcomingRides(userId!),
     enabled: !!userId,
   });
 
   const { data: historyRides, isLoading: loadingHistory } = useQuery({
     queryKey: ['historyRides', userId],
-    queryFn: () => apiService.getHistoryRides(userId!),
+    queryFn: () => userApi.getHistoryRides(userId!),
     enabled: !!userId,
   });
 
@@ -34,23 +34,15 @@ export default function MyRides() {
         tripId,
         cancellationReason: reason
       };
-      return apiService.cancelRide(userId!, cancelData);
+      return userApi.cancelRide(userId!, cancelData);
     },
-    onSuccess: (data) => {
-      if (data.success && data.responseContent?.rideCancelled) {
-        toast({
-          title: 'Ride cancelled',
-          description: 'Your ride has been successfully cancelled.',
-        });
-        queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
-        queryClient.invalidateQueries({ queryKey: ['historyRides', userId] });
-      } else {
-        toast({
-          title: 'Cancellation failed',
-          description: data.responseContent?.errMsg || data.errorMessage || 'Failed to cancel ride',
-          variant: 'destructive',
-        });
-      }
+    onSuccess: () => {
+      toast({
+        title: 'Ride cancelled',
+        description: 'Your ride has been successfully cancelled.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
+      queryClient.invalidateQueries({ queryKey: ['historyRides', userId] });
     },
     onError: () => {
       toast({
@@ -140,9 +132,9 @@ export default function MyRides() {
           <TabsContent value="upcoming" className="space-y-4">
             {loadingUpcoming ? (
               <div className="text-center py-8">Loading upcoming rides...</div>
-            ) : upcomingRides?.responseContent && upcomingRides.responseContent.length > 0 ? (
+            ) : upcomingRides && upcomingRides.length > 0 ? (
               <div className="space-y-4">
-                {upcomingRides.responseContent.map((ride) => (
+                {upcomingRides.map((ride) => (
                   <RideCard key={ride.tripId} ride={ride} showCancelButton={true} />
                 ))}
               </div>
@@ -158,9 +150,9 @@ export default function MyRides() {
           <TabsContent value="history" className="space-y-4">
             {loadingHistory ? (
               <div className="text-center py-8">Loading ride history...</div>
-            ) : historyRides?.responseContent && historyRides.responseContent.length > 0 ? (
+            ) : historyRides && historyRides.length > 0 ? (
               <div className="space-y-4">
-                {historyRides.responseContent.map((ride) => (
+                {historyRides.map((ride) => (
                   <RideCard key={ride.tripId} ride={ride} />
                 ))}
               </div>

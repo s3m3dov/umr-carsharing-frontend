@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { passengerApi as userApi } from '@/shared/api/passenger-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,29 +78,14 @@ export default function RideBooking() {
         requestedSeats,
       };
 
-      const response = await apiService.findRides(userId!, rideData);
-      
-      if (response.success && response.responseContent) {
-        setAvailableRides(response.responseContent);
-        if (response.responseContent.length === 0) {
-          toast({
-            title: 'No Rides Found',
-            description: 'No available rides match your criteria.',
-          });
-        }
-      } else {
-        toast({
-          title: 'Search Failed',
-          description: response.errorMessage || 'Failed to search for rides.',
-          variant: 'destructive',
-        });
+      const result = await userApi.findRides(userId!, rideData);
+      setAvailableRides(result);
+      if (result.length === 0) {
+        toast({ title: 'No Rides Found', description: 'No available rides match your criteria.' });
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to search for rides. Please try again.',
-        variant: 'destructive',
-      });
+      const message = error instanceof Error ? error.message : 'Failed to search for rides.';
+      toast({ title: 'Search Failed', description: message, variant: 'destructive' });
     } finally {
       setIsSearching(false);
     }
@@ -119,27 +104,12 @@ export default function RideBooking() {
         requestedSeats,
       };
 
-      const response = await apiService.joinTrip(userId!, rideData);
-      
-      if (response.success && response.responseContent?.rideJoined) {
-        toast({
-          title: 'Ride Booked!',
-          description: 'You have successfully joined the ride.',
-        });
-        navigate('/my-rides');
-      } else {
-        toast({
-          title: 'Booking Failed',
-          description: response.responseContent?.errMsg || 'Failed to book the ride.',
-          variant: 'destructive',
-        });
-      }
+      await userApi.joinTrip(userId!, rideData);
+      toast({ title: 'Ride Booked!', description: 'You have successfully joined the ride.' });
+      navigate('/my-rides');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to book the ride. Please try again.',
-        variant: 'destructive',
-      });
+      const message = error instanceof Error ? error.message : 'Failed to book the ride.';
+      toast({ title: 'Booking Failed', description: message, variant: 'destructive' });
     } finally {
       setIsJoining(null);
     }

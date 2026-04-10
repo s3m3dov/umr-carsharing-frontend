@@ -1,7 +1,9 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { apiService } from '@/services/api';
+import { apiClient } from '@/shared/api/client';
+import { ROUTES } from '@/shared/api/service-routes';
+import { ApiError } from '@/shared/api/error-parser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,27 +36,20 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const response = await apiService.signup(formData);
-      
-      if (response.success && response.responseContent?.signUpSuccess) {
-        navigate('/login');
-        toast({
-          title: 'Account created!',
-          description: 'Your account has been created successfully. Please log in.',
-        });
-      } else {
-        toast({
-          title: 'Signup failed',
-          description: response.errorMessage || 'Failed to create account',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await apiClient.post<void>(ROUTES.auth.signup, formData);
+      navigate('/login');
       toast({
-        title: 'Error',
-        description: 'Failed to connect to server. Please try again.',
-        variant: 'destructive',
+        title: 'Account created!',
+        description: 'Your account has been created successfully. Please log in.',
       });
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Failed to connect to server.';
+      toast({ title: 'Signup failed', description: message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
