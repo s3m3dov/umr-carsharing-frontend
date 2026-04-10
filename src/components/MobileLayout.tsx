@@ -4,6 +4,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import BrandIcon from '@/components/BrandIcon';
 import { 
   Car, 
   Search, 
@@ -22,7 +29,7 @@ interface MobileLayoutProps {
 }
 
 export default function MobileLayout({ children }: MobileLayoutProps) {
-  const { userInfo, logout } = useAuth();
+  const { email, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,12 +55,10 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       <header className="bg-white/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-              <Car className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <BrandIcon className="h-10 w-10 shadow-lg" />
             <div>
-              <h1 className="text-xl font-bold text-primary">Carpool</h1>
-              <p className="text-xs text-muted-foreground">Share the journey</p>
+              <h1 className="text-xl font-bold text-primary">Kamilli Ride</h1>
+              <p className="text-xs text-muted-foreground">Share every journey</p>
             </div>
           </div>
           <Button
@@ -98,20 +103,31 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
 
             {/* User Profile in Menu */}
             <div className="px-4 mt-8">
-              <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+              <TooltipProvider>
+                <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-primary-foreground text-lg font-bold">
-                      {userInfo?.fullName?.charAt(0) || 'U'}
+                      {email?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold text-foreground truncate">
-                      {userInfo?.fullName || 'User'}
-                    </p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {userInfo?.emailId || ''}
-                    </p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-base font-semibold text-foreground truncate cursor-default">
+                          {email || 'User'}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">{email || 'User'}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-sm text-muted-foreground truncate cursor-default">
+                          {email || ''}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">{email || ''}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 <Button 
@@ -122,7 +138,8 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                   <LogOut className="h-5 w-5 mr-2" />
                   Logout
                 </Button>
-              </Card>
+                </Card>
+              </TooltipProvider>
             </div>
           </div>
         </div>

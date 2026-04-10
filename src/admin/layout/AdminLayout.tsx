@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import BrandIcon from '@/components/BrandIcon';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -50,10 +51,15 @@ export default function AdminLayout() {
     <div className="flex h-screen overflow-hidden bg-background">
       <aside className="w-56 shrink-0 flex flex-col border-r bg-card">
         <div className="px-4 py-3 border-b">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Carsharing
-          </p>
-          <p className="text-base font-bold">Admin Panel</p>
+          <div className="flex items-center gap-2">
+            <BrandIcon className="h-7 w-7 rounded-lg" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Kamilli Ride
+              </p>
+              <p className="text-base font-bold">Admin Panel</p>
+            </div>
+          </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
@@ -86,9 +92,14 @@ export default function AdminLayout() {
                 </AvatarFallback>
               </Avatar>
 
-              <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate" title={email ?? ''}>
-                {email}
-              </p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate cursor-default">
+                    {email}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent side="top">{email}</TooltipContent>
+              </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
