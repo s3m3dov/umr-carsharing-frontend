@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Tooltip,
   TooltipContent,
@@ -128,44 +128,39 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
 
             {/* User Profile */}
-            <div className="p-4 border-t border-border/50">
-              <TooltipProvider>
-                <Card className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground text-sm font-bold">
-                      {email?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                    <div className="flex-1 min-w-0">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p className="text-sm font-semibold text-foreground truncate cursor-pointer">
-                              {email || 'User'}
-                            </p>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">{email || 'User'}</TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p className="text-xs text-muted-foreground truncate cursor-pointer">
-                              {email || ''}
-                            </p>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">{email || ''}</TooltipContent>
-                        </Tooltip>
-                      </div>
+            <div className="p-3 border-t">
+              <TooltipProvider delayDuration={300}>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      {email ? email[0].toUpperCase() : '?'}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="flex-1 min-w-0 text-xs text-muted-foreground truncate cursor-pointer">
+                        {email}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{email}</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 shrink-0 text-muted-foreground hover:text-foreground"
+                        onClick={handleLogout}
+                        aria-label="Logout"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Logout</TooltipContent>
+                  </Tooltip>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleLogout}
-                  className="w-full border-primary/20 hover:bg-primary/10 hover:border-primary/30"
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-                </Card>
               </TooltipProvider>
             </div>
           </div>
