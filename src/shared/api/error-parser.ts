@@ -17,8 +17,22 @@ export class ApiError extends Error {
 export async function parseResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
     clearSession();
+    // Best-effort: extract the backend message before redirecting.
+    const raw = await res.text().catch(() => '');
+    let message = 'You have been signed out. Please log in again.';
+    if (raw.trim()) {
+      try {
+        const json = JSON.parse(raw) as Record<string, unknown>;
+        const errorObj = json['error'] as Record<string, unknown> | undefined;
+        message =
+          (errorObj?.['message'] as string | undefined) ??
+          (json['message'] as string | undefined) ??
+          message;
+      } catch { /* non-JSON body — keep default */ }
+    }
+    sessionStorage.setItem('login_notice', message);
     window.location.replace('/login');
-    throw new ApiError(401, 'Session expired. Please log in again.');
+    throw new ApiError(401, message);
   }
 
   const text = await res.text();
