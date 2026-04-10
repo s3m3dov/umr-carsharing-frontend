@@ -285,7 +285,7 @@ export default function AdminDashboard() {
   // Health queries
   const healthResults = useQueries({
     queries: SERVICES.map((svc) => ({
-      queryKey: ['service-health', svc.path],
+      queryKey: ['service-health-summary', svc.path],
       queryFn: () => fetchHealth(svc.path),
       refetchInterval: 30_000,
       retry: false,
