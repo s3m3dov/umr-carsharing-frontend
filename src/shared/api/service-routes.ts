@@ -21,4 +21,15 @@ export const ROUTES = {
     reports: '/trip-service/api/admin/reports',
     auditLogs: '/trip-service/api/admin/audit-logs',
   },
+  user: {
+    profile: (userId: string) => `/user-service/api/users/${userId}`,
+    vehicles: (userId: string) => `/user-service/api/vehicles/${userId}`,
+    registerVehicle: '/user-service/api/vehicles/register',
+    findRides: '/trip-service/api/rides/find-ride',
+    joinTrip: '/trip-service/api/rides/join-trip',
+    createTrip: '/trip-service/api/ride/create-trip',
+    upcomingRides: '/trip-service/api/myrides/upcoming',
+    historyRides: '/trip-service/api/myrides/history',
+    cancelRide: '/trip-service/api/myrides/cancel',
+  },
 } as const;
