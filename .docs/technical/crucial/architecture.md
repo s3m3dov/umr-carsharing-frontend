@@ -99,6 +99,14 @@ The app uses layered guards:
 1. `ProtectedRoute` for authenticated legacy pages
 2. `AdminRouteGuard` for authenticated + ADMIN role pages
 
+Approved role-forwarding policy for dashboard entry points:
+
+- `ADMIN` users are forwarded to `/admin`
+- `DRIVER` users are forwarded to `/driver`
+- `PASSENGER` users are forwarded to `/passenger`
+- Any unsupported role value must route to `/forbidden` with message:
+  `Only PASSENGER, DRIVER, and ADMIN roles are supported.`
+
 Flow for admin route access:
 
 - No session token: redirect to `/login`

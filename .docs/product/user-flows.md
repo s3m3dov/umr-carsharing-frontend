@@ -16,6 +16,19 @@ Notes:
 - `Login.tsx` already uses shared API client
 - Redirect behavior for non-admin users should be reviewed for consistency with transition policy
 
+## 1.1 Role-Based Dashboard Forwarding (Approved)
+
+After successful authentication, dashboard forwarding must be role-based:
+
+- `ADMIN` -> `/admin`
+- `DRIVER` -> `/driver`
+- `PASSENGER` -> `/passenger`
+
+If backend returns any other role value, frontend must:
+
+1. redirect user to `/forbidden`
+2. show explicit message: `Only PASSENGER, DRIVER, and ADMIN roles are supported.`
+
 ## 2. Admin Access Guard Flow
 
 1. User tries to open `/admin/*`
