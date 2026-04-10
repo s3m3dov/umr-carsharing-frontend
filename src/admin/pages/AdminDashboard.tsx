@@ -3,6 +3,8 @@ import { useQueries } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   UserCheck,
   Users,
@@ -17,6 +19,7 @@ import {
   CheckCircle2,
   XCircle,
   Minus,
+  RefreshCw,
 } from 'lucide-react';
 
 // ─── Nav module grid ──────────────────────────────────────────────────────────
@@ -102,23 +105,45 @@ const SERVICES = [
 
 type ServiceStatus = 'UP' | 'DOWN' | 'OUT_OF_SERVICE' | 'UNKNOWN';
 
-async function fetchHealth(path: string): Promise<ServiceStatus> {
+interface ServiceHealthSnapshot {
+  status: ServiceStatus;
+  responseMs: number;
+}
+
+async function fetchHealth(path: string): Promise<ServiceHealthSnapshot> {
+  const start = performance.now();
   try {
     const res = await fetch(`${BASE_URL}${path}`, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) return 'DOWN';
+    const responseMs = Math.round(performance.now() - start);
+    if (!res.ok) {
+      return { status: 'DOWN', responseMs };
+    }
     const json = await res.json();
-    return (json.status as ServiceStatus) ?? 'UNKNOWN';
+    return {
+      status: (json.status as ServiceStatus) ?? 'UNKNOWN',
+      responseMs,
+    };
   } catch {
-    return 'DOWN';
+    return {
+      status: 'DOWN',
+      responseMs: Math.round(performance.now() - start),
+    };
   }
 }
 
-// ─── Health summary ───────────────────────────────────────────────────────────
-
 function ServiceDot({ status }: { status: ServiceStatus | undefined }) {
-  if (!status) return <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" />;
-  if (status === 'UP') return <span className="inline-block h-2 w-2 rounded-full bg-green-500" />;
-  return <span className="inline-block h-2 w-2 rounded-full bg-destructive" />;
+  return (
+    <span
+      className={cn(
+        'inline-block h-2.5 w-2.5 rounded-full',
+        !status
+          ? 'bg-muted-foreground/40 animate-pulse'
+          : status === 'UP'
+          ? 'bg-green-500'
+          : 'bg-destructive',
+      )}
+    />
+  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -139,9 +164,21 @@ export default function AdminDashboard() {
   });
 
   const allHealthDone = healthResults.every((r) => !r.isLoading);
-  const upCount = healthResults.filter((r) => r.data === 'UP').length;
-  const downCount = healthResults.filter((r) => r.data && r.data !== 'UP').length;
+  const isRefreshing = healthResults.some((r) => r.isFetching);
+  const upCount = healthResults.filter((r) => r.data?.status === 'UP').length;
+  const downCount = healthResults.filter((r) => r.data && r.data.status !== 'UP').length;
   const allOk = allHealthDone && downCount === 0;
+  const avgResponseMs = (() => {
+    const samples = healthResults
+      .map((r) => r.data)
+      .filter((d): d is ServiceHealthSnapshot => !!d && d.status === 'UP');
+    if (samples.length === 0) return null;
+    return Math.round(samples.reduce((sum, s) => sum + s.responseMs, 0) / samples.length);
+  })();
+
+  const refreshHealth = () => {
+    healthResults.forEach((r) => r.refetch());
+  };
 
   return (
     <div className="p-6 space-y-8">
@@ -155,52 +192,60 @@ export default function AdminDashboard() {
 
       {/* Service health summary */}
       <Card className={cn(
-        'border',
+        'border shadow-sm',
         !allHealthDone
           ? ''
           : allOk
-          ? 'border-green-200 bg-green-500/5'
-          : 'border-destructive/30 bg-destructive/5',
+          ? 'border-green-200/80 bg-green-500/[0.04]'
+          : 'border-destructive/30 bg-destructive/[0.04]',
       )}>
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
+        <CardContent className="py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0 flex items-center gap-2.5">
               {!allHealthDone ? (
                 <Minus className="h-4 w-4 text-muted-foreground animate-pulse" />
               ) : allOk ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
               ) : (
                 <XCircle className="h-4 w-4 text-destructive" />
               )}
-              <div>
-                <p className="text-sm font-semibold">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold leading-5">
                   {!allHealthDone
                     ? 'Checking services…'
                     : allOk
                     ? 'All systems operational'
                     : `${downCount} service${downCount !== 1 ? 's' : ''} degraded`}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {allHealthDone
-                    ? `${upCount} of ${SERVICES.length} services up`
-                    : 'Auto-refreshes every 30 s'}
-                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <div
+                    className="inline-flex items-center gap-1 rounded-full border bg-background/70 px-2 py-1"
+                    aria-label="Service status dots"
+                  >
+                    {SERVICES.map((svc, i) => (
+                      <ServiceDot key={svc.path} status={healthResults[i].data?.status} />
+                    ))}
+                  </div>
+                  <Badge variant="secondary" className="text-[11px] font-medium">
+                    {allHealthDone ? `${upCount}/${SERVICES.length} up` : 'Checking'}
+                  </Badge>
+                  {avgResponseMs != null && (
+                    <Badge variant="outline" className="text-[11px] font-medium">
+                      Avg {avgResponseMs} ms
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              {SERVICES.map((svc, i) => (
-                <div key={svc.path} className="flex flex-col items-center gap-1">
-                  <ServiceDot status={healthResults[i].data} />
-                  <span className="text-[10px] text-muted-foreground hidden sm:block">{svc.name.split(' ')[0]}</span>
-                </div>
-              ))}
-              <Link
-                to="/admin/status"
-                className="ml-2 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-              >
-                Details
-              </Link>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <Button variant="outline" size="sm" className="gap-2" onClick={refreshHealth}>
+                <RefreshCw className={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin')} />
+                Refresh
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/status">Details</Link>
+              </Button>
             </div>
           </div>
         </CardContent>
