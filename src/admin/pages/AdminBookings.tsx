@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bookingsApi } from '@/admin/api';
+import { bookingsApi } from '@/shared/api/admin-api';
 import type { BookingResponse, BookingStatus, UpdateBookingRequest } from '@/admin/types';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';

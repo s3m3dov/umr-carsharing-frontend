@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { auditLogsApi } from '@/admin/api';
+import { auditLogsApi } from '@/shared/api/admin-api';
 import { TableSkeleton } from '@/admin/shared';
 import type { AuditAction, EntityType } from '@/admin/types';
 

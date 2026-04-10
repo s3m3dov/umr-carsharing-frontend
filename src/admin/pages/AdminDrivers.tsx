@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { driversApi } from '@/admin/api';
+import { driversApi } from '@/shared/api/admin-api';
 import type { DriverResponse, DriverStatus, UpdateDriverRequest } from '@/admin/types';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -151,7 +151,7 @@ export default function AdminDrivers() {
   function toggleRow(id: string) {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
   }

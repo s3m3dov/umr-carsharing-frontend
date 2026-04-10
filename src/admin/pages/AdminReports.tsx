@@ -9,7 +9,7 @@ import {
   Euro,
   Users,
 } from 'lucide-react';
-import { reportsApi } from '@/admin/api';
+import { reportsApi } from '@/shared/api/admin-api';
 import type {
   DriverPerformanceReport,
   BookingSummaryReport,

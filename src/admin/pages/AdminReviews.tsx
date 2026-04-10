@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { reviewsApi } from '@/admin/api';
+import { reviewsApi } from '@/shared/api/admin-api';
 import type { ReviewResponse, ReviewStatus } from '@/admin/types';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
