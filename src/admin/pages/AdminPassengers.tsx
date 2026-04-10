@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { passengersApi } from '@/admin/api';
+import { passengersApi } from '@/shared/api/admin-api';
 import type { PassengerResponse, CreatePassengerRequest, UpdatePassengerRequest } from '@/admin/types';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
