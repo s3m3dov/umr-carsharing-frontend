@@ -278,7 +278,7 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{booking.bookingId.slice(0, 8)}...</span>
+                          <span className="cursor-help">{booking.bookingId.slice(0, 8)}...</span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.bookingId}</TooltipContent>
                         </Tooltip>
@@ -286,7 +286,7 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{booking.passengerId.slice(0, 8)}...</span>
+                          <span className="cursor-help">{booking.passengerId.slice(0, 8)}...</span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.passengerId}</TooltipContent>
                         </Tooltip>
@@ -294,7 +294,7 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-pointer">{booking.tripId.slice(0, 8)}...</span>
+                          <span className="cursor-help">{booking.tripId.slice(0, 8)}...</span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.tripId}</TooltipContent>
                         </Tooltip>
@@ -338,7 +338,7 @@ export default function AdminBookings() {
                                   Are you sure you want to cancel booking{' '}
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="font-mono cursor-pointer">
+                                      <span className="font-mono cursor-help">
                                         {booking.bookingId.slice(0, 8)}...
                                       </span>
                                     </TooltipTrigger>
@@ -377,7 +377,7 @@ export default function AdminBookings() {
               <PaginationPrevious
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 aria-disabled={page === 0}
-                className={page === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={page === 0 ? 'pointer-events-none opacity-50' : 'cursor-help'}
               />
             </PaginationItem>
             <PaginationItem>
@@ -390,7 +390,7 @@ export default function AdminBookings() {
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 aria-disabled={page >= totalPages - 1}
                 className={
-                  page >= totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'
+                  page >= totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-help'
                 }
               />
             </PaginationItem>
