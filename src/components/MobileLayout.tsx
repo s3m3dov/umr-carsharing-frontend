@@ -114,7 +114,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                     <div className="flex-1 min-w-0">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="text-base font-semibold text-foreground truncate cursor-pointer">
+                            <p className="text-base font-semibold text-foreground truncate cursor-help">
                               {email || 'User'}
                             </p>
                           </TooltipTrigger>
@@ -122,7 +122,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="text-sm text-muted-foreground truncate cursor-pointer">
+                            <p className="text-sm text-muted-foreground truncate cursor-help">
                               {email || ''}
                             </p>
                           </TooltipTrigger>

@@ -301,7 +301,7 @@ export default function AdminTrips() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-pointer">{truncate(trip.tripId, 8)}</span>
+                            <span className="cursor-help">{truncate(trip.tripId, 8)}</span>
                           </TooltipTrigger>
                           <TooltipContent>{trip.tripId}</TooltipContent>
                         </Tooltip>
@@ -309,7 +309,7 @@ export default function AdminTrips() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-pointer">{truncate(trip.driverId, 8)}</span>
+                            <span className="cursor-help">{truncate(trip.driverId, 8)}</span>
                           </TooltipTrigger>
                           <TooltipContent>{trip.driverId}</TooltipContent>
                         </Tooltip>
@@ -317,7 +317,7 @@ export default function AdminTrips() {
                       <TableCell className="max-w-[160px] truncate text-sm">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="block truncate cursor-pointer">{formatAddress(trip.sourceAddress)}</span>
+                            <span className="block truncate cursor-help">{formatAddress(trip.sourceAddress)}</span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs whitespace-pre-wrap">{formatAddress(trip.sourceAddress)}</TooltipContent>
                         </Tooltip>
@@ -325,7 +325,7 @@ export default function AdminTrips() {
                       <TableCell className="max-w-[160px] truncate text-sm">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="block truncate cursor-pointer">{formatAddress(trip.destinationAddress)}</span>
+                            <span className="block truncate cursor-help">{formatAddress(trip.destinationAddress)}</span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs whitespace-pre-wrap">{formatAddress(trip.destinationAddress)}</TooltipContent>
                         </Tooltip>
@@ -422,7 +422,7 @@ export default function AdminTrips() {
               Are you sure you want to cancel trip{' '}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="font-mono font-semibold cursor-pointer">
+                  <span className="font-mono font-semibold cursor-help">
                     {truncate(cancelTrip?.tripId ?? '', 8)}
                   </span>
                 </TooltipTrigger>
