@@ -5,6 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Car,
   Search,
   Plus,
@@ -17,6 +23,7 @@ import {
   Navigation
 } from 'lucide-react';
 import { useState } from 'react';
+import BrandIcon from '@/components/BrandIcon';
 
 interface LayoutProps {
   children: ReactNode;
@@ -57,10 +64,8 @@ export default function Layout({ children }: LayoutProps) {
       <div className="lg:hidden bg-white/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Car className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <h1 className="text-xl font-bold text-primary">Carpool</h1>
+            <BrandIcon className="h-8 w-8 rounded-lg" />
+            <h1 className="text-xl font-bold text-primary">Kamilli Ride</h1>
           </div>
           <Button
             variant="ghost"
@@ -84,12 +89,10 @@ export default function Layout({ children }: LayoutProps) {
             {/* Logo */}
             <div className="p-6 border-b border-border/50 hidden lg:block">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                  <Car className="w-6 h-6 text-primary-foreground" />
-                </div>
+                <BrandIcon className="h-10 w-10" />
                 <div>
-                  <h1 className="text-2xl font-bold text-primary">Carpool</h1>
-                  <p className="text-xs text-muted-foreground">Share the journey</p>
+                  <h1 className="text-2xl font-bold text-primary">Kamilli Ride</h1>
+                  <p className="text-xs text-muted-foreground">Share every journey</p>
                 </div>
               </div>
             </div>
@@ -122,7 +125,8 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* User Profile */}
             <div className="p-4 border-t border-border/50">
-              <Card className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+              <TooltipProvider>
+                <Card className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-primary-foreground text-sm font-bold">
@@ -130,12 +134,22 @@ export default function Layout({ children }: LayoutProps) {
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {email || 'User'}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {email || ''}
-                    </p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-sm font-semibold text-foreground truncate cursor-default">
+                          {email || 'User'}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">{email || 'User'}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-xs text-muted-foreground truncate cursor-default">
+                          {email || ''}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">{email || ''}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 <Button 
@@ -147,7 +161,8 @@ export default function Layout({ children }: LayoutProps) {
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </Button>
-              </Card>
+                </Card>
+              </TooltipProvider>
             </div>
           </div>
         </div>
