@@ -73,7 +73,7 @@ function fmt(date: Date) {
 export default function AdminStatus() {
   const results = useQueries({
     queries: SERVICES.map((svc) => ({
-      queryKey: ['service-health', svc.path],
+      queryKey: ['service-health-detail', svc.path],
       queryFn: () => fetchHealth(svc.path),
       refetchInterval: 30_000,
       retry: false,
