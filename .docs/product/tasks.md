@@ -20,9 +20,15 @@ This is the active technical backlog for frontend stabilization and migration co
 
 ## P1 - Guard and Contract Reliability
 
+4A. **Implement role-based dashboard forwarding and unsupported-role handling**
+    - Add explicit forwarding for `ADMIN -> /admin`, `DRIVER -> /driver`, `PASSENGER -> /passenger`
+    - Ensure `/dashboard` compatibility path resolves using role-aware redirect
+    - Redirect unsupported roles to `/forbidden`
+    - Show message: `Only PASSENGER, DRIVER, and ADMIN roles are supported.`
+
 4. **Add tests for route guards**
-   - `AdminRouteGuard`: unauthenticated, non-admin, admin
-   - `ProtectedRoute`: unauthenticated redirect behavior
+    - `AdminRouteGuard`: unauthenticated, non-admin, admin
+    - `ProtectedRoute`: unauthenticated redirect behavior
 
 5. **Add parser tests for API response handling**
    - Success envelope
