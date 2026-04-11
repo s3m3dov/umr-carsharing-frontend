@@ -10,6 +10,7 @@ import {
   User,
   ArrowRight,
   MapPin,
+  Star,
 } from 'lucide-react';
 
 const modules = [
@@ -34,6 +35,13 @@ const modules = [
     description: 'Manage your account and contact information',
     color: 'bg-amber-500/10 text-amber-600',
   },
+  {
+    to: '/reviews',
+    label: 'Reviews',
+    icon: Star,
+    description: 'Read and submit driver reviews',
+    color: 'bg-yellow-500/10 text-yellow-700',
+  },
 ];
 
 export default function PassengerDashboard() {
@@ -45,8 +53,26 @@ export default function PassengerDashboard() {
     enabled: !!userId,
   });
 
+  const { data: historyRides, isLoading: loadingHistory } = useQuery({
+    queryKey: ['historyRides', userId],
+    queryFn: () => passengerApi.getHistoryRides(userId!),
+    enabled: !!userId,
+  });
+
+  const { data: reviews, isLoading: loadingReviews } = useQuery({
+    queryKey: ['reviews', 'PASSENGER', userId],
+    queryFn: () => passengerApi.getReviewsForPassenger(userId!),
+    enabled: !!userId,
+  });
+
   const displayName = email ? email.split('@')[0].slice(0, 12) : 'Passenger';
   const nextRide = activeRides && activeRides.length > 0 ? activeRides[0] : null;
+  const completedCount = loadingHistory ? null : (historyRides?.length ?? 0);
+  const avgRating = loadingReviews
+    ? null
+    : reviews && reviews.length > 0
+      ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+      : '—';
 
   return (
     <Layout>
@@ -64,26 +90,38 @@ export default function PassengerDashboard() {
         </div>
 
         {!isLoading && (
-          <div className="rounded-xl border bg-card p-4 space-y-1">
-            <p className="text-xs text-muted-foreground">Active Rides</p>
-            <p className="text-2xl font-bold">{activeRides?.length ?? 0}</p>
-            {nextRide && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
-                <span>
-                  Next:{' '}
-                  {new Date(nextRide.rideStartTime).toLocaleString(undefined, {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  {nextRide.pickupPoint.placeAddress
-                    ? ` — ${nextRide.pickupPoint.placeAddress}`
-                    : ''}
-                </span>
-              </div>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-xl border bg-card p-4 space-y-1">
+              <p className="text-xs text-muted-foreground">Active Rides</p>
+              <p className="text-2xl font-bold">{activeRides?.length ?? 0}</p>
+              {nextRide && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Next:{' '}
+                    {new Date(nextRide.rideStartTime).toLocaleString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    {nextRide.pickupPoint.placeAddress
+                      ? ` — ${nextRide.pickupPoint.placeAddress}`
+                      : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-xl border bg-card p-4 space-y-1">
+              <p className="text-xs text-muted-foreground">Completed</p>
+              <p className="text-2xl font-bold">{completedCount ?? '—'}</p>
+            </div>
+
+            <div className="rounded-xl border bg-card p-4 space-y-1">
+              <p className="text-xs text-muted-foreground">Average Rating</p>
+              <p className="text-2xl font-bold">{avgRating ?? '—'}</p>
+            </div>
           </div>
         )}
 
