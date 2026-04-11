@@ -1,0 +1,32 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth-service/:path*",
+      "destination": "http://35.186.208.67/auth-service/:path*"
+    },
+    {
+      "source": "/user-service/:path*",
+      "destination": "http://35.186.208.67/user-service/:path*"
+    },
+    {
+      "source": "/trip-service/:path*",
+      "destination": "http://35.186.208.67/trip-service/:path*"
+    },
+    {
+      "source": "/review-service/:path*",
+      "destination": "http://35.186.208.67/review-service/:path*"
+    },
+    {
+      "source": "/notification-service/:path*",
+      "destination": "http://35.186.208.67/notification-service/:path*"
+    },
+    {
+      "source": "/actuator/:path*",
+      "destination": "http://35.186.208.67/actuator/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
