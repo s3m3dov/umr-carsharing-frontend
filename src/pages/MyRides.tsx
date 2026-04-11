@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { driverApi } from '@/shared/api/driver-api';
 import { passengerApi } from '@/shared/api/passenger-api';
-import { RideBasicInfoDTO, CancelRideRequestDTO } from '@/types/api';
+import { RideBasicInfoDTO, CancelRideRequestDTO, RideLifecycleStatus, UserRole } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,20 +22,21 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { MapPin, Clock, Car, Users, X, Map } from 'lucide-react';
+import { MapPin, Clock, Car, Users, X, Map, Star } from 'lucide-react';
 import GoogleMap from '@/components/GoogleMap';
+import { Link } from 'react-router-dom';
 
 function getRideStatusClass(status: string): string {
   switch (status.toUpperCase()) {
-    case 'ALLOTTED':
-    case 'CONFIRMED':
-    case 'AVAILABLE':
+    case RideLifecycleStatus.ALLOTTED:
+    case RideLifecycleStatus.CONFIRMED:
+    case RideLifecycleStatus.AVAILABLE:
       return 'bg-green-100 text-green-800';
-    case 'CANCELLED':
+    case RideLifecycleStatus.CANCELLED:
       return 'bg-red-100 text-red-800';
-    case 'COMPLETED':
+    case RideLifecycleStatus.COMPLETED:
       return 'bg-blue-100 text-blue-800';
-    case 'IN_PROGRESS':
+    case RideLifecycleStatus.IN_PROGRESS:
       return 'bg-yellow-100 text-yellow-800';
     default:
       return 'bg-gray-100 text-gray-800';
@@ -60,7 +61,7 @@ export default function MyRides() {
   const queryClient = useQueryClient();
   const [rideToCancel, setRideToCancel] = useState<{ tripId: string; rideId?: string } | null>(null);
 
-  const userApi = role === 'DRIVER' ? driverApi : passengerApi;
+  const userApi = role === UserRole.DRIVER ? driverApi : passengerApi;
 
   const { data: upcomingRides, isLoading: loadingUpcoming } = useQuery({
     queryKey: ['upcomingRides', userId],
@@ -73,6 +74,18 @@ export default function MyRides() {
     queryFn: () => userApi.getHistoryRides(userId!),
     enabled: !!userId,
   });
+
+  const { data: givenReviews = [] } = useQuery({
+    queryKey: ['reviews', 'given', role, userId],
+    queryFn: () => (
+      role === UserRole.DRIVER
+        ? driverApi.getReviewsGivenByDriver(userId!)
+        : passengerApi.getReviewsGivenByPassenger(userId!)
+    ),
+    enabled: !!userId,
+  });
+
+  const reviewedBookingIds = new Set(givenReviews.map((review) => review.bookingId));
 
   const cancelRideMutation = useMutation({
     mutationFn: ({ tripId, rideId }: { tripId: string; rideId?: string }) => {
@@ -114,7 +127,15 @@ export default function MyRides() {
 
     const isCancellable =
       showCancelButton &&
-      !['COMPLETED', 'CANCELLED', 'REJECTED'].includes(ride.tripStatus.toUpperCase());
+      ![RideLifecycleStatus.COMPLETED, RideLifecycleStatus.CANCELLED, RideLifecycleStatus.REJECTED].includes(
+        ride.tripStatus.toUpperCase() as RideLifecycleStatus,
+      );
+    const bookingIdentifier = ride.rideId ?? ride.tripId;
+    const canReview =
+      ride.tripStatus.toUpperCase() === RideLifecycleStatus.COMPLETED &&
+      !!bookingIdentifier &&
+      !reviewedBookingIds.has(bookingIdentifier);
+    const reviewLink = `/reviews?bookingId=${encodeURIComponent(ride.rideId ?? ride.tripId)}&tripId=${encodeURIComponent(ride.tripId)}`;
 
     return (
       <Card>
@@ -160,6 +181,14 @@ export default function MyRides() {
                 <Map className="h-4 w-4 mr-1" />
                 {showMap ? 'Hide Map' : 'Map'}
               </Button>
+              {canReview && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={reviewLink}>
+                    <Star className="h-4 w-4 mr-1" />
+                    Review
+                  </Link>
+                </Button>
+              )}
               {isCancellable && (
                 <Button
                   variant="outline"
@@ -183,7 +212,7 @@ export default function MyRides() {
     );
   };
 
-  const subtitle = role === 'DRIVER' ? 'Manage your offered rides' : 'Manage your ride bookings';
+  const subtitle = role === UserRole.DRIVER ? 'Manage your offered rides' : 'Manage your ride bookings';
 
   return (
     <Layout>

@@ -79,7 +79,7 @@ export default function RideBooking() {
         requestedSeats,
       };
 
-      const result = await userApi.findRides(userId!, rideData);
+      const result = await userApi.findRides(rideData);
       setAvailableRides(result);
       if (result.length === 0) {
         toast({ title: 'No Rides Found', description: 'No available rides match your criteria.' });
