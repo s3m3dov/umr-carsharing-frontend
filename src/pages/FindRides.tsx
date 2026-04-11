@@ -40,7 +40,7 @@ export default function FindRides() {
     
     setIsSearching(true);
     try {
-      const result = await userApi.findRides(userId!, searchParams);
+      const result = await userApi.findRides(searchParams);
       setRides(result);
       if (result.length === 0) {
         toast({ title: 'No rides found', description: 'Try adjusting your search criteria.' });
