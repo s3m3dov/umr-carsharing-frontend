@@ -22,6 +22,12 @@ export type TripStatus = 'CREATED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED' |
 export type BookingStatus = 'REQUESTED' | 'REJECTED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 export type ReviewStatus = 'PENDING' | 'PUBLISHED' | 'FLAGGED' | 'REMOVED';
 export type UserType = 'DRIVER' | 'PASSENGER';
+export enum VehicleType {
+  SEDAN = 'sedan',
+  SUV = 'suv',
+  MINIVAN = 'minivan',
+  HATCHBACK = 'hatchback',
+}
 export type AuditAction =
   | 'CREATE' | 'UPDATE' | 'DELETE' | 'APPROVE' | 'REJECT'
   | 'FLAG' | 'CANCEL' | 'PUBLISH' | 'RESTORE' | 'LOGIN'
@@ -63,7 +69,7 @@ export interface AdminVehicleResponse {
   userId: string;
   vehicleNumber: string;
   vehicleName: string;
-  vehicleType: string;
+  vehicleType: VehicleType;
   vehicleColor: string;
   seatingCapacity: string;
   createdAt: string;
@@ -198,14 +204,14 @@ export interface RegisterVehicleRequest {
   userId: string;
   vehicleName: string;
   vehicleNumber: string;
-  vehicleType: string;
+  vehicleType: VehicleType;
   vehicleColor?: string;
   seatingCapacity?: string;
 }
 
 export interface UpdateVehicleRequest {
   vehicleName?: string;
-  vehicleType?: string;
+  vehicleType?: VehicleType;
   vehicleColor?: string;
   seatingCapacity?: string;
 }

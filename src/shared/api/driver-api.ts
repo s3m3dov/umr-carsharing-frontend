@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { ROUTES } from './service-routes';
+import { ApiError } from './error-parser';
 import type {
   UserInfoDTO,
   RideBasicInfoDTO,
@@ -8,6 +9,9 @@ import type {
   DriverProfileResponse,
   VehicleResponseDTO,
   VehicleRegisterRequestDTO,
+  OfferRideDTO,
+  ReviewResponse,
+  ReviewRequestDTO,
 } from '@/types/api';
 
 function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
@@ -48,7 +52,10 @@ export const driverApi = {
       .get<DriverTripResponse[]>(ROUTES.driver.tripHistory(driverId))
       .then((trips) => trips.map(normalizeDriverTrip)),
 
-  offerTrip: (data: object) =>
+  createTrip: (_userId: string, data: OfferRideDTO) =>
+    apiClient.post<void>(ROUTES.driver.offerTrip, data),
+
+  offerTrip: (data: OfferRideDTO) =>
     apiClient.post<void>(ROUTES.driver.offerTrip, data),
 
   startTrip: (tripId: string) =>
@@ -69,4 +76,22 @@ export const driverApi = {
 
   completeRide: (bookingId: string) =>
     apiClient.post<void>(ROUTES.driver.completeRide(bookingId), {}),
+
+  // Review endpoints
+  getReviewsForDriver: (driverId: string) =>
+    apiClient.get<ReviewResponse[]>(ROUTES.driver.reviewsReceived(driverId)),
+  getReviewsGivenByDriver: async (driverId: string) => {
+    try {
+      return await apiClient.get<ReviewResponse[]>(ROUTES.driver.reviewsGiven(driverId));
+    } catch (error) {
+      if (error instanceof ApiError && [404, 405].includes(error.status)) {
+        return [];
+      }
+      throw error;
+    }
+  },
+  leaveReviewForPassenger: (bookingId: string, reviewData: ReviewRequestDTO) =>
+    apiClient.post<void>(ROUTES.driver.leaveReview(bookingId), reviewData),
+  getDriverRating: (driverId: string) =>
+    apiClient.get<number>(ROUTES.driver.rating(driverId)),
 };
