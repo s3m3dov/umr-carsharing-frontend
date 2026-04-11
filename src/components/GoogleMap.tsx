@@ -1,6 +1,11 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+interface RouteGeometry {
+  type: string;
+  coordinates: number[][];
+}
+
 interface GoogleMapProps {
   center?: { lat: number; lng: number };
   zoom?: number;
@@ -9,6 +14,7 @@ interface GoogleMapProps {
     title?: string;
     info?: string;
   }>;
+  routeGeometry?: RouteGeometry | null;
   className?: string;
 }
 
@@ -18,15 +24,17 @@ declare global {
   }
 }
 
-export default function GoogleMap({ 
+export default function GoogleMap({
   center = { lat: 28.6139, lng: 77.2090 }, // Default to Delhi
   zoom = 10,
   markers = [],
+  routeGeometry,
   className = "w-full h-64"
 }: GoogleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const polylineRef = useRef<google.maps.Polyline | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -65,16 +73,16 @@ export default function GoogleMap({
 
       script.async = true;
       script.defer = true;
-      
+
       script.onload = () => {
         setIsLoaded(true);
         createMap();
       };
-      
+
       script.onerror = () => {
         setError('Failed to load Google Maps API');
       };
-      
+
       document.head.appendChild(script);
     };
 
@@ -93,6 +101,7 @@ export default function GoogleMap({
     initializeMap();
   }, []);
 
+  // Render markers and fit bounds
   useEffect(() => {
     if (mapInstanceRef.current && isLoaded) {
       // Clear existing markers
@@ -120,14 +129,42 @@ export default function GoogleMap({
         markersRef.current.push(marker);
       });
 
-      // Adjust map bounds if there are markers
+      // Adjust map bounds to include markers and polyline points
       if (markers.length > 0) {
         const bounds = new window.google.maps.LatLngBounds();
         markers.forEach(marker => bounds.extend(marker.position));
+
+        if (routeGeometry?.type === 'LineString' && routeGeometry.coordinates.length >= 2) {
+          routeGeometry.coordinates.forEach(([lng, lat]) => bounds.extend({ lat, lng }));
+        }
+
         mapInstanceRef.current.fitBounds(bounds);
       }
     }
-  }, [markers, isLoaded]);
+  }, [markers, isLoaded, routeGeometry]);
+
+  // Render polyline
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isLoaded) return;
+
+    // Remove existing polyline
+    if (polylineRef.current) {
+      polylineRef.current.setMap(null);
+      polylineRef.current = null;
+    }
+
+    if (routeGeometry?.type === 'LineString' && routeGeometry.coordinates.length >= 2) {
+      const path = routeGeometry.coordinates.map(([lng, lat]) => ({ lat, lng }));
+      polylineRef.current = new window.google.maps.Polyline({
+        path,
+        map: mapInstanceRef.current,
+        geodesic: true,
+        strokeColor: '#2563eb',
+        strokeOpacity: 0.9,
+        strokeWeight: 4,
+      });
+    }
+  }, [routeGeometry, isLoaded]);
 
   useEffect(() => {
     if (mapInstanceRef.current && isLoaded) {
@@ -136,23 +173,28 @@ export default function GoogleMap({
     }
   }, [center, zoom, isLoaded]);
 
-  if (error) {
-    return (
-      <div className={`${className} flex items-center justify-center bg-gray-100 border border-gray-300 rounded`}>
-        <div className="text-red-500 text-sm text-center p-4">
-          {error}
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (polylineRef.current) {
+        polylineRef.current.setMap(null);
+      }
+    };
+  }, []);
+
+  return (
+    <div className={`${className} relative`}>
+      <div ref={mapRef} className="w-full h-full" />
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 border border-gray-300 rounded">
+          <div className="text-red-500 text-sm text-center p-4">{error}</div>
         </div>
-      </div>
-    );
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className={`${className} flex items-center justify-center bg-gray-100 border border-gray-300 rounded`}>
-        <div className="text-gray-500 text-sm">Loading map...</div>
-      </div>
-    );
-  }
-
-  return <div ref={mapRef} className={className} />;
+      )}
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 border border-gray-300 rounded">
+          <div className="text-gray-500 text-sm">Loading map...</div>
+        </div>
+      )}
+    </div>
+  );
 }

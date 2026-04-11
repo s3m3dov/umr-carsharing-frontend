@@ -10,7 +10,7 @@ declare global {
 export default function TestMapPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [mapInstance, setMapInstance] = useState<any>(null);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
 
   useEffect(() => {
     // Load the Google Maps API script

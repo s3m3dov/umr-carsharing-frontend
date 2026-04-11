@@ -1,65 +1,60 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserInfoDTO } from '@/types/api';
+import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import {
+  type UserRole,
+  type Session,
+  getSession,
+  saveSession,
+  clearSession,
+} from '@/shared/auth/session';
 
 interface AuthContextType {
-  userInfo: UserInfoDTO | null;
+  token: string | null;
+  role: UserRole | null;
+  email: string | null;
+  /** Alias for email — used by API methods expecting userId. */
   userId: string | null;
   isAuthenticated: boolean;
-  login: (userId: string, userInfo: UserInfoDTO) => void;
+  isAdmin: boolean;
+  login: (token: string, role: string, email: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-interface AuthProviderProps {
-  children: ReactNode;
+export function useAuth(): AuthContextType {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 }
 
-export default function AuthProvider({ children }: AuthProviderProps) {
-  const [userInfo, setUserInfo] = useState<UserInfoDTO | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+export default function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(() => getSession());
 
-  useEffect(() => {
-    // Check for stored auth data on app load
-    const storedUserId = localStorage.getItem('carpoolUserId');
-    const storedUser = localStorage.getItem('carpoolUser');
-    
-    if (storedUserId && storedUser) {
-      setUserId(storedUserId);
-      setUserInfo(JSON.parse(storedUser));
-    }
+  const login = useCallback((token: string, role: string, email: string) => {
+    const s: Session = { token, role: role as UserRole, email };
+    saveSession(s);
+    setSession(s);
   }, []);
 
-  const login = (newUserId: string, userData: UserInfoDTO) => {
-    setUserId(newUserId);
-    setUserInfo(userData);
-    localStorage.setItem('carpoolUserId', newUserId);
-    localStorage.setItem('carpoolUser', JSON.stringify(userData));
-  };
+  const logout = useCallback(() => {
+    clearSession();
+    setSession(null);
+  }, []);
 
-  const logout = () => {
-    setUserId(null);
-    setUserInfo(null);
-    localStorage.removeItem('carpoolUserId');
-    localStorage.removeItem('carpoolUser');
-  };
-
-  const value = {
-    userInfo,
-    userId,
-    isAuthenticated: !!userId,
-    login,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        token: session?.token ?? null,
+        role: session?.role ?? null,
+        email: session?.email ?? null,
+        userId: session?.email ?? null,
+        isAuthenticated: !!session?.token,
+        isAdmin: session?.role === 'ADMIN',
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }

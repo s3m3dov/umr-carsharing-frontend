@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import { VehicleRegisterRequestDTO } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Car, Plus } from 'lucide-react';
 
 export default function Vehicles() {
@@ -28,40 +29,33 @@ export default function Vehicles() {
 
   const { data: vehicles, isLoading } = useQuery({
     queryKey: ['vehicles', userId],
-    queryFn: () => apiService.getUserVehicles(userId!),
+    queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
   const addVehicleMutation = useMutation({
-    mutationFn: (vehicleData: VehicleRegisterRequestDTO) => 
-      apiService.registerVehicle(userId!, vehicleData),
-    onSuccess: (data) => {
-      if (data.success) {
-        toast({
-          title: 'Vehicle added',
-          description: 'Your vehicle has been successfully registered.',
-        });
-        queryClient.invalidateQueries({ queryKey: ['vehicles', userId] });
-        setShowAddForm(false);
-        setNewVehicle({
-          vehicleName: '',
-          vehicleNumber: '',
-          vehicleType: '',
-          vehicleColor: '',
-          seatingCapacity: ''
-        });
-      } else {
-        toast({
-          title: 'Registration failed',
-          description: data.errorMessage || 'Failed to register vehicle',
-          variant: 'destructive',
-        });
-      }
+    mutationFn: (vehicleData: VehicleRegisterRequestDTO) =>
+      userApi.registerVehicle(userId!, vehicleData),
+    onSuccess: () => {
+      toast({
+        title: 'Vehicle added',
+        description: 'Your vehicle has been successfully registered.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['vehicles', userId] });
+      setShowAddForm(false);
+      setNewVehicle({
+        vehicleName: '',
+        vehicleNumber: '',
+        vehicleType: '',
+        vehicleColor: '',
+        seatingCapacity: ''
+      });
     },
-    onError: () => {
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to register vehicle');
       toast({
         title: 'Error',
-        description: 'Failed to register vehicle',
+        description: message,
         variant: 'destructive',
       });
     },
@@ -82,7 +76,7 @@ export default function Vehicles() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">My Vehicles</h1>
@@ -192,9 +186,9 @@ export default function Vehicles() {
           <h2 className="text-2xl font-semibold">Registered Vehicles</h2>
           {isLoading ? (
             <div className="text-center py-8">Loading vehicles...</div>
-          ) : vehicles?.responseContent && vehicles.responseContent.length > 0 ? (
+          ) : vehicles && vehicles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {vehicles.responseContent.map((vehicle) => (
+              {vehicles.map((vehicle) => (
                 <Card key={vehicle.value}>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
