@@ -120,7 +120,7 @@ export default function AdminAuditLogs() {
       {/* Filter bar */}
       <Card>
         <CardContent className="pt-4">
-          <div className="flex flex-wrap items-end gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,160px)_minmax(0,160px)_minmax(0,220px)_auto]">
             {/* Action filter */}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="action-filter" className="text-xs">Action</Label>
@@ -128,7 +128,7 @@ export default function AdminAuditLogs() {
                 value={actionFilter}
                 onValueChange={(val) => setActionFilter(val === 'ALL' ? '' : val as AuditAction)}
               >
-                <SelectTrigger id="action-filter" className="w-40">
+                <SelectTrigger id="action-filter" className="w-full">
                   <SelectValue placeholder="All actions" />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +147,7 @@ export default function AdminAuditLogs() {
                 value={entityTypeFilter}
                 onValueChange={(val) => setEntityTypeFilter(val === 'ALL' ? '' : val as EntityType)}
               >
-                <SelectTrigger id="entity-filter" className="w-40">
+                <SelectTrigger id="entity-filter" className="w-full">
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,14 +167,16 @@ export default function AdminAuditLogs() {
                 placeholder="Email or ID..."
                 value={performedByInput}
                 onChange={(e) => setPerformedByInput(e.target.value)}
-                className="w-52"
+                className="w-full"
               />
             </div>
 
             {/* Clear button */}
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear filters
-            </Button>
+            <div className="flex sm:col-span-2 lg:col-span-1 lg:self-end lg:justify-end">
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
+                Clear filters
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
