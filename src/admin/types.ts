@@ -84,6 +84,7 @@ export interface AdminTripResponse {
   pricePerSeat: number;
   routeDistance: number;
   routeDuration: number;
+  routeGeometry?: { type: string; coordinates: number[][] } | null;
   tripStartDateTimeUTC: string;
   tripTimezone: string;
   createdAt: string;
