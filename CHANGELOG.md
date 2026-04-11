@@ -11,6 +11,12 @@ and this project adheres to **Semantic Versioning**
 
 ## [Unreleased]
 
+---
+
+## [v0.6.1] – Admin Sorting & Feature Polish (2026-04-11)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
 ### Added
 
 - Added a full frontend documentation tree under `.docs/` (architecture, API integration, routing/guards, admin modules, environment, testing, roadmap, user flows, tasks, glossary, and backend integration matrix).
@@ -27,6 +33,7 @@ and this project adheres to **Semantic Versioning**
 
 ### Changed
 
+- **Admin API Sorting** — enforced server-side sorting by `desc(createdAt)` (or `desc(timestamp)` for audit logs) across all paginated Admin Dashboard list endpoints to ensure newest records appear first by default.
 - Rewrote `README.md` to match the admin-first frontend direction and link to the new `.docs/` documentation index and key reference pages.
 - Consolidated previous root-level AI planning documents into `.docs/` equivalents and removed obsolete planning files.
 - Updated `RideLifecycleStatus` and `UserRole` enums across the codebase
