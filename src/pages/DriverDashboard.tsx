@@ -11,6 +11,7 @@ import {
   Navigation,
   User,
   History,
+  Star,
   ArrowRight,
 } from 'lucide-react';
 
@@ -57,6 +58,13 @@ const modules = [
     description: 'Review past trips and ride history',
     color: 'bg-rose-500/10 text-rose-600',
   },
+  {
+    to: '/reviews',
+    label: 'Reviews',
+    icon: Star,
+    description: 'Read feedback and leave passenger reviews',
+    color: 'bg-yellow-500/10 text-yellow-700',
+  },
 ];
 
 export default function DriverDashboard() {
@@ -81,12 +89,19 @@ export default function DriverDashboard() {
     enabled: !!userId,
   });
 
+  const { data: rating, isLoading: loadingRating } = useQuery({
+    queryKey: ['driver-rating', userId],
+    queryFn: () => driverApi.getDriverRating(userId!),
+    enabled: !!userId,
+  });
+
   const displayName =
     (profile as { fullName?: string } | undefined)?.fullName ??
     (email ? email.split('@')[0].slice(0, 12) : 'Driver');
 
   const upcomingCount = loadingUpcoming ? null : (upcomingRides?.length ?? 0);
   const completedCount = loadingHistory ? null : (historyRides?.length ?? 0);
+  const avgRating = loadingRating ? null : (typeof rating === 'number' ? rating.toFixed(1) : '—');
 
   return (
     <Layout>
@@ -103,7 +118,7 @@ export default function DriverDashboard() {
           <h1 className="text-2xl font-bold">Welcome back, {displayName}</h1>
         </div>
 
-        <div className="flex gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex-1 rounded-xl border bg-card p-4">
             <p className="text-xs text-muted-foreground mb-1">Upcoming</p>
             <p className="text-2xl font-bold">{upcomingCount ?? '—'}</p>
@@ -111,6 +126,10 @@ export default function DriverDashboard() {
           <div className="flex-1 rounded-xl border bg-card p-4">
             <p className="text-xs text-muted-foreground mb-1">Completed</p>
             <p className="text-2xl font-bold">{completedCount ?? '—'}</p>
+          </div>
+          <div className="flex-1 rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Rating</p>
+            <p className="text-2xl font-bold">{avgRating ?? '—'}</p>
           </div>
         </div>
 

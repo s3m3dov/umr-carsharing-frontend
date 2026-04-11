@@ -26,6 +26,7 @@ import RideTracking from './pages/RideTracking';
 // Feature pages — shared
 import MyRides from './pages/MyRides';
 import Profile from './pages/Profile';
+import Reviews from './pages/Reviews';
 
 
 // Admin shell
@@ -139,6 +140,7 @@ function App() {
               {/* Shared feature pages (any authenticated user) */}
               <Route path="/my-rides" element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
               <Route path="/profile"  element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/reviews"  element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
             </Routes>
             <Toaster />
           </div>

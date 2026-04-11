@@ -17,6 +17,23 @@ export interface RequestDTO<T> {
   requestContent: T;
 }
 
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  DRIVER = 'DRIVER',
+  PASSENGER = 'PASSENGER',
+}
+
+export enum RideLifecycleStatus {
+  AVAILABLE = 'AVAILABLE',
+  ALLOTTED = 'ALLOTTED',
+  REQUESTED = 'REQUESTED',
+  CONFIRMED = 'CONFIRMED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
+}
+
 // Points/Location Type
 export interface Points {
   latitude: number;
@@ -154,6 +171,30 @@ export interface PassengerRideResponse {
     rating: number | null;
     totalTrips: number | null;
   } | null;
+}
+
+export enum ReviewUserType {
+  DRIVER = 'DRIVER',
+  PASSENGER = 'PASSENGER',
+}
+
+export interface ReviewResponse {
+  reviewId: string;
+  bookingId: string;
+  tripId: string;
+  reviewerId: string;
+  reviewerType: ReviewUserType;
+  revieweeId: string;
+  revieweeType: ReviewUserType;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ReviewRequestDTO {
+  rating: number;
+  comment: string;
 }
 
 export interface DriverProfileResponse {

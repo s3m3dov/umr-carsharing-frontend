@@ -15,10 +15,21 @@ and this project adheres to **Semantic Versioning**
 
 - Added a full frontend documentation tree under `.docs/` (architecture, API integration, routing/guards, admin modules, environment, testing, roadmap, user flows, tasks, glossary, and backend integration matrix).
 
+### Features
+
+- **Reviews system** — new Reviews page and API endpoints for driver/passenger reviews:
+  - View received reviews and leave reviews for completed trips
+  - Rating display on driver and passenger dashboards
+  - Reviews quick link module added to both dashboards
+  - Review links in MyRides page for completed trips
+- **Admin vehicle owner picker** — searchable dropdown to select vehicle owner when registering vehicles
+- **Enhanced ride search** — improved API params building with fallback to legacy endpoint
+
 ### Changed
 
 - Rewrote `README.md` to match the admin-first frontend direction and link to the new `.docs/` documentation index and key reference pages.
 - Consolidated previous root-level AI planning documents into `.docs/` equivalents and removed obsolete planning files.
+- Updated `RideLifecycleStatus` and `UserRole` enums across the codebase
 
 ---
 

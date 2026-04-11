@@ -16,6 +16,7 @@ import {
   Plus,
   Calendar,
   User,
+  Star,
   LogOut,
   Menu,
   X,
@@ -33,6 +34,7 @@ const passengerNav = [
   { name: 'Dashboard', href: '/passenger', icon: Home, end: true },
   { name: 'Find Ride',  href: '/find-rides', icon: Search },
   { name: 'My Rides',  href: '/my-rides',   icon: Calendar },
+  { name: 'Reviews',   href: '/reviews',    icon: Star },
   { name: 'Profile',   href: '/profile',    icon: User },
 ];
 
@@ -40,6 +42,7 @@ const driverNav = [
   { name: 'Dashboard',  href: '/driver',      icon: Home, end: true },
   { name: 'Offer Ride', href: '/offer-ride',  icon: Plus },
   { name: 'My Rides',   href: '/my-rides',    icon: Calendar },
+  { name: 'Reviews',    href: '/reviews',     icon: Star },
   { name: 'Vehicles',   href: '/vehicles',    icon: Car },
   { name: 'Track Ride', href: '/track-ride',  icon: Navigation },
   { name: 'Profile',    href: '/profile',     icon: User },
