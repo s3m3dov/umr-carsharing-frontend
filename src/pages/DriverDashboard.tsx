@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { driverApi } from '@/shared/api/driver-api';
 import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 import {
@@ -8,6 +10,7 @@ import {
   Car,
   Navigation,
   User,
+  History,
   ArrowRight,
 } from 'lucide-react';
 
@@ -47,12 +50,43 @@ const modules = [
     description: 'Update account and contact information',
     color: 'bg-amber-500/10 text-amber-600',
   },
+  {
+    to: '/my-rides',
+    label: 'Ride History',
+    icon: History,
+    description: 'Review past trips and ride history',
+    color: 'bg-rose-500/10 text-rose-600',
+  },
 ];
 
 export default function DriverDashboard() {
-  const { email } = useAuth();
+  const { email, userId } = useAuth();
 
-  const initials = email ? email.split('@')[0].slice(0, 12) : 'Driver';
+  const { data: profile } = useQuery({
+    queryKey: ['driverProfile', userId],
+    queryFn: () => driverApi.getProfile(userId!),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: upcomingRides, isLoading: loadingUpcoming } = useQuery({
+    queryKey: ['upcomingRides', userId],
+    queryFn: () => driverApi.getUpcomingRides(userId!),
+    enabled: !!userId,
+  });
+
+  const { data: historyRides, isLoading: loadingHistory } = useQuery({
+    queryKey: ['historyRides', userId],
+    queryFn: () => driverApi.getHistoryRides(userId!),
+    enabled: !!userId,
+  });
+
+  const displayName =
+    (profile as { fullName?: string } | undefined)?.fullName ??
+    (email ? email.split('@')[0].slice(0, 12) : 'Driver');
+
+  const upcomingCount = loadingUpcoming ? null : (upcomingRides?.length ?? 0);
+  const completedCount = loadingHistory ? null : (historyRides?.length ?? 0);
 
   return (
     <Layout>
@@ -66,13 +100,24 @@ export default function DriverDashboard() {
               day: 'numeric',
             })}
           </p>
-          <h1 className="text-2xl font-bold">Welcome back, {initials}</h1>
+          <h1 className="text-2xl font-bold">Welcome back, {displayName}</h1>
+        </div>
+
+        <div className="flex gap-4">
+          <div className="flex-1 rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Upcoming</p>
+            <p className="text-2xl font-bold">{upcomingCount ?? '—'}</p>
+          </div>
+          <div className="flex-1 rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Completed</p>
+            <p className="text-2xl font-bold">{completedCount ?? '—'}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {modules.map(({ to, label, icon: Icon, description, color }) => (
             <Link
-              key={to}
+              key={`${to}-${label}`}
               to={to}
               className={cn(
                 'group flex items-start gap-4 rounded-xl border bg-card p-4',
