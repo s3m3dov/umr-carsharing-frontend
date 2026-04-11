@@ -20,6 +20,7 @@ function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
     seats: `${trip.bookedSeats}/${trip.totalSeats}`,
     tripStatus: trip.tripStatus,
     vehicleNumber: trip.vehicleNumber ?? '',
+    routeGeometry: trip.routeGeometry ?? null,
   };
 }
 

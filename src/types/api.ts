@@ -25,6 +25,12 @@ export interface Points {
   placeAddress?: string;
 }
 
+// GeoJSON LineString geometry from OSRM (coordinates are [lng, lat] pairs)
+export interface RouteGeometry {
+  type: 'LineString';
+  coordinates: number[][];
+}
+
 // User Types
 export interface UserInfoDTO {
   fullName: string;
@@ -95,6 +101,7 @@ export interface RideBasicInfoDTO {
   seats: string;
   tripStatus: string;
   vehicleNumber: string;
+  routeGeometry?: RouteGeometry | null;
 }
 
 // --- New backend DTOs ---
@@ -122,6 +129,7 @@ export interface DriverTripResponse {
   routeDurationInMinutes: number | null;
   pricePerSeat: number | null;
   estimatedEarnings: number | null;
+  routeGeometry?: RouteGeometry | null;
 }
 
 export interface PassengerRideResponse {
@@ -140,6 +148,7 @@ export interface PassengerRideResponse {
   rideDurationInMinutes: number | null;
   pricePerSeat: number | null;
   estimatedFare: number | null;
+  routeGeometry?: RouteGeometry | null;
   driverDetails: {
     name: string;
     rating: number | null;

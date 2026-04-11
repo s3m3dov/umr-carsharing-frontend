@@ -18,6 +18,7 @@ function normalizePassengerRide(ride: PassengerRideResponse): RideBasicInfoDTO {
     seats: `${ride.bookedSeats}`,
     tripStatus: ride.rideStatus,
     vehicleNumber: ride.vehicleNumber ?? '',
+    routeGeometry: ride.routeGeometry ?? null,
   };
 }
 
