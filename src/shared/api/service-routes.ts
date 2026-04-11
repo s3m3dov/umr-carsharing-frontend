@@ -38,6 +38,11 @@ export const ROUTES = {
     acceptBooking: '/trip-service/api/bookings/accept',
     rejectBooking: '/trip-service/api/bookings/reject',
     completeRide: (bookingId: string) => `/trip-service/api/bookings/${bookingId}/complete`,
+    // Review endpoints
+    reviewsReceived: (driverId: string) => `/review-service/api/reviews/driver/${driverId}`,
+    reviewsGiven: (driverId: string) => `/review-service/api/reviews/reviewer/${driverId}`,
+    leaveReview: (bookingId: string) => `/review-service/api/reviews/passenger/${bookingId}`,
+    rating: (driverId: string) => `/review-service/api/reviews/driver/${driverId}/average-rating`,
   },
   passenger: {
     activeRides: (passengerId: string) => `/trip-service/api/rides/active/passenger/${passengerId}`,
@@ -46,5 +51,11 @@ export const ROUTES = {
     bookRideWithApproval: '/trip-service/api/rides/book/new',
     cancelRide: '/trip-service/api/rides/cancel',
     searchRoutes: '/trip-service/api/trips/search/matching-route',
+    searchRoutesLegacy: '/trip-service/api/rides/find-ride',
+    // Review endpoints
+    reviewsReceived: (passengerId: string) => `/review-service/api/reviews/passenger/${passengerId}`,
+    reviewsGiven: (passengerId: string) => `/review-service/api/reviews/reviewer/${passengerId}`,
+    leaveReview: (bookingId: string) => `/review-service/api/reviews/driver/${bookingId}`,
+    stats: (passengerId: string) => `/trip-service/api/passengers/${passengerId}/stats`,
   },
 } as const;
