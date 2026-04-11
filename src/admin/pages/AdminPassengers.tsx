@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { passengersApi } from '@/shared/api/admin-api';
-import type { PassengerResponse, CreatePassengerRequest, UpdatePassengerRequest } from '@/admin/types';
+import type { PassengerResponse, UpdatePassengerRequest } from '@/admin/types';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -22,18 +22,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
-
-const createSchema = z.object({
-  email: z.string().email('Invalid email'),
-  firstName: z.string().min(1, 'Required'),
-  lastName: z.string().min(1, 'Required'),
-  phoneNumber: z.string().optional(),
-  age: z.coerce.number().int().min(1).max(120).optional(),
-});
 
 const editSchema = z.object({
   firstName: z.string().min(1, 'Required'),
@@ -42,7 +34,6 @@ const editSchema = z.object({
   age: z.coerce.number().int().min(1).max(120).optional(),
 });
 
-type CreateFormValues = z.infer<typeof createSchema>;
 type EditFormValues = z.infer<typeof editSchema>;
 
 export default function AdminPassengers() {
@@ -50,7 +41,6 @@ export default function AdminPassengers() {
   const queryClient = useQueryClient();
 
   const [page, setPage] = useState(0);
-  const [createOpen, setCreateOpen] = useState(false);
   const [editPassenger, setEditPassenger] = useState<PassengerResponse | null>(null);
   const [deletePassenger, setDeletePassenger] = useState<PassengerResponse | null>(null);
 
@@ -62,19 +52,6 @@ export default function AdminPassengers() {
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-passengers'] });
-
-  const createMutation = useMutation({
-    mutationFn: (body: CreatePassengerRequest) => passengersApi.create(body),
-    onSuccess: () => {
-      toast({ title: 'Passenger created' });
-      setCreateOpen(false);
-      invalidate();
-    },
-    onError: (error) => {
-      const message = getBackendErrorMessage(error, 'Failed to create passenger');
-      toast({ title: 'Failed to create passenger', description: message, variant: 'destructive' });
-    },
-  });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, body }: { id: string; body: UpdatePassengerRequest }) =>
@@ -103,11 +80,6 @@ export default function AdminPassengers() {
     },
   });
 
-  const createForm = useForm<CreateFormValues>({
-    resolver: zodResolver(createSchema),
-    defaultValues: { email: '', firstName: '', lastName: '', phoneNumber: '' },
-  });
-
   const editForm = useForm<EditFormValues>({
     resolver: zodResolver(editSchema),
   });
@@ -120,22 +92,6 @@ export default function AdminPassengers() {
       age: passenger.age,
     });
     setEditPassenger(passenger);
-  }
-
-  function openCreate() {
-    createForm.reset({ email: '', firstName: '', lastName: '', phoneNumber: '' });
-    setCreateOpen(true);
-  }
-
-  function handleCreateSubmit(values: CreateFormValues) {
-    const body: CreatePassengerRequest = {
-      email: values.email,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      phoneNumber: values.phoneNumber || undefined,
-      age: values.age ?? 0,
-    };
-    createMutation.mutate(body);
   }
 
   function handleEditSubmit(values: EditFormValues) {
@@ -157,10 +113,6 @@ export default function AdminPassengers() {
             <p className="text-sm text-muted-foreground">{totalElements} total</p>
           )}
         </div>
-        <Button size="sm" className="gap-2" onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Add Passenger
-        </Button>
       </div>
 
       {/* Table */}
@@ -262,98 +214,6 @@ export default function AdminPassengers() {
           </Button>
         </div>
       )}
-
-      {/* Create Dialog */}
-      <Dialog open={createOpen} onOpenChange={(open) => !open && setCreateOpen(false)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Passenger</DialogTitle>
-          </DialogHeader>
-          <Form {...createForm}>
-            <form onSubmit={createForm.handleSubmit(handleCreateSubmit)} className="space-y-4">
-              <FormField
-                control={createForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={createForm.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={createForm.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={createForm.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={createForm.control}
-                name="age"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Age</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setCreateOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Creating...' : 'Create'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editPassenger} onOpenChange={(open) => !open && setEditPassenger(null)}>
