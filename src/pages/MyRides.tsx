@@ -175,7 +175,7 @@ export default function MyRides() {
           </div>
           {showMap && (
             <div className="mt-4">
-              <GoogleMap markers={mapMarkers} className="w-full h-52 rounded-md overflow-hidden" />
+              <GoogleMap markers={mapMarkers} routeGeometry={ride.routeGeometry} className="w-full h-52 rounded-md overflow-hidden" />
             </div>
           )}
         </CardContent>
