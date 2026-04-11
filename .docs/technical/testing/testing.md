@@ -55,7 +55,7 @@ Priority smoke flows:
 2. Non-admin to `/admin` -> `/forbidden`
 3. Admin login -> `/admin` dashboard
 4. One CRUD mutation path per major module
-5. Root redirect behavior for both `VITE_ADMIN_DEFAULT_ROUTE` values
+5. Root redirect behavior (`/dashboard`)
 
 ## 4. High-Value Test Cases
 

@@ -17,16 +17,7 @@ Protected namespaces:
 - `/admin/*` (admin-only)
 - `/legacy/*` (authenticated legacy user flows)
 
-## 2. Root Redirect Behavior
-
-Root route (`/`) redirect depends on `VITE_ADMIN_DEFAULT_ROUTE`:
-
-- `true` -> `/admin`
-- `false` -> `/legacy/dashboard`
-
-This supports controlled migration rollout without code changes.
-
-## 3. Admin Route Tree
+## 2. Admin Route Tree
 
 `/admin` is wrapped by `AdminRouteGuard` and `AdminLayout`.
 

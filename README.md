@@ -8,7 +8,7 @@ This application is the web client for the carsharing system. It is currently in
 
 - Primary surface: `/admin/*`
 - Legacy surface (temporary): `/legacy/*`
-- Root redirect controlled by feature flag `VITE_ADMIN_DEFAULT_ROUTE`
+- Root redirect goes to `/dashboard`
 
 ## Documentation
 
@@ -58,7 +58,6 @@ src/
 Use `.env.example` as the base.
 
 - `VITE_API_BASE_URL` - API gateway base URL
-- `VITE_ADMIN_DEFAULT_ROUTE` - root redirect flag
 - `VITE_GOOGLE_MAPS_API_KEY` - required for map/places legacy pages
 
 ## Getting Started

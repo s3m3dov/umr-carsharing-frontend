@@ -21,11 +21,6 @@ The app is currently admin-first with a legacy transition area.
 - Legacy namespace: `/legacy/*`
 - Legacy short paths remain as redirects for one transition cycle
 
-Root routing behavior is controlled by `VITE_ADMIN_DEFAULT_ROUTE`:
-
-- `true`: `/` redirects to `/admin`
-- `false`: `/` redirects to `/legacy/dashboard`
-
 ## 3. Directory Structure
 
 Primary frontend layout:

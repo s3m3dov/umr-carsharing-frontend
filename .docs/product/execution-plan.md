@@ -50,7 +50,7 @@ R0 -> R0-VERIFY -> R0.5 -> R1 -> R1-SMOKE -> R2 -> R3 -> R3.5
 
 - Finalize `/admin/*` route tree
 - Ensure guard matrix works (unauthenticated, non-admin, admin)
-- Ensure root redirect honors `VITE_ADMIN_DEFAULT_ROUTE`
+- Root redirect goes to `/dashboard`
 
 ### R3 - Tooling and Quality Foundation
 

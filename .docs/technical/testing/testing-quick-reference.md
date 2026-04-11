@@ -36,7 +36,6 @@ npm run build
 
 1. Check `.env` values:
    - `VITE_API_BASE_URL`
-   - `VITE_ADMIN_DEFAULT_ROUTE`
    - `VITE_GOOGLE_MAPS_API_KEY` (legacy pages only)
 2. Confirm expected root redirect behavior at `/`
 

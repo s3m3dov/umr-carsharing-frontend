@@ -55,9 +55,7 @@ Track this work in `.docs/product/tasks.md`.
 
 ## 6. Rollout and Rollback
 
-- Root route behavior is controlled by `VITE_ADMIN_DEFAULT_ROUTE`
-- Rollout sets default entry to admin
-- Rollback switches default entry back to legacy
+- Root route redirects to `/dashboard`
 
 Important:
 
