@@ -22,6 +22,40 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+## [v0.6.0] – Trip Maps, Dashboard Polish & Branding (2026-04-11)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Added
+
+- **Trip map views** — interactive maps displaying trip routes using polylines:
+  - `AdminTrips` — map view toggle in trip detail dialogs
+  - `DriverTripView` — route visualization for drivers
+  - `PassengerTripView` — route visualization for passengers with pickup/dropoff markers
+- **Route geometry DTOs** — `routeGeometry` field added to ride and admin trip DTOs for polyline rendering
+- **Health check & KPI stats** — `useAdminHealth` hook with 5-minute stale time; `useKpiStats` query for Admin Dashboard; error boundary wrapping
+- **Actuator proxy** — `/actuator/health` proxied to API Gateway for service health monitoring
+- **Kamilli Ride branding** — app shell title and branding updated across the application
+
+### Changed
+
+- **Dashboard alignment** — refactored to unify driver and passenger dashboard styling with admin panel:
+  - `Dashboard.tsx` streamlined, charts moved to Reports page
+  - Status summary components aligned with health check design
+  - Admin health summary polished with unified status badges
+- **Sidebar alignment** — driver and passenger sidebar styled to match admin panel for visual consistency
+- **Profile styling** — profile page and sidebar components updated to match admin panel design
+- **Responsive filter layout** — audit log filter grid improved for better mobile/tablet responsiveness
+
+### Fixed
+
+- **Unit conversion** — admin trip distance (km) and duration (minutes) converted to display units (km/miles, min/hr)
+- **Health query isolation** — admin health query keys isolated to prevent status-page crash from key collisions
+- **Tooltip cursor** — tooltip indicators now use `cursor-help` for better affordance
+- **API route alignment** — frontend API layer modernized to match backend routes and query parameters
+
+---
+
 ## [v0.5.0] – Admin Panel, Legacy Migration & UI Polish (2026-04-08 to 2026-04-09)
 
 **Author:** s3m3dov (Hikmat Samadov)
