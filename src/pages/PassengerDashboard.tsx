@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { passengerApi } from '@/shared/api/passenger-api';
 import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 import {
   Search,
   Calendar,
-  Ticket,
   User,
   ArrowRight,
+  MapPin,
 } from 'lucide-react';
 
 const modules = [
@@ -26,13 +28,6 @@ const modules = [
     color: 'bg-emerald-500/10 text-emerald-600',
   },
   {
-    to: '/my-rides',
-    label: 'Bookings',
-    icon: Ticket,
-    description: 'Review ride history and booking details',
-    color: 'bg-indigo-500/10 text-indigo-600',
-  },
-  {
     to: '/profile',
     label: 'Profile',
     icon: User,
@@ -42,9 +37,16 @@ const modules = [
 ];
 
 export default function PassengerDashboard() {
-  const { email } = useAuth();
+  const { email, userId } = useAuth();
 
-  const initials = email ? email.split('@')[0].slice(0, 12) : 'Passenger';
+  const { data: activeRides, isLoading } = useQuery({
+    queryKey: ['upcomingRides', userId],
+    queryFn: () => passengerApi.getUpcomingRides(userId!),
+    enabled: !!userId,
+  });
+
+  const displayName = email ? email.split('@')[0].slice(0, 12) : 'Passenger';
+  const nextRide = activeRides && activeRides.length > 0 ? activeRides[0] : null;
 
   return (
     <Layout>
@@ -58,13 +60,37 @@ export default function PassengerDashboard() {
               day: 'numeric',
             })}
           </p>
-          <h1 className="text-2xl font-bold">Welcome back, {initials}</h1>
+          <h1 className="text-2xl font-bold">Welcome back, {displayName}</h1>
         </div>
+
+        {!isLoading && (
+          <div className="rounded-xl border bg-card p-4 space-y-1">
+            <p className="text-xs text-muted-foreground">Active Rides</p>
+            <p className="text-2xl font-bold">{activeRides?.length ?? 0}</p>
+            {nextRide && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  Next:{' '}
+                  {new Date(nextRide.rideStartTime).toLocaleString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                  {nextRide.pickupPoint.placeAddress
+                    ? ` — ${nextRide.pickupPoint.placeAddress}`
+                    : ''}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {modules.map(({ to, label, icon: Icon, description, color }) => (
             <Link
-              key={`${to}-${label}`}
+              key={to}
               to={to}
               className={cn(
                 'group flex items-start gap-4 rounded-xl border bg-card p-4',
