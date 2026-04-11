@@ -4,34 +4,68 @@ import type {
   UserInfoDTO,
   RideBasicInfoDTO,
   CancelRideRequestDTO,
-  CancelRideResponseDTO,
-  OfferRideDTO,
-  CreateTripResponseDTO,
+  DriverTripResponse,
+  DriverProfileResponse,
   VehicleResponseDTO,
   VehicleRegisterRequestDTO,
 } from '@/types/api';
 
-const r = ROUTES.user;
+function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
+  return {
+    userId: trip.driverId,
+    tripId: trip.tripId,
+    pickupPoint: trip.sourceAddress,
+    destinationPoint: trip.destinationAddress,
+    rideStartTime: trip.tripStartDateTime,
+    seats: `${trip.bookedSeats}/${trip.totalSeats}`,
+    tripStatus: trip.tripStatus,
+    vehicleNumber: trip.vehicleNumber ?? '',
+  };
+}
 
 export const driverApi = {
   getProfile: (userId: string) =>
-    apiClient.get<UserInfoDTO>(r.profile(userId)),
+    apiClient.get<UserInfoDTO>(ROUTES.user.profile(userId)),
+
+  getDriverProfile: (userId: string) =>
+    apiClient.get<DriverProfileResponse>(ROUTES.user.driverProfile(userId)),
 
   getVehicles: (userId: string) =>
-    apiClient.get<VehicleResponseDTO[]>(r.vehicles(userId)),
+    apiClient.get<VehicleResponseDTO[]>(ROUTES.user.vehicles(userId)),
 
   registerVehicle: (userId: string, data: VehicleRegisterRequestDTO) =>
-    apiClient.post<void>(r.registerVehicle, { userId, ...data }),
+    apiClient.post<void>(ROUTES.user.registerVehicle, { userId, ...data }),
 
-  createTrip: (userId: string, data: OfferRideDTO) =>
-    apiClient.post<CreateTripResponseDTO>(r.createTrip, { userId, ...data }),
+  // Trips — normalised to RideBasicInfoDTO for MyRides compatibility
+  getUpcomingRides: (driverId: string) =>
+    apiClient
+      .get<DriverTripResponse[]>(ROUTES.driver.activeTrips(driverId))
+      .then((trips) => trips.map(normalizeDriverTrip)),
 
-  getUpcomingRides: (userId: string) =>
-    apiClient.post<RideBasicInfoDTO[]>(r.upcomingRides, { userId }),
+  getHistoryRides: (driverId: string) =>
+    apiClient
+      .get<DriverTripResponse[]>(ROUTES.driver.tripHistory(driverId))
+      .then((trips) => trips.map(normalizeDriverTrip)),
 
-  getHistoryRides: (userId: string) =>
-    apiClient.post<RideBasicInfoDTO[]>(r.historyRides, { userId }),
+  offerTrip: (data: object) =>
+    apiClient.post<void>(ROUTES.driver.offerTrip, data),
 
-  cancelRide: (userId: string, data: CancelRideRequestDTO) =>
-    apiClient.post<CancelRideResponseDTO>(r.cancelRide, { userId, ...data }),
+  startTrip: (tripId: string) =>
+    apiClient.post<void>(ROUTES.driver.startTrip(tripId), {}),
+
+  completeTrip: (tripId: string) =>
+    apiClient.post<void>(ROUTES.driver.completeTrip(tripId), {}),
+
+  cancelRide: (_userId: string, data: CancelRideRequestDTO) =>
+    apiClient.post<string>(ROUTES.driver.cancelTrip, data),
+
+  // Bookings
+  acceptBooking: (bookingId: string) =>
+    apiClient.post<string>(`${ROUTES.driver.acceptBooking}?bookingId=${bookingId}`, {}),
+
+  rejectBooking: (bookingId: string) =>
+    apiClient.post<string>(`${ROUTES.driver.rejectBooking}?bookingId=${bookingId}`, {}),
+
+  completeRide: (bookingId: string) =>
+    apiClient.post<void>(ROUTES.driver.completeRide(bookingId), {}),
 };

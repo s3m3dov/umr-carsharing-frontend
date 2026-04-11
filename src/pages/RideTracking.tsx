@@ -1,19 +1,19 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { passengerApi as userApi } from '@/shared/api/passenger-api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
-import { 
-  MapPin, 
-  Clock, 
-  Users, 
+import {
+  MapPin,
+  Clock,
+  Users,
   Car,
-  Phone,
   Navigation,
   AlertCircle,
   CheckCircle,
@@ -25,6 +25,7 @@ import { useQuery } from '@tanstack/react-query';
 export default function RideTracking() {
   const { userId } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedRide, setSelectedRide] = useState<RideBasicInfoDTO | null>(null);
 
   // Fetch upcoming rides
@@ -110,8 +111,8 @@ export default function RideTracking() {
                   <p className="text-muted-foreground mb-4">
                     You don't have any active or upcoming rides at the moment.
                   </p>
-                  <Button onClick={() => window.location.href = '/book-ride'}>
-                    Book a Ride
+                  <Button onClick={() => navigate('/offer-ride')}>
+                    Offer a Ride
                   </Button>
                 </CardContent>
               </Card>
@@ -251,21 +252,7 @@ export default function RideTracking() {
                     </div>
                   </div>
 
-                  {selectedRide.tripStatus.toLowerCase() === 'active' && (
-                    <div className="pt-4 border-t">
-                      <h4 className="font-medium mb-2">Live Updates</h4>
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>• Driver is on the way</p>
-                        <p>• Estimated pickup: 5 minutes</p>
-                      </div>
-                    </div>
-                  )}
-
                   <div className="pt-4 space-y-2">
-                    <Button className="w-full" variant="outline">
-                      <Phone className="h-4 w-4 mr-2" />
-                      Contact Driver
-                    </Button>
                     {selectedRide.tripStatus.toLowerCase() !== 'completed' && selectedRide.tripStatus.toLowerCase() !== 'cancelled' && (
                       <Button
                         className="w-full"
