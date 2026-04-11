@@ -54,9 +54,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Feature flag: set VITE_ADMIN_DEFAULT_ROUTE=true to land admins on /admin by default.
-const adminDefault = import.meta.env.VITE_ADMIN_DEFAULT_ROUTE === 'true';
-
 /** Role-aware redirect for /dashboard. */
 function DashboardRedirect() {
   const { isAuthenticated, role } = useAuth();
@@ -82,7 +79,7 @@ function App() {
               {/* Root redirect — controlled by feature flag */}
               <Route
                 path="/"
-                element={<Navigate to={adminDefault ? '/admin' : '/dashboard'} replace />}
+                element={<Navigate to="/dashboard" replace />}
               />
 
               {/* Admin routes — role-guarded */}

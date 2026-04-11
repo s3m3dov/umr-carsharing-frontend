@@ -22,12 +22,6 @@ Examples:
 - Same-origin with Vite proxy: empty string
 - Production custom domain: `https://api.your-domain.com`
 
-### `VITE_ADMIN_DEFAULT_ROUTE`
-
-- Controls root route behavior
-- `false`: `/` -> `/legacy/dashboard`
-- `true`: `/` -> `/admin`
-
 ## 2. Vite Proxy Configuration
 
 File: `vite.config.ts`
@@ -74,8 +68,7 @@ From `package.json`:
 Before deploying:
 
 1. Set `VITE_API_BASE_URL` for target environment
-2. Set `VITE_ADMIN_DEFAULT_ROUTE` according to rollout stage
-3. Confirm login + admin route guard behavior
+2. Confirm login + admin route guard behavior
 4. Confirm health status page reaches target services
 5. Confirm no hardcoded localhost URLs are used in active code paths
 
