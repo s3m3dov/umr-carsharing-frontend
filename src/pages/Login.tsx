@@ -1,59 +1,62 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { apiClient } from '@/shared/api/client';
+import { ROUTES } from '@/shared/api/service-routes';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Car } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import BrandIcon from '@/components/BrandIcon';
+
+interface LoginResponse {
+  token: string;
+  email: string;
+  role: string;
+}
 
 export default function Login() {
-  const [emailId, setEmailId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Consume the flash message set by the 401 handler before the hard redirect.
+  const [notice] = useState<string | null>(() => {
+    const msg = sessionStorage.getItem('login_notice');
+    sessionStorage.removeItem('login_notice');
+    return msg;
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const response = await apiService.login({ emailId, password });
-      
-      if (response.success && response.responseContent?.loginSuccess) {
-        // Get user info after successful login
-        const userInfoResponse = await apiService.getUserInfo(response.responseContent.userId!);
-        
-        if (userInfoResponse.success && userInfoResponse.responseContent) {
-          login(
-            response.responseContent.userId!,
-            userInfoResponse.responseContent
-          );
-          navigate('/dashboard');
-          toast({
-            title: 'Welcome back!',
-            description: 'You have successfully logged in.',
-          });
-        } else {
-          throw new Error('Failed to get user information');
-        }
+      const data = await apiClient.post<LoginResponse>(ROUTES.auth.login, {
+        email,
+        password,
+      });
+      login(data.token, data.role, data.email);
+      if (data.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else if (data.role === 'DRIVER') {
+        navigate('/driver', { replace: true });
+      } else if (data.role === 'PASSENGER') {
+        navigate('/passenger', { replace: true });
       } else {
-        toast({
-          title: 'Login failed',
-          description: response.responseContent?.errMsg || response.errorMessage || 'Invalid credentials',
-          variant: 'destructive',
+        navigate('/forbidden', {
+          state: { message: 'Only PASSENGER, DRIVER, and ADMIN roles are supported.' },
+          replace: true,
         });
       }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to connect to server. Please try again.',
-        variant: 'destructive',
-      });
+    } catch (err) {
+      const message = getBackendErrorMessage(err, 'Failed to connect to server.');
+      toast({ title: 'Login failed', description: message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -64,22 +67,27 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8 p-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <Car className="h-12 w-12 text-primary" />
+            <BrandIcon className="h-12 w-12 rounded-2xl" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">Welcome back</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to your carpool account
-          </p>
+          <h2 className="text-3xl font-bold text-foreground">Welcome to Kamilli Ride</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
+
+        {notice && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{notice}</AlertDescription>
+          </Alert>
+        )}
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <Label htmlFor="emailId">Email address</Label>
+            <Label htmlFor="email">Email address</Label>
             <Input
-              id="emailId"
+              id="email"
               type="email"
-              value={emailId}
-              onChange={(e) => setEmailId(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="mt-1"
               placeholder="Enter your email"
@@ -99,11 +107,7 @@ export default function Login() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>

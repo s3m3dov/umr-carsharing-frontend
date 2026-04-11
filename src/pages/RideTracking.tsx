@@ -1,18 +1,19 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
-import { 
-  MapPin, 
-  Clock, 
-  Users, 
+import {
+  MapPin,
+  Clock,
+  Users,
   Car,
-  Phone,
   Navigation,
   AlertCircle,
   CheckCircle,
@@ -24,17 +25,18 @@ import { useQuery } from '@tanstack/react-query';
 export default function RideTracking() {
   const { userId } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedRide, setSelectedRide] = useState<RideBasicInfoDTO | null>(null);
 
   // Fetch upcoming rides
   const { data: upcomingRidesResponse, refetch } = useQuery({
     queryKey: ['upcoming-rides', userId],
-    queryFn: () => apiService.getUpcomingRides(userId!),
+    queryFn: () => userApi.getUpcomingRides(userId!),
     enabled: !!userId,
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
   });
 
-  const upcomingRides = upcomingRidesResponse?.responseContent || [];
+  const upcomingRides = upcomingRidesResponse || [];
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -72,28 +74,17 @@ export default function RideTracking() {
 
   const handleCancelRide = async (tripId: string) => {
     try {
-      const response = await apiService.cancelRide(userId!, {
-        tripId,
-        cancellationReason: 'User cancelled',
-      });
-
-      if (response.success && response.responseContent?.rideCancelled) {
-        toast({
-          title: 'Ride Cancelled',
-          description: 'Your ride has been successfully cancelled.',
-        });
-        refetch();
-      } else {
-        toast({
-          title: 'Cancellation Failed',
-          description: response.responseContent?.errMsg || 'Failed to cancel ride.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await userApi.cancelRide(userId!, { tripId, cancellationReason: 'User cancelled' });
       toast({
-        title: 'Error',
-        description: 'Failed to cancel ride. Please try again.',
+        title: 'Ride Cancelled',
+        description: 'Your ride has been successfully cancelled.',
+      });
+      refetch();
+    } catch (error) {
+      const message = getBackendErrorMessage(error, 'Failed to cancel ride.');
+      toast({
+        title: 'Cancellation Failed',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -101,7 +92,7 @@ export default function RideTracking() {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="p-6 max-w-6xl mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Track Your Rides</h1>
           <p className="text-muted-foreground">Monitor your active and upcoming rides in real-time</p>
@@ -120,8 +111,8 @@ export default function RideTracking() {
                   <p className="text-muted-foreground mb-4">
                     You don't have any active or upcoming rides at the moment.
                   </p>
-                  <Button onClick={() => window.location.href = '/book-ride'}>
-                    Book a Ride
+                  <Button onClick={() => navigate('/offer-ride')}>
+                    Offer a Ride
                   </Button>
                 </CardContent>
               </Card>
@@ -261,21 +252,7 @@ export default function RideTracking() {
                     </div>
                   </div>
 
-                  {selectedRide.tripStatus.toLowerCase() === 'active' && (
-                    <div className="pt-4 border-t">
-                      <h4 className="font-medium mb-2">Live Updates</h4>
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>• Driver is on the way</p>
-                        <p>• Estimated pickup: 5 minutes</p>
-                      </div>
-                    </div>
-                  )}
-
                   <div className="pt-4 space-y-2">
-                    <Button className="w-full" variant="outline">
-                      <Phone className="h-4 w-4 mr-2" />
-                      Contact Driver
-                    </Button>
                     {selectedRide.tripStatus.toLowerCase() !== 'completed' && selectedRide.tripStatus.toLowerCase() !== 'cancelled' && (
                       <Button
                         className="w-full"

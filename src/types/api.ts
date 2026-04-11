@@ -25,6 +25,12 @@ export interface Points {
   placeAddress?: string;
 }
 
+// GeoJSON LineString geometry from OSRM (coordinates are [lng, lat] pairs)
+export interface RouteGeometry {
+  type: 'LineString';
+  coordinates: number[][];
+}
+
 // User Types
 export interface UserInfoDTO {
   fullName: string;
@@ -87,12 +93,80 @@ export interface TripBasicInfoDTO {
 export interface RideBasicInfoDTO {
   userId: string;
   tripId: string;
+  /** Populated for passenger rides; used when cancelling a specific booking */
+  rideId?: string;
   pickupPoint: Points;
   destinationPoint: Points;
   rideStartTime: string;
   seats: string;
   tripStatus: string;
   vehicleNumber: string;
+  routeGeometry?: RouteGeometry | null;
+}
+
+// --- New backend DTOs ---
+
+export interface DriverTripResponse {
+  tripId: string;
+  driverId: string;
+  vehicleNumber: string;
+  carType: string;
+  tripStatus: 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  sourceAddress: Points;
+  destinationAddress: Points;
+  tripStartDateTime: string;
+  tripTimezone: string;
+  totalSeats: number;
+  availableSeats: number;
+  bookedSeats: number;
+  passengers: Array<{
+    userId: string;
+    bookedSeats: number;
+    pickupLocation: Points;
+    dropoffLocation: Points;
+  }>;
+  routeDistanceInKm: number | null;
+  routeDurationInMinutes: number | null;
+  pricePerSeat: number | null;
+  estimatedEarnings: number | null;
+  routeGeometry?: RouteGeometry | null;
+}
+
+export interface PassengerRideResponse {
+  rideId: string;
+  tripId: string;
+  driverId: string;
+  vehicleNumber: string;
+  carType: string;
+  rideStatus: 'REQUESTED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'REJECTED';
+  pickupLocation: Points;
+  dropoffLocation: Points;
+  tripStartDateTime: string;
+  tripTimezone: string;
+  bookedSeats: number;
+  rideDistanceInKm: number | null;
+  rideDurationInMinutes: number | null;
+  pricePerSeat: number | null;
+  estimatedFare: number | null;
+  routeGeometry?: RouteGeometry | null;
+  driverDetails: {
+    name: string;
+    rating: number | null;
+    totalTrips: number | null;
+  } | null;
+}
+
+export interface DriverProfileResponse {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  age: number;
+  licenseNumber: string;
+  driverStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface JoinRideResponseDTO {

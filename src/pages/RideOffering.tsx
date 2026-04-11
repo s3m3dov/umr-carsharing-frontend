@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { 
@@ -39,11 +40,11 @@ export default function RideOffering() {
   // Fetch user vehicles
   const { data: vehiclesResponse } = useQuery({
     queryKey: ['vehicles', userId],
-    queryFn: () => apiService.getUserVehicles(userId!),
+    queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
-  const vehicles = vehiclesResponse?.responseContent || [];
+  const vehicles = vehiclesResponse || [];
 
   const handlePickupChange = (address: string, lat?: number, lng?: number) => {
     setPickupAddress(address);
@@ -87,25 +88,17 @@ export default function RideOffering() {
         offeredSeats,
       };
 
-      const response = await apiService.createTrip(userId!, tripData);
-      
-      if (response.success && response.responseContent?.tripCreated) {
-        toast({
-          title: 'Trip Created!',
-          description: 'Your ride has been successfully created and is now available for booking.',
-        });
-        navigate('/my-rides');
-      } else {
-        toast({
-          title: 'Creation Failed',
-          description: response.responseContent?.errMsg || response.errorMessage || 'Failed to create trip.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await userApi.createTrip(userId!, tripData);
       toast({
-        title: 'Error',
-        description: 'Failed to create trip. Please try again.',
+        title: 'Trip Created!',
+        description: 'Your ride has been successfully created and is now available for booking.',
+      });
+      navigate('/my-rides');
+    } catch (error) {
+      const message = getBackendErrorMessage(error, 'Failed to create trip.');
+      toast({
+        title: 'Creation Failed',
+        description: message,
         variant: 'destructive',
       });
     } finally {
@@ -115,7 +108,7 @@ export default function RideOffering() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="p-6 max-w-4xl mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Offer a Ride</h1>
           <p className="text-muted-foreground">Share your journey and help others get around</p>

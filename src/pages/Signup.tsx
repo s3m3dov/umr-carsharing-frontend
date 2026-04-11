@@ -1,12 +1,23 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { apiService } from '@/services/api';
+import { apiClient } from '@/shared/api/client';
+import { ROUTES } from '@/shared/api/service-routes';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Car } from 'lucide-react';
+import BrandIcon from '@/components/BrandIcon';
+
+type SignupRole = 'DRIVER' | 'PASSENGER';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -16,6 +27,7 @@ export default function Signup() {
     password: '',
     age: 0,
     organisationName: '',
+    role: '' as SignupRole | '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -31,30 +43,28 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.role) {
+      toast({
+        title: 'Role required',
+        description: 'Please choose Driver or Passenger to continue.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await apiService.signup(formData);
-      
-      if (response.success && response.responseContent?.signUpSuccess) {
-        navigate('/login');
-        toast({
-          title: 'Account created!',
-          description: 'Your account has been created successfully. Please log in.',
-        });
-      } else {
-        toast({
-          title: 'Signup failed',
-          description: response.errorMessage || 'Failed to create account',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await apiClient.post<void>(ROUTES.auth.signup, formData);
+      navigate('/login');
       toast({
-        title: 'Error',
-        description: 'Failed to connect to server. Please try again.',
-        variant: 'destructive',
+        title: 'Account created!',
+        description: 'Your account has been created successfully. Please log in.',
       });
+    } catch (err) {
+      const message = getBackendErrorMessage(err, 'Failed to connect to server.');
+      toast({ title: 'Signup failed', description: message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
@@ -65,15 +75,31 @@ export default function Signup() {
       <div className="w-full max-w-md space-y-8 p-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <Car className="h-12 w-12 text-primary" />
+            <BrandIcon className="h-12 w-12 rounded-2xl" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">Create account</h2>
+          <h2 className="text-3xl font-bold text-foreground">Create your Kamilli Ride account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Join our carpool community
+            Sign up as a passenger or a driver
           </p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <Label htmlFor="role">User Role</Label>
+            <Select
+              value={formData.role}
+              onValueChange={(value: SignupRole) => setFormData((prev) => ({ ...prev, role: value }))}
+            >
+              <SelectTrigger id="role" className="mt-1" aria-label="User role">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PASSENGER">Passenger</SelectItem>
+                <SelectItem value="DRIVER">Driver</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <Label htmlFor="fullName">Full Name</Label>
             <Input

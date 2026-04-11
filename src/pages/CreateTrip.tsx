@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/services/api';
+import { driverApi as userApi } from '@/shared/api/driver-api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import { Plus, Car } from 'lucide-react';
 import { OfferRideDTO } from '@/types/api';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
@@ -36,46 +37,31 @@ export default function CreateTrip() {
 
   const { data: vehicles } = useQuery({
     queryKey: ['vehicles', userId],
-    queryFn: () => apiService.getUserVehicles(userId!),
+    queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
   const createTripMutation = useMutation({
-    mutationFn: (data: OfferRideDTO) => apiService.createTrip(userId!, data),
-    onSuccess: (response) => {
-      if (response.success && response.responseContent?.tripCreated) {
-        toast({
-          title: 'Trip created successfully!',
-          description: 'Your trip has been posted and is now available for others to join.',
-        });
-        setTripData({
-          vehicleNumber: '',
-          pickupPoint: {
-            latitude: 0,
-            longitude: 0,
-            placeAddress: '',
-          },
-          destinationPoint: {
-            latitude: 0,
-            longitude: 0,
-            placeAddress: '',
-          },
-          tripStartTime: '',
-          offeredSeats: 1,
-        });
-        queryClient.invalidateQueries({ queryKey: ['upcomingRides'] });
-      } else {
-        toast({
-          title: 'Failed to create trip',
-          description: response.responseContent?.errMsg || 'Could not create trip',
-          variant: 'destructive',
-        });
-      }
+    mutationFn: (data: OfferRideDTO) => userApi.createTrip(userId!, data),
+    onSuccess: () => {
+      toast({
+        title: 'Trip created successfully!',
+        description: 'Your trip has been posted and is now available for others to join.',
+      });
+      setTripData({
+        vehicleNumber: '',
+        pickupPoint: { latitude: 0, longitude: 0, placeAddress: '' },
+        destinationPoint: { latitude: 0, longitude: 0, placeAddress: '' },
+        tripStartTime: '',
+        offeredSeats: 1,
+      });
+      queryClient.invalidateQueries({ queryKey: ['upcomingRides'] });
     },
-    onError: () => {
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to create trip. Please try again.');
       toast({
         title: 'Error',
-        description: 'Failed to create trip. Please try again.',
+        description: message,
         variant: 'destructive',
       });
     },
@@ -122,7 +108,7 @@ export default function CreateTrip() {
     }));
   };
 
-  const vehiclesData = vehicles?.responseContent || [];
+  const vehiclesData = vehicles || [];
 
   // Prepare map markers
   const mapMarkers = [];
@@ -151,7 +137,7 @@ export default function CreateTrip() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Create Trip</h1>
           <p className="text-muted-foreground">Offer a ride to help others reach their destination</p>

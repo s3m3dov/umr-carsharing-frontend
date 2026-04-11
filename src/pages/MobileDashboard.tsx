@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export default function MobileDashboard() {
-  const { userInfo } = useAuth();
+  const { email } = useAuth();
   const navigate = useNavigate();
 
   const quickActions = [
@@ -73,7 +73,7 @@ export default function MobileDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">
-              Welcome back, {userInfo?.fullName?.split(' ')[0] || 'User'}!
+              Welcome back, {email?.split('@')[0] || 'User'}!
             </h1>
             <p className="text-primary-foreground/80">
               Ready for your next journey?
