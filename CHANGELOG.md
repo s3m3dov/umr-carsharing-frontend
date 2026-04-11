@@ -20,10 +20,6 @@ and this project adheres to **Semantic Versioning**
 - Rewrote `README.md` to match the admin-first frontend direction and link to the new `.docs/` documentation index and key reference pages.
 - Consolidated previous root-level AI planning documents into `.docs/` equivalents and removed obsolete planning files.
 
-### Removed
-
-- `VITE_ADMIN_DEFAULT_ROUTE` feature flag — root redirect now always goes to `/dashboard`
-
 ---
 
 ## [v0.6.0] – Trip Maps, Dashboard Polish & Branding (2026-04-11)
@@ -43,6 +39,7 @@ and this project adheres to **Semantic Versioning**
 
 ### Changed
 
+- **Root redirect** — removed `VITE_ADMIN_DEFAULT_ROUTE` feature flag; root now always redirects to `/dashboard`
 - **Dashboard alignment** — refactored to unify driver and passenger dashboard styling with admin panel:
   - `Dashboard.tsx` streamlined, charts moved to Reports page
   - Status summary components aligned with health check design
