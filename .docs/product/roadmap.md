@@ -15,7 +15,7 @@ This roadmap tracks the frontend transition to an admin-first model and follow-u
 - Session model moved to `sessionStorage` (`src/shared/auth/session.ts`)
 - Admin route guard and forbidden page implemented
 - Admin shell and navigation implemented
-- `VITE_ADMIN_DEFAULT_ROUTE` feature flag added
+- `/admin/*` routing and guards implemented
 
 ## Phase 2 - Admin Modules (Completed)
 

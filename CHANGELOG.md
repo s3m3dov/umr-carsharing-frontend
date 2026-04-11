@@ -20,6 +20,10 @@ and this project adheres to **Semantic Versioning**
 - Rewrote `README.md` to match the admin-first frontend direction and link to the new `.docs/` documentation index and key reference pages.
 - Consolidated previous root-level AI planning documents into `.docs/` equivalents and removed obsolete planning files.
 
+### Removed
+
+- `VITE_ADMIN_DEFAULT_ROUTE` feature flag — root redirect now always goes to `/dashboard`
+
 ---
 
 ## [v0.6.0] – Trip Maps, Dashboard Polish & Branding (2026-04-11)
@@ -93,8 +97,6 @@ and this project adheres to **Semantic Versioning**
 - `AdminReports` — flat stat rows replaced with 2-column KPI stat grid; large `text-2xl` numbers; currency formatted via `Intl.NumberFormat`
 - `AdminLayout` sidebar footer — replaced email text + full-width logout button with avatar (initials), truncated email, and ghost icon logout button with tooltip
 - `App.tsx` — removed `ComingSoon` placeholder component; all 8 admin routes wired to real pages; legacy routes moved to `/legacy/*` with redirects
-- Root `/` redirect now lands on `/legacy/dashboard` when `VITE_ADMIN_DEFAULT_ROUTE=false`
-
 ### Fixed
 
 - `AdminBookings` — update dialog no longer fires a network request when no fields were changed, preventing spurious audit log entries on the backend
@@ -115,7 +117,6 @@ and this project adheres to **Semantic Versioning**
 - **Service routes** (`src/shared/api/service-routes.ts`) — gateway-relative paths for all backend services
 - **Session module** (`src/shared/auth/session.ts`) — `sessionStorage`-backed session with `{ token, role, email }`; clears legacy `localStorage` keys on logout
 - **Vite dev proxy** — forwards `/auth-service/**`, `/user-service/**`, `/trip-service/**`, `/review-service/**`, `/notification-service/**` to the API gateway
-- `VITE_ADMIN_DEFAULT_ROUTE` feature flag in `.env.example`
 - `Forbidden` page for non-admin role rejection
 
 ### Changed
