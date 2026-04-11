@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { vehiclesApi } from '@/shared/api/admin-api';
-import type { AdminVehicleResponse, RegisterVehicleRequest, UpdateVehicleRequest } from '@/admin/types';
+import { vehiclesApi, driversApi, passengersApi } from '@/shared/api/admin-api';
+import type {
+  AdminVehicleResponse,
+  RegisterVehicleRequest,
+  UpdateVehicleRequest,
+  DriverResponse,
+  PassengerResponse,
+} from '@/admin/types';
+import { VehicleType } from '@/admin/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,19 +47,51 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { PlusCircle, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, ChevronsUpDown, PlusCircle, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TableSkeleton } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
-const VEHICLE_TYPES = ['sedan', 'suv', 'minivan', 'hatchback'] as const;
+const VEHICLE_TYPES = [
+  VehicleType.SEDAN,
+  VehicleType.SUV,
+  VehicleType.MINIVAN,
+  VehicleType.HATCHBACK,
+] as const;
+
+const USER_PAGE_SIZE = 100;
+
+type OwnerOption = {
+  userId: string;
+  fullName: string;
+  email: string;
+};
+
+function formatOwnerName(firstName: string, lastName: string) {
+  const name = `${firstName} ${lastName}`.trim();
+  return name || 'Unnamed user';
+}
 
 function truncate(str: string, len = 8) {
   if (str.length <= len) return str;
@@ -66,32 +105,55 @@ interface RegisterDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: RegisterVehicleRequest) => void;
   isPending: boolean;
+  owners: OwnerOption[];
+  ownersLoading: boolean;
 }
 
-function RegisterDialog({ open, onOpenChange, onSubmit, isPending }: RegisterDialogProps) {
+function RegisterDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  isPending,
+  owners,
+  ownersLoading,
+}: RegisterDialogProps) {
+  const [ownerPickerOpen, setOwnerPickerOpen] = useState(false);
   const [form, setForm] = useState<RegisterVehicleRequest>({
     userId: '',
     vehicleName: '',
     vehicleNumber: '',
-    vehicleType: 'sedan',
+    vehicleType: VehicleType.SEDAN,
     vehicleColor: '',
     seatingCapacity: '',
   });
 
   useEffect(() => {
     if (open) {
-      setForm({ userId: '', vehicleName: '', vehicleNumber: '', vehicleType: 'sedan', vehicleColor: '', seatingCapacity: '' });
+      setForm({ userId: '', vehicleName: '', vehicleNumber: '', vehicleType: VehicleType.SEDAN, vehicleColor: '', seatingCapacity: '' });
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open || form.userId || owners.length === 0) return;
+    setForm((prev) => ({ ...prev, userId: owners[0].userId }));
+  }, [open, owners, form.userId]);
+
   function handleChange(field: keyof RegisterVehicleRequest, value: string) {
+    if (field === 'vehicleType') {
+      setForm((prev) => ({ ...prev, vehicleType: value as VehicleType }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.userId) return;
     onSubmit(form);
   }
+
+  const selectedOwner = owners.find((owner) => owner.userId === form.userId);
+  const selectedOwnerIdentifier = selectedOwner?.email || selectedOwner?.userId;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,13 +164,65 @@ function RegisterDialog({ open, onOpenChange, onSubmit, isPending }: RegisterDia
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="reg-userId">Owner ID *</Label>
-            <Input
-              id="reg-userId"
-              value={form.userId}
-              onChange={(e) => handleChange('userId', e.target.value)}
-              placeholder="User UUID"
-              required
-            />
+            <Popover open={ownerPickerOpen} onOpenChange={setOwnerPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  id="reg-userId"
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={ownerPickerOpen}
+                  className="w-full justify-between font-normal"
+                  disabled={ownersLoading || owners.length === 0}
+                >
+                  <span className="min-w-0 truncate text-left">
+                    {selectedOwner
+                      ? selectedOwnerIdentifier
+                      : ownersLoading
+                        ? 'Loading users...'
+                        : owners.length === 0
+                          ? 'No users found'
+                          : 'Select user UUID'}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search by UUID or name..." />
+                  <CommandList>
+                    <CommandEmpty>No users found.</CommandEmpty>
+                    <CommandGroup>
+                      {owners.map((owner) => (
+                        <CommandItem
+                          key={owner.userId}
+                          value={`${owner.fullName} ${owner.email} ${owner.userId}`}
+                          className="items-start py-2"
+                          onSelect={() => {
+                            handleChange('userId', owner.userId);
+                            setOwnerPickerOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              form.userId === owner.userId ? 'opacity-100' : 'opacity-0',
+                            )}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm">{owner.fullName}</p>
+                            <p className="truncate text-xs text-muted-foreground">{owner.email || owner.userId}</p>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {!form.userId && !ownersLoading && owners.length > 0 && (
+              <p className="text-xs text-destructive">Owner selection is required.</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="reg-vehicleName">Vehicle Name *</Label>
@@ -194,7 +308,7 @@ interface EditDialogProps {
 function EditDialog({ vehicle, onOpenChange, onSubmit, isPending }: EditDialogProps) {
   const [form, setForm] = useState<UpdateVehicleRequest>({
     vehicleName: vehicle?.vehicleName ?? '',
-    vehicleType: vehicle?.vehicleType ?? 'sedan',
+    vehicleType: vehicle?.vehicleType ?? VehicleType.SEDAN,
     vehicleColor: vehicle?.vehicleColor ?? '',
     seatingCapacity: vehicle?.seatingCapacity ?? '',
   });
@@ -211,6 +325,10 @@ function EditDialog({ vehicle, onOpenChange, onSubmit, isPending }: EditDialogPr
   }, [vehicle]);
 
   function handleChange(field: keyof UpdateVehicleRequest, value: string) {
+    if (field === 'vehicleType') {
+      setForm((prev) => ({ ...prev, vehicleType: value as VehicleType }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -238,7 +356,7 @@ function EditDialog({ vehicle, onOpenChange, onSubmit, isPending }: EditDialogPr
           <div className="space-y-2">
             <Label htmlFor="edit-vehicleType">Vehicle Type</Label>
             <Select
-              value={form.vehicleType ?? 'sedan'}
+              value={form.vehicleType ?? VehicleType.SEDAN}
               onValueChange={(v) => handleChange('vehicleType', v)}
             >
               <SelectTrigger id="edit-vehicleType">
@@ -304,6 +422,21 @@ export default function AdminVehicles() {
     queryKey: ['admin', 'vehicles', page],
     queryFn: () => vehiclesApi.list({ page, size: PAGE_SIZE }),
   });
+
+  const { data: driversPage, isLoading: loadingDrivers } = useQuery({
+    queryKey: ['admin', 'drivers', 'owners'],
+    queryFn: () => driversApi.list({ page: 0, size: USER_PAGE_SIZE }),
+  });
+
+  const ownerOptions: OwnerOption[] = [
+    ...((driversPage?.content ?? []).map((driver: DriverResponse) => ({
+      userId: driver.userId,
+      fullName: formatOwnerName(driver.firstName, driver.lastName),
+      email: driver.email,
+    }))),
+  ];
+
+  const ownersLoading = loadingDrivers;
 
   // ── Mutations ──────────────────────────────────────────────────────────────
 
@@ -500,6 +633,8 @@ export default function AdminVehicles() {
         onOpenChange={setRegisterOpen}
         onSubmit={(data) => createMutation.mutate(data)}
         isPending={createMutation.isPending}
+        owners={ownerOptions}
+        ownersLoading={ownersLoading}
       />
 
       {/* Edit Dialog */}
