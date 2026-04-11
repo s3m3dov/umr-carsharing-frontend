@@ -1,10 +1,14 @@
 import { getToken } from '@/shared/auth/session';
 import { parseResponse } from './error-parser';
 
+// When empty, the client makes relative requests (e.g., /auth-service/...).
+// This is required for Vercel/Production to use the "vercel.json" proxy to reach the HTTP backend.
 const RAW_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? '';
 const BASE_URL = RAW_BASE_URL.replace(/\/+$/, '');
 
 function buildRequestUrl(path: string): string {
+  // If BASE_URL is empty, return the relative path (Vercel proxy).
+  // If BASE_URL is an absolute URL (like https://api.com), concatenate it.
   return `${BASE_URL}${path}`;
 }
 
