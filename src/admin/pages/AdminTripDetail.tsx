@@ -222,7 +222,7 @@ export default function AdminTripDetail() {
 
           {/* Map */}
           <div className="flex-1 min-h-0">
-            <GoogleMap markers={mapMarkers} className="w-full h-full" />
+            <GoogleMap markers={mapMarkers} routeGeometry={trip.routeGeometry} className="w-full h-full" />
           </div>
         </div>
       </div>
