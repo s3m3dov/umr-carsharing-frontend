@@ -90,8 +90,15 @@ export const vehiclesApi = {
 // ─── Trips ───────────────────────────────────────────────────────────────────
 
 export const tripsApi = {
-  list: (params?: { page?: number; size?: number }) => {
+  list: (params?: {
+    status?: TripStatus;
+    driverId?: string;
+    page?: number;
+    size?: number;
+  }) => {
     const q = new URLSearchParams();
+    if (params?.status) q.set('status', params.status);
+    if (params?.driverId) q.set('driverId', params.driverId);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
     q.set('sort', 'createdAt,desc');
@@ -118,8 +125,17 @@ export const tripsApi = {
 // ─── Bookings ────────────────────────────────────────────────────────────────
 
 export const bookingsApi = {
-  list: (params?: { page?: number; size?: number }) => {
+  list: (params?: {
+    status?: BookingStatus;
+    passengerId?: string;
+    tripId?: string;
+    page?: number;
+    size?: number;
+  }) => {
     const q = new URLSearchParams();
+    if (params?.status) q.set('status', params.status);
+    if (params?.passengerId) q.set('passengerId', params.passengerId);
+    if (params?.tripId) q.set('tripId', params.tripId);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
     q.set('sort', 'createdAt,desc');
