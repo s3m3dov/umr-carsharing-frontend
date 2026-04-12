@@ -204,25 +204,19 @@ export default function AdminBookings() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'ALL'>('ALL');
-  const [passengerIdSearch, setPassengerIdSearch] = useState('');
-  const [tripIdSearch, setTripIdSearch] = useState('');
   const [editingBooking, setEditingBooking] = useState<BookingResponse | null>(null);
 
   function clearFilters() {
     setStatusFilter('ALL');
-    setPassengerIdSearch('');
-    setTripIdSearch('');
     setPage(0);
   }
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin', 'bookings', page, statusFilter, passengerIdSearch, tripIdSearch],
+    queryKey: ['admin', 'bookings', page, statusFilter],
     queryFn: () => bookingsApi.list({
       page,
       size: PAGE_SIZE,
       status: statusFilter === 'ALL' ? undefined : statusFilter,
-      passengerId: passengerIdSearch || undefined,
-      tripId: tripIdSearch || undefined,
     }),
   });
 
@@ -257,7 +251,7 @@ export default function AdminBookings() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar onClear={statusFilter !== 'ALL' || passengerIdSearch || tripIdSearch ? clearFilters : undefined}>
+      <FilterBar onClear={statusFilter !== 'ALL' ? clearFilters : undefined}>
         <Select
           value={statusFilter}
           onValueChange={(v) => { setStatusFilter(v as BookingStatus | 'ALL'); setPage(0); }}
@@ -271,26 +265,6 @@ export default function AdminBookings() {
             ))}
           </SelectContent>
         </Select>
-
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Passenger ID..."
-            className="pl-9"
-            value={passengerIdSearch}
-            onChange={(e) => { setPassengerIdSearch(e.target.value); setPage(0); }}
-          />
-        </div>
-
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Trip ID..."
-            className="pl-9"
-            value={tripIdSearch}
-            onChange={(e) => { setTripIdSearch(e.target.value); setPage(0); }}
-          />
-        </div>
       </FilterBar>
 
       {/* Table */}
