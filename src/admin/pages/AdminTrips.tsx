@@ -29,10 +29,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { ChevronLeft, ChevronRight, Eye, XCircle } from 'lucide-react';
-import { TableSkeleton } from '@/admin/shared';
+import { ChevronLeft, ChevronRight, Eye, XCircle, Search } from 'lucide-react';
+import { TableSkeleton, FilterBar } from '@/admin/shared';
 
 const PAGE_SIZE = 20;
 
@@ -42,6 +50,15 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'upcoming', label: 'Upcoming' },
   { key: 'history', label: 'History' },
+];
+
+const TRIP_STATUSES: (TripStatus | 'ALL')[] = [
+  'ALL',
+  'CREATED',
+  'AVAILABLE',
+  'IN_PROGRESS',
+  'COMPLETED',
+  'CANCELLED',
 ];
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -86,6 +103,8 @@ export default function AdminTrips() {
 
   const [tab, setTab] = useState<TabKey>('all');
   const [page, setPage] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<TripStatus | 'ALL'>('ALL');
+  const [driverIdSearch, setDriverIdSearch] = useState('');
   const [cancelTrip, setCancelTrip] = useState<AdminTripResponse | null>(null);
 
   function handleTabChange(key: TabKey) {
@@ -93,17 +112,28 @@ export default function AdminTrips() {
     setPage(0);
   }
 
+  function clearFilters() {
+    setStatusFilter('ALL');
+    setDriverIdSearch('');
+    setPage(0);
+  }
+
   // ── Query ──────────────────────────────────────────────────────────────────
 
   function queryFn() {
-    const params = { page, size: PAGE_SIZE };
+    const params = {
+      page,
+      size: PAGE_SIZE,
+      status: statusFilter === 'ALL' ? undefined : statusFilter,
+      driverId: driverIdSearch || undefined,
+    };
     if (tab === 'upcoming') return tripsApi.upcoming(params);
     if (tab === 'history') return tripsApi.history(params);
     return tripsApi.list(params);
   }
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin', 'trips', tab, page],
+    queryKey: ['admin', 'trips', tab, page, statusFilter, driverIdSearch],
     queryFn,
   });
 
@@ -159,6 +189,33 @@ export default function AdminTrips() {
           </button>
         ))}
       </div>
+
+      {/* Filter Bar */}
+      <FilterBar onClear={statusFilter !== 'ALL' || driverIdSearch ? clearFilters : undefined}>
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => { setStatusFilter(v as TripStatus | 'ALL'); setPage(0); }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {TRIP_STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="relative w-64">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search Driver ID..."
+            className="pl-9"
+            value={driverIdSearch}
+            onChange={(e) => { setDriverIdSearch(e.target.value); setPage(0); }}
+          />
+        </div>
+      </FilterBar>
 
       {/* Table */}
       <div className="rounded-md border">

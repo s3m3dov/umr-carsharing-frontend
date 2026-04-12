@@ -55,7 +55,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { TableSkeleton } from '@/admin/shared';
+import { Search } from 'lucide-react';
+import { TableSkeleton, FilterBar } from '@/admin/shared';
 
 const BOOKING_STATUSES: BookingStatus[] = [
   'REQUESTED',
@@ -64,6 +65,11 @@ const BOOKING_STATUSES: BookingStatus[] = [
   'IN_PROGRESS',
   'COMPLETED',
   'CANCELLED',
+];
+
+const BOOKING_STATUS_FILTERS: (BookingStatus | 'ALL')[] = [
+  'ALL',
+  ...BOOKING_STATUSES,
 ];
 
 const PAGE_SIZE = 20;
@@ -197,11 +203,27 @@ export default function AdminBookings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<BookingStatus | 'ALL'>('ALL');
+  const [passengerIdSearch, setPassengerIdSearch] = useState('');
+  const [tripIdSearch, setTripIdSearch] = useState('');
   const [editingBooking, setEditingBooking] = useState<BookingResponse | null>(null);
 
+  function clearFilters() {
+    setStatusFilter('ALL');
+    setPassengerIdSearch('');
+    setTripIdSearch('');
+    setPage(0);
+  }
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin', 'bookings', page],
-    queryFn: () => bookingsApi.list({ page, size: PAGE_SIZE }),
+    queryKey: ['admin', 'bookings', page, statusFilter, passengerIdSearch, tripIdSearch],
+    queryFn: () => bookingsApi.list({
+      page,
+      size: PAGE_SIZE,
+      status: statusFilter === 'ALL' ? undefined : statusFilter,
+      passengerId: passengerIdSearch || undefined,
+      tripId: tripIdSearch || undefined,
+    }),
   });
 
   const cancelMutation = useMutation({
@@ -233,6 +255,43 @@ export default function AdminBookings() {
           )}
         </div>
       </div>
+
+      {/* Filter Bar */}
+      <FilterBar onClear={statusFilter !== 'ALL' || passengerIdSearch || tripIdSearch ? clearFilters : undefined}>
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => { setStatusFilter(v as BookingStatus | 'ALL'); setPage(0); }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {BOOKING_STATUS_FILTERS.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="relative w-64">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search Passenger ID..."
+            className="pl-9"
+            value={passengerIdSearch}
+            onChange={(e) => { setPassengerIdSearch(e.target.value); setPage(0); }}
+          />
+        </div>
+
+        <div className="relative w-64">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search Trip ID..."
+            className="pl-9"
+            value={tripIdSearch}
+            onChange={(e) => { setTripIdSearch(e.target.value); setPage(0); }}
+          />
+        </div>
+      </FilterBar>
 
       {/* Table */}
       <div className="rounded-md border">
