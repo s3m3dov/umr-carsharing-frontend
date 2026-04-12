@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f766e" />
+      <stop offset="100%" stop-color="#065f46" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  
+  <g transform="translate(150, 140) scale(4)">
+    <g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 38h5l5-10h18l9 10h1" />
+      <path d="M17 38v4" />
+      <path d="M47 38v4" />
+      <circle cx="23" cy="44" r="4" fill="#ffffff" stroke="none" />
+      <circle cx="41" cy="44" r="4" fill="#ffffff" stroke="none" />
+    </g>
+  </g>
+
+  <text x="150" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="96" font-weight="bold" fill="#ffffff">Kamilli Ride</text>
+  <text x="150" y="520" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="#cbd5e1">Find, book, and share rides in minutes.</text>
+</svg>
