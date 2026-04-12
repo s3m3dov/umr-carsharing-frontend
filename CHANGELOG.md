@@ -13,9 +13,16 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.3.6] – Admin Feature Refinement (2026-04-12)
+## [v0.3.6] – Admin Refinement & Bug Fixes (2026-04-12)
 
 **Author:** s3m3dov (Hikmat Samadov)
+
+### Fixed
+
+- **TypeError in Admin Bookings** — Resolved a crash in `AdminBookings.tsx` when `estimatedPrice` was `undefined`.
+- **Admin Data Safety** — Hardened list views and detail pages (`AdminBookings`, `AdminTrips`, `AdminAuditLogs`, `AdminPassengers`) with optional chaining and nullish coalescing for IDs, dates, and numeric values to prevent similar runtime crashes.
+- **Update Dialog Reliability** — Improved `UpdateBookingDialog` with proper React `key` handling to ensure state resets correctly when switching between bookings.
+- **Helper Robustness** — Updated common `truncate` and `format` helpers to safely handle `null` or `undefined` input strings and numbers.
 
 ### Removed
 
