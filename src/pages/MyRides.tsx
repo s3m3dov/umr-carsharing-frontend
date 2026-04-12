@@ -1,30 +1,15 @@
-
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { driverApi } from '@/shared/api/driver-api';
 import { passengerApi } from '@/shared/api/passenger-api';
-import { RideBasicInfoDTO, CancelRideRequestDTO, RideLifecycleStatus, UserRole } from '@/types/api';
+import { RideBasicInfoDTO, RideLifecycleStatus, UserRole } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { MapPin, Clock, Car, Users, X, Map, Star } from 'lucide-react';
-import GoogleMap from '@/components/GoogleMap';
-import { Link } from 'react-router-dom';
+import { MapPin, Clock, Car, Users, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 function getRideStatusClass(status: string): string {
   switch (status.toUpperCase()) {
@@ -57,9 +42,7 @@ function RideCardSkeleton() {
 
 export default function MyRides() {
   const { userId, role } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [rideToCancel, setRideToCancel] = useState<{ tripId: string; rideId?: string } | null>(null);
+  const navigate = useNavigate();
 
   const userApi = role === UserRole.DRIVER ? driverApi : passengerApi;
 
@@ -75,138 +58,64 @@ export default function MyRides() {
     enabled: !!userId,
   });
 
-  const { data: givenReviews = [] } = useQuery({
-    queryKey: ['reviews', 'given', role, userId],
-    queryFn: () => (
-      role === UserRole.DRIVER
-        ? driverApi.getReviewsGivenByDriver(userId!)
-        : passengerApi.getReviewsGivenByPassenger(userId!)
-    ),
-    enabled: !!userId,
-  });
-
-  const reviewedBookingIds = new Set(givenReviews.map((review) => review.bookingId));
-
-  const cancelRideMutation = useMutation({
-    mutationFn: ({ tripId, rideId }: { tripId: string; rideId?: string }) => {
-      const cancelData: CancelRideRequestDTO & { rideId?: string } = { tripId, rideId };
-      return userApi.cancelRide(userId!, cancelData);
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Ride cancelled',
-        description: 'Your ride has been successfully cancelled.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
-      queryClient.invalidateQueries({ queryKey: ['historyRides', userId] });
-    },
-    onError: (error) => {
-      const message = getBackendErrorMessage(error, 'Failed to cancel ride');
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const RideCard = ({ ride, showCancelButton = false }: { ride: RideBasicInfoDTO; showCancelButton?: boolean }) => {
-    const [showMap, setShowMap] = useState(false);
-    const markers = [
-      {
-        position: { lat: ride.pickupPoint.latitude, lng: ride.pickupPoint.longitude },
-        title: 'Departure',
-        info: `<strong>Departure</strong><br/>${ride.pickupPoint.placeAddress ?? ''}`,
-      },
-      {
-        position: { lat: ride.destinationPoint.latitude, lng: ride.destinationPoint.longitude },
-        title: 'Destination',
-        info: `<strong>Destination</strong><br/>${ride.destinationPoint.placeAddress ?? ''}`,
-      },
-    ];
-
-    const isCancellable =
-      showCancelButton &&
-      ![RideLifecycleStatus.COMPLETED, RideLifecycleStatus.CANCELLED, RideLifecycleStatus.REJECTED].includes(
-        ride.tripStatus.toUpperCase() as RideLifecycleStatus,
-      );
-    const bookingIdentifier = ride.rideId ?? ride.tripId;
-    const canReview =
-      ride.tripStatus.toUpperCase() === RideLifecycleStatus.COMPLETED &&
-      !!bookingIdentifier &&
-      !reviewedBookingIds.has(bookingIdentifier);
-    const reviewLink = `/reviews?bookingId=${encodeURIComponent(ride.rideId ?? ride.tripId)}&tripId=${encodeURIComponent(ride.tripId)}`;
-
+  const RideCard = ({ ride }: { ride: RideBasicInfoDTO }) => {
+    const detailUrl = `/my-rides/${ride.rideId ?? ride.tripId}`;
+    
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex justify-between items-start">
-            <div className="space-y-2 flex-1">
-              <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">
-                  {ride.pickupPoint.placeAddress} → {ride.destinationPoint.placeAddress}
-                </span>
+      <Card 
+        className="group cursor-pointer hover:border-border/80 transition-all duration-150 hover:shadow-md hover:-translate-y-0.5"
+        onClick={() => navigate(detailUrl)}
+      >
+        <CardContent className="p-0">
+          <div className="flex flex-col md:flex-row md:items-stretch">
+            {/* Date/Time Sidebar */}
+            <div className="bg-muted/30 md:w-28 p-4 flex md:flex-col justify-between md:justify-center items-center border-b md:border-b-0 md:border-r text-center gap-1">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                {new Date(ride.rideStartTime).toLocaleDateString(undefined, { month: 'short' })}
               </div>
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                <div className="flex items-center space-x-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{new Date(ride.rideStartTime).toLocaleString()}</span>
+              <div className="text-xl font-bold text-foreground">
+                {new Date(ride.rideStartTime).getDate()}
+              </div>
+              <div className="text-[10px] font-medium text-muted-foreground">
+                {new Date(ride.rideStartTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 p-4 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-tight border ${getRideStatusClass(ride.tripStatus)}`}>
+                  {ride.tripStatus}
                 </div>
-                {ride.vehicleNumber && (
-                  <div className="flex items-center space-x-1">
-                    <Car className="h-4 w-4" />
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Car className="h-3.5 w-3.5" />
                     <span>{ride.vehicleNumber}</span>
                   </div>
-                )}
-              </div>
-              {ride.seats && (
-                <div className="flex items-center space-x-1">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{ride.seats}</span>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5" />
+                    <span>{ride.seats} seats</span>
+                  </div>
                 </div>
-              )}
-              <div className="inline-block">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRideStatusClass(ride.tripStatus)}`}>
-                  {ride.tripStatus}
-                </span>
+              </div>
+
+              <div className="relative pl-5 space-y-3">
+                <div className="absolute left-[4px] top-[6px] bottom-[6px] w-0.5 bg-border" />
+                <div className="relative">
+                  <div className="absolute -left-[23px] top-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-background" />
+                  <p className="text-sm font-semibold leading-tight line-clamp-1">{ride.pickupPoint.placeAddress}</p>
+                </div>
+                <div className="relative">
+                  <div className="absolute -left-[23px] top-1 w-2 h-2 rounded-full bg-rose-500 ring-4 ring-background" />
+                  <p className="text-sm font-semibold leading-tight line-clamp-1">{ride.destinationPoint.placeAddress}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 ml-4 shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowMap((v) => !v)}
-              >
-                <Map className="h-4 w-4 mr-1" />
-                {showMap ? 'Hide Map' : 'Map'}
-              </Button>
-              {canReview && (
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={reviewLink}>
-                    <Star className="h-4 w-4 mr-1" />
-                    Review
-                  </Link>
-                </Button>
-              )}
-              {isCancellable && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setRideToCancel({ tripId: ride.tripId, rideId: ride.rideId })}
-                  disabled={cancelRideMutation.isPending}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-              )}
+            
+            <div className="hidden md:flex items-center px-3 bg-muted/5 border-l">
+              <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
             </div>
           </div>
-          {showMap && (
-            <div className="mt-4">
-              <GoogleMap markers={mapMarkers} routeGeometry={ride.routeGeometry} className="w-full h-52 rounded-md overflow-hidden" />
-            </div>
-          )}
         </CardContent>
       </Card>
     );
@@ -216,87 +125,66 @@ export default function MyRides() {
 
   return (
     <Layout>
-      <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">My Rides</h1>
-          <p className="text-muted-foreground">{subtitle}</p>
+      <div className="p-6 space-y-8 max-w-6xl mx-auto">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold tracking-tight">My Rides</h1>
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          </div>
+          <Button asChild variant="outline" size="sm" className="hidden sm:flex font-semibold">
+            <Link to={role === UserRole.DRIVER ? "/offer-ride" : "/find-rides"}>
+              {role === UserRole.DRIVER ? "New Offer" : "Find Rides"}
+            </Link>
+          </Button>
         </div>
 
-        <Tabs defaultValue="upcoming" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming Rides</TabsTrigger>
-            <TabsTrigger value="history">Ride History</TabsTrigger>
+        <Tabs defaultValue="upcoming" className="space-y-6">
+          <TabsList className="bg-muted/50 p-1">
+            <TabsTrigger value="upcoming" className="px-6 text-xs font-semibold">Upcoming</TabsTrigger>
+            <TabsTrigger value="history" className="px-6 text-xs font-semibold">History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="upcoming" className="space-y-4">
+          <TabsContent value="upcoming" className="space-y-4 outline-none">
             {loadingUpcoming ? (
-              <div className="space-y-4">
-                <RideCardSkeleton />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <RideCardSkeleton />
                 <RideCardSkeleton />
               </div>
             ) : upcomingRides && upcomingRides.length > 0 ? (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {upcomingRides.map((ride) => (
-                  <RideCard key={ride.tripId} ride={ride} showCancelButton={true} />
+                  <RideCard key={ride.rideId ?? ride.tripId} ride={ride} />
                 ))}
               </div>
             ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No upcoming rides found.</p>
-                </CardContent>
-              </Card>
+              <div className="text-center py-12 border-2 border-dashed rounded-xl bg-muted/5">
+                <Car className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">No upcoming rides found.</p>
+              </div>
             )}
           </TabsContent>
 
-          <TabsContent value="history" className="space-y-4">
+          <TabsContent value="history" className="space-y-4 outline-none">
             {loadingHistory ? (
-              <div className="space-y-4">
-                <RideCardSkeleton />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <RideCardSkeleton />
                 <RideCardSkeleton />
               </div>
             ) : historyRides && historyRides.length > 0 ? (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {historyRides.map((ride) => (
-                  <RideCard key={ride.tripId} ride={ride} />
+                  <RideCard key={ride.rideId ?? ride.tripId} ride={ride} />
                 ))}
               </div>
             ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No ride history found.</p>
-                </CardContent>
-              </Card>
+              <div className="text-center py-12 border-2 border-dashed rounded-xl bg-muted/5">
+                <Car className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">No ride history found.</p>
+              </div>
             )}
           </TabsContent>
         </Tabs>
       </div>
-
-      <AlertDialog open={!!rideToCancel} onOpenChange={(open) => { if (!open) setRideToCancel(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel this ride?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The ride will be cancelled and your seat released.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Ride</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (rideToCancel) {
-                  cancelRideMutation.mutate(rideToCancel);
-                  setRideToCancel(null);
-                }
-              }}
-            >
-              Yes, Cancel
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Layout>
   );
 }

@@ -126,8 +126,8 @@ export default function AdminTripDetail() {
   const mapMarkers = [
     {
       position: { lat: trip.sourceAddress.latitude, lng: trip.sourceAddress.longitude },
-      title: 'Pickup',
-      info: `<strong>Pickup</strong><br/>${formatAddress(trip.sourceAddress)}`,
+      title: 'Departure',
+      info: `<strong>Departure</strong><br/>${formatAddress(trip.sourceAddress)}`,
     },
     {
       position: { lat: trip.destinationAddress.latitude, lng: trip.destinationAddress.longitude },

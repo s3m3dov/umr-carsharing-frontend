@@ -142,16 +142,24 @@ export default function RideOffering() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-4xl mx-auto space-y-6">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Offer a Ride</h1>
-          <p className="text-muted-foreground">Share your journey and help others get around</p>
+      <div className="p-6 max-w-6xl mx-auto space-y-8">
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground">
+            {new Date().toLocaleDateString(undefined, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+          <h1 className="text-2xl font-bold">Offer a Ride</h1>
+          <p className="text-sm text-muted-foreground">Share your journey and help others get around</p>
         </div>
 
         {/* Create Trip Form */}
-        <Card className="shadow-lg">
+        <Card className="rounded-xl border shadow-none">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-lg">
               <Plus className="h-5 w-5" />
               <span>Create New Trip</span>
             </CardTitle>
@@ -159,18 +167,18 @@ export default function RideOffering() {
           <CardContent className="space-y-6">
             {/* Route Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Route Information</h3>
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Route Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="pickup">Departure Location</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pickup" className="text-xs">Departure Location</Label>
                   <PlacesAutocomplete
                     value={sourceAddressStr}
                     onChange={handleSourceChange}
                     placeholder="Enter departure location"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="destination">Destination</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="destination" className="text-xs">Destination</Label>
                   <PlacesAutocomplete
                     value={destinationAddressStr || ''}
                     onChange={handleDestinationChange}
@@ -182,20 +190,21 @@ export default function RideOffering() {
 
             {/* Trip Details */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Trip Details</h3>
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Trip Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-2">
-                  <Label htmlFor="datetime">Departure Time</Label>
+                <div className="md:col-span-2 space-y-1.5">
+                  <Label htmlFor="datetime" className="text-xs">Departure Time</Label>
                   <Input
                     id="datetime"
                     type="datetime-local"
                     value={tripStartDateTime}
                     onChange={(e) => setTripStartDateTime(e.target.value)}
                     min={new Date().toISOString().slice(0, 16)}
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="seats">Total Seats</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="seats" className="text-xs">Total Seats</Label>
                   <Input
                     id="seats"
                     type="number"
@@ -203,10 +212,11 @@ export default function RideOffering() {
                     max="8"
                     value={totalSeats}
                     onChange={(e) => setTotalSeats(parseInt(e.target.value))}
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="price">Price Per Seat (€)</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="price" className="text-xs">Price Per Seat (€)</Label>
                   <Input
                     id="price"
                     type="number"
@@ -214,13 +224,14 @@ export default function RideOffering() {
                     step="0.5"
                     value={pricePerSeat}
                     onChange={(e) => setPricePerSeat(parseFloat(e.target.value))}
+                    className="rounded-lg"
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="vehicle">Select Vehicle</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="vehicle" className="text-xs">Select Vehicle</Label>
                 <Select onValueChange={handleVehicleChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-lg">
                     <SelectValue placeholder="Choose your vehicle" />
                   </SelectTrigger>
                   <SelectContent>
@@ -240,42 +251,34 @@ export default function RideOffering() {
             {/* Trip Preview */}
             {sourceAddress && destinationAddress && tripStartDateTime && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">Trip Preview</h3>
-                <Card className="border-dashed border-2 border-primary/20 bg-primary/5">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Trip Preview</h3>
+                <Card className="rounded-xl border border-dashed bg-muted/5">
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-green-600" />
-                        <span className="text-sm">
-                          <strong>Departure:</strong> {sourceAddress.placeAddress || `${sourceAddress.latitude}, ${sourceAddress.longitude}`}
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="h-4 w-4 text-emerald-500" />
+                        <span className="text-sm font-medium">
+                          <span className="text-muted-foreground mr-1">From:</span> {sourceAddress.placeAddress || `${sourceAddress.latitude}, ${sourceAddress.longitude}`}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-red-600" />
-                        <span className="text-sm">
-                          <strong>To:</strong> {destinationAddress.placeAddress || `${destinationAddress.latitude}, ${destinationAddress.longitude}`}
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="h-4 w-4 text-rose-500" />
+                        <span className="text-sm font-medium">
+                          <span className="text-muted-foreground mr-1">To:</span> {destinationAddress.placeAddress || `${destinationAddress.latitude}, ${destinationAddress.longitude}`}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm">
-                          <strong>Departure:</strong> {new Date(tripStartDateTime).toLocaleString()}
+                      <div className="flex items-center space-x-3">
+                        <Clock className="h-4 w-4 text-sky-500" />
+                        <span className="text-sm font-medium">
+                          <span className="text-muted-foreground mr-1">When:</span> {new Date(tripStartDateTime).toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm">
-                          <strong>Total Seats:</strong> {totalSeats} | <strong>Price:</strong> €{pricePerSeat}/seat
+                      <div className="flex items-center space-x-3">
+                        <Users className="h-4 w-4 text-amber-500" />
+                        <span className="text-sm font-medium">
+                          <span className="text-muted-foreground mr-1">Capacity:</span> {totalSeats} seats | €{pricePerSeat}/seat
                         </span>
                       </div>
-                      {selectedVehicle && (
-                        <div className="flex items-center space-x-2">
-                          <Car className="h-4 w-4 text-orange-600" />
-                          <span className="text-sm">
-                            <strong>Vehicle:</strong> {vehicles.find(v => v.value === selectedVehicle)?.text}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -285,7 +288,7 @@ export default function RideOffering() {
             <Button 
               onClick={handleCreateTrip}
               disabled={isCreating}
-              className="w-full bg-primary hover:bg-primary/90 py-3"
+              className="w-full bg-primary hover:bg-primary/90 py-4 rounded-xl font-bold"
             >
               {isCreating ? 'Creating Trip...' : 'Create Trip'}
             </Button>
@@ -294,44 +297,23 @@ export default function RideOffering() {
 
         {/* No Vehicles Warning */}
         {vehicles.length === 0 && (
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="rounded-xl border-amber-200 bg-amber-50/50 shadow-none">
             <CardContent className="p-6 text-center">
-              <Car className="h-12 w-12 text-yellow-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-yellow-800 mb-2">No Vehicles Found</h3>
-              <p className="text-yellow-700 mb-4">
+              <Car className="h-10 w-10 text-amber-600 mx-auto mb-3" />
+              <h3 className="font-bold text-amber-800 mb-1">No Vehicles Found</h3>
+              <p className="text-sm text-amber-700 mb-4">
                 You need to register a vehicle before you can offer rides.
               </p>
               <Button
                 onClick={() => navigate('/vehicles')}
                 variant="outline"
-                className="border-yellow-600 text-yellow-600 hover:bg-yellow-100"
+                className="border-amber-600 text-amber-600 hover:bg-amber-100 rounded-lg"
               >
                 Register Vehicle
               </Button>
             </CardContent>
           </Card>
         )}
-
-        {/* Benefits Section */}
-        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Benefits of Offering Rides</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm">Reduce travel costs</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm">Help the environment</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm">Meet new people</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   );

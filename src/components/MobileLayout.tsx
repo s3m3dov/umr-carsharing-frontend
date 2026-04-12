@@ -43,7 +43,6 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
     { name: 'Home', href: '/dashboard', icon: Home },
     { name: 'Book Ride', href: '/book-ride', icon: Search },
     { name: 'Offer Ride', href: '/offer-ride', icon: Plus },
-    { name: 'Track Ride', href: '/track-ride', icon: Navigation },
     { name: 'My Rides', href: '/my-rides', icon: Calendar },
     { name: 'Vehicles', href: '/vehicles', icon: Car },
     { name: 'Profile', href: '/profile', icon: User },
