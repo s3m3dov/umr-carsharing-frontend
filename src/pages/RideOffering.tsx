@@ -28,12 +28,36 @@ export default function RideOffering() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [pickupPoint, setPickupPoint] = useState<Points | null>(null);
-  const [destinationPoint, setDestinationPoint] = useState<Points | null>(null);
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [destinationAddress, setDestinationAddress] = useState('');
-  const [tripStartTime, setTripStartTime] = useState('');
-  const [offeredSeats, setOfferedSeats] = useState(1);
+  // Calculate tomorrow at 12:00 for default value
+  const getTomorrowAtNoon = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    date.setHours(12, 0, 0, 0);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const [sourceAddress, setSourceAddress] = useState<Points | null>({
+    latitude: 50.8093,
+    longitude: 8.7707,
+    placeAddress: 'Philipps University of Marburg'
+  });
+  const [destinationAddress, setDestinationAddress] = useState<Points | null>({
+    latitude: 50.1272,
+    longitude: 8.6654,
+    placeAddress: 'Goethe University Frankfurt'
+  });
+  const [sourceAddressStr, setSourceAddressStr] = useState('Philipps University of Marburg');
+  const [destinationAddressStr, setDestinationAddressStr] = useState('Goethe University Frankfurt');
+  const [tripStartDateTime, setTripStartDateTime] = useState(getTomorrowAtNoon());
+  const [totalSeats, setTotalSeats] = useState(4);
+  const [pricePerSeat, setPricePerSeat] = useState(5);
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -46,10 +70,19 @@ export default function RideOffering() {
 
   const vehicles = vehiclesResponse || [];
 
-  const handlePickupChange = (address: string, lat?: number, lng?: number) => {
-    setPickupAddress(address);
+  const handleVehicleChange = (value: string) => {
+    setSelectedVehicle(value);
+    const vehicle = vehicles.find(v => v.value === value);
+    if (vehicle?.seatingCapacity) {
+      const capacity = parseInt(vehicle.seatingCapacity);
+      setTotalSeats(capacity);
+    }
+  };
+
+  const handleSourceChange = (address: string, lat?: number, lng?: number) => {
+    setSourceAddressStr(address);
     if (lat !== undefined && lng !== undefined) {
-      setPickupPoint({
+      setSourceAddress({
         latitude: lat,
         longitude: lng,
         placeAddress: address
@@ -58,9 +91,9 @@ export default function RideOffering() {
   };
 
   const handleDestinationChange = (address: string, lat?: number, lng?: number) => {
-    setDestinationAddress(address);
+    setDestinationAddressStr(address);
     if (lat !== undefined && lng !== undefined) {
-      setDestinationPoint({
+      setDestinationAddress({
         latitude: lat,
         longitude: lng,
         placeAddress: address
@@ -69,7 +102,7 @@ export default function RideOffering() {
   };
 
   const handleCreateTrip = async () => {
-    if (!pickupPoint || !destinationPoint || !tripStartTime || !selectedVehicle) {
+    if (!sourceAddress || !destinationAddress || !tripStartDateTime || !selectedVehicle) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all required fields.',
@@ -82,10 +115,11 @@ export default function RideOffering() {
     try {
       const tripData: OfferRideDTO = {
         vehicleNumber: selectedVehicle,
-        pickupPoint,
-        destinationPoint,
-        tripStartTime,
-        offeredSeats,
+        sourceAddress,
+        destinationAddress,
+        tripStartDateTime: new Date(tripStartDateTime).toISOString(),
+        totalSeats,
+        pricePerSeat,
       };
 
       await userApi.createTrip(userId!, tripData);
@@ -128,17 +162,17 @@ export default function RideOffering() {
               <h3 className="text-lg font-semibold text-foreground">Route Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="pickup">Pickup Location</Label>
+                  <Label htmlFor="pickup">Departure Location</Label>
                   <PlacesAutocomplete
-                    value={pickupAddress}
-                    onChange={handlePickupChange}
-                    placeholder="Enter pickup location"
+                    value={sourceAddressStr}
+                    onChange={handleSourceChange}
+                    placeholder="Enter departure location"
                   />
                 </div>
                 <div>
                   <Label htmlFor="destination">Destination</Label>
                   <PlacesAutocomplete
-                    value={destinationAddress}
+                    value={destinationAddressStr || ''}
                     onChange={handleDestinationChange}
                     placeholder="Enter destination"
                   />
@@ -149,48 +183,62 @@ export default function RideOffering() {
             {/* Trip Details */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground">Trip Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-2">
                   <Label htmlFor="datetime">Departure Time</Label>
                   <Input
                     id="datetime"
                     type="datetime-local"
-                    value={tripStartTime}
-                    onChange={(e) => setTripStartTime(e.target.value)}
+                    value={tripStartDateTime}
+                    onChange={(e) => setTripStartDateTime(e.target.value)}
                     min={new Date().toISOString().slice(0, 16)}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="seats">Available Seats</Label>
+                  <Label htmlFor="seats">Total Seats</Label>
                   <Input
                     id="seats"
                     type="number"
                     min="1"
                     max="8"
-                    value={offeredSeats}
-                    onChange={(e) => setOfferedSeats(parseInt(e.target.value))}
+                    value={totalSeats}
+                    onChange={(e) => setTotalSeats(parseInt(e.target.value))}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="vehicle">Select Vehicle</Label>
-                  <Select onValueChange={setSelectedVehicle}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose your vehicle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vehicles.map((vehicle) => (
-                        <SelectItem key={vehicle.value} value={vehicle.value}>
-                          {vehicle.text}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="price">Price Per Seat (€)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={pricePerSeat}
+                    onChange={(e) => setPricePerSeat(parseFloat(e.target.value))}
+                  />
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="vehicle">Select Vehicle</Label>
+                <Select onValueChange={handleVehicleChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose your vehicle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicles.map((vehicle) => (
+                      <SelectItem key={vehicle.value} value={vehicle.value}>
+                        <div className="flex items-center space-x-2">
+                          <Car className="h-4 w-4" />
+                          <span>{vehicle.text} ({vehicle.value}) {vehicle.seatingCapacity ? `- ${vehicle.seatingCapacity} seats` : ''}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {/* Trip Preview */}
-            {pickupPoint && destinationPoint && tripStartTime && (
+            {sourceAddress && destinationAddress && tripStartDateTime && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">Trip Preview</h3>
                 <Card className="border-dashed border-2 border-primary/20 bg-primary/5">
@@ -199,25 +247,25 @@ export default function RideOffering() {
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4 text-green-600" />
                         <span className="text-sm">
-                          <strong>From:</strong> {pickupPoint.placeAddress || `${pickupPoint.latitude}, ${pickupPoint.longitude}`}
+                          <strong>Departure:</strong> {sourceAddress.placeAddress || `${sourceAddress.latitude}, ${sourceAddress.longitude}`}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4 text-red-600" />
                         <span className="text-sm">
-                          <strong>To:</strong> {destinationPoint.placeAddress || `${destinationPoint.latitude}, ${destinationPoint.longitude}`}
+                          <strong>To:</strong> {destinationAddress.placeAddress || `${destinationAddress.latitude}, ${destinationAddress.longitude}`}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-blue-600" />
                         <span className="text-sm">
-                          <strong>Departure:</strong> {new Date(tripStartTime).toLocaleString()}
+                          <strong>Departure:</strong> {new Date(tripStartDateTime).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Users className="h-4 w-4 text-purple-600" />
                         <span className="text-sm">
-                          <strong>Available Seats:</strong> {offeredSeats}
+                          <strong>Total Seats:</strong> {totalSeats} | <strong>Price:</strong> €{pricePerSeat}/seat
                         </span>
                       </div>
                       {selectedVehicle && (

@@ -18,19 +18,35 @@ import GoogleMap from '@/components/GoogleMap';
 export default function FindRides() {
   const { userId } = useAuth();
   const { toast } = useToast();
+
+  // Calculate tomorrow at 12:00 for default value
+  const getTomorrowAtNoon = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    date.setHours(12, 0, 0, 0);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const [searchParams, setSearchParams] = useState<RideDTO>({
     pickupPoint: {
-      latitude: 0,
-      longitude: 0,
-      placeAddress: ''
+      latitude: 50.8093,
+      longitude: 8.7707,
+      placeAddress: 'Philipps University of Marburg'
     },
     destinationPoint: {
-      latitude: 0,
-      longitude: 0,
-      placeAddress: ''
+      latitude: 50.1272,
+      longitude: 8.6654,
+      placeAddress: 'Goethe University Frankfurt'
     },
-    rideStartTime: new Date().toISOString(),
-    requestedSeats: 1
+    rideStartTime: new Date(getTomorrowAtNoon()).toISOString(),
+    requestedSeats: 4
   });
   const [rides, setRides] = useState<TripBasicInfoDTO[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -116,12 +132,12 @@ export default function FindRides() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="pickup-location">Pickup Location</Label>
+                <Label htmlFor="pickup-location">Departure Location</Label>
                 <PlacesAutocomplete
                     id="pickup-location"
                     value={searchParams.pickupPoint.placeAddress}
                     onChange={handlePickupChange}
-                    placeholder="Enter pickup location"
+                    placeholder="Enter departure location"
                 />
               </div>
               <div>

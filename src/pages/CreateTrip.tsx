@@ -19,20 +19,37 @@ export default function CreateTrip() {
   const { userId } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Calculate tomorrow at 12:00 for default value
+  const getTomorrowAtNoon = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    date.setHours(12, 0, 0, 0);
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const [tripData, setTripData] = useState<OfferRideDTO>({
     vehicleNumber: '',
-    pickupPoint: {
-      latitude: 0,
-      longitude: 0,
-      placeAddress: '',
+    sourceAddress: {
+      latitude: 50.8093,
+      longitude: 8.7707,
+      placeAddress: 'Philipps University of Marburg',
     },
-    destinationPoint: {
-      latitude: 0,
-      longitude: 0,
-      placeAddress: '',
+    destinationAddress: {
+      latitude: 50.1272,
+      longitude: 8.6654,
+      placeAddress: 'Goethe University Frankfurt',
     },
-    tripStartTime: '',
-    offeredSeats: 1,
+    tripStartDateTime: getTomorrowAtNoon(),
+    totalSeats: 4,
+    pricePerSeat: 5,
   });
 
   const { data: vehicles } = useQuery({
@@ -40,6 +57,17 @@ export default function CreateTrip() {
     queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
+
+  const handleVehicleChange = (value: string) => {
+    const selectedVehicle = vehicles?.find(v => v.value === value);
+    const capacity = selectedVehicle?.seatingCapacity ? parseInt(selectedVehicle.seatingCapacity) : 4;
+    
+    setTripData({
+      ...tripData,
+      vehicleNumber: value,
+      totalSeats: capacity,
+    });
+  };
 
   const createTripMutation = useMutation({
     mutationFn: (data: OfferRideDTO) => userApi.createTrip(userId!, data),
@@ -50,10 +78,11 @@ export default function CreateTrip() {
       });
       setTripData({
         vehicleNumber: '',
-        pickupPoint: { latitude: 0, longitude: 0, placeAddress: '' },
-        destinationPoint: { latitude: 0, longitude: 0, placeAddress: '' },
-        tripStartTime: '',
-        offeredSeats: 1,
+        sourceAddress: { latitude: 0, longitude: 0, placeAddress: '' },
+        destinationAddress: { latitude: 0, longitude: 0, placeAddress: '' },
+        tripStartDateTime: getTomorrowAtNoon(),
+        totalSeats: 4,
+        pricePerSeat: 5,
       });
       queryClient.invalidateQueries({ queryKey: ['upcomingRides'] });
     },
@@ -69,7 +98,7 @@ export default function CreateTrip() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tripData.pickupPoint.placeAddress || !tripData.destinationPoint.placeAddress || !tripData.tripStartTime || !tripData.vehicleNumber) {
+    if (!tripData.sourceAddress.placeAddress || !tripData.destinationAddress.placeAddress || !tripData.tripStartDateTime || !tripData.vehicleNumber) {
       toast({
         title: 'Missing information',
         description: 'Please fill in all required fields',
@@ -79,17 +108,17 @@ export default function CreateTrip() {
     }
     
     // Convert datetime-local to ISO string
-    const tripStartTime = new Date(tripData.tripStartTime).toISOString();
+    const tripStartDateTime = new Date(tripData.tripStartDateTime).toISOString();
     createTripMutation.mutate({
       ...tripData,
-      tripStartTime,
+      tripStartDateTime,
     });
   };
 
-  const handlePickupChange = (address: string, lat?: number, lng?: number) => {
+  const handleSourceChange = (address: string, lat?: number, lng?: number) => {
     setTripData(prevData => ({
       ...prevData,
-      pickupPoint: {
+      sourceAddress: {
         latitude: lat || 0,
         longitude: lng || 0,
         placeAddress: address,
@@ -100,7 +129,7 @@ export default function CreateTrip() {
   const handleDestinationChange = (address: string, lat?: number, lng?: number) => {
     setTripData(prevData => ({
       ...prevData,
-      destinationPoint: {
+      destinationAddress: {
         latitude: lat || 0,
         longitude: lng || 0,
         placeAddress: address,
@@ -112,25 +141,25 @@ export default function CreateTrip() {
 
   // Prepare map markers
   const mapMarkers = [];
-  if (tripData.pickupPoint.latitude && tripData.pickupPoint.longitude) {
+  if (tripData.sourceAddress.latitude && tripData.sourceAddress.longitude) {
     mapMarkers.push({
       position: {
-        lat: tripData.pickupPoint.latitude,
-        lng: tripData.pickupPoint.longitude
+        lat: tripData.sourceAddress.latitude,
+        lng: tripData.sourceAddress.longitude
       },
-      title: 'Pickup',
-      info: tripData.pickupPoint.placeAddress
+      title: 'Departure',
+      info: tripData.sourceAddress.placeAddress
     });
   }
 
-  if (tripData.destinationPoint.latitude && tripData.destinationPoint.longitude) {
+  if (tripData.destinationAddress.latitude && tripData.destinationAddress.longitude) {
     mapMarkers.push({
       position: {
-        lat: tripData.destinationPoint.latitude,
-        lng: tripData.destinationPoint.longitude
+        lat: tripData.destinationAddress.latitude,
+        lng: tripData.destinationAddress.longitude
       },
       title: 'Destination',
-      info: tripData.destinationPoint.placeAddress
+      info: tripData.destinationAddress.placeAddress
     });
   }
 
@@ -157,12 +186,12 @@ export default function CreateTrip() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="create-pickup-location">Pickup Location</Label>
+                  <Label htmlFor="create-pickup-location">Departure Location</Label>
                   <PlacesAutocomplete
                       id="create-pickup-location"
-                      value={tripData.pickupPoint.placeAddress}
-                      onChange={handlePickupChange}
-                      placeholder="Enter pickup location"
+                      value={tripData.sourceAddress.placeAddress || ''}
+                      onChange={handleSourceChange}
+                      placeholder="Enter departure location"
                       required
                   />
                 </div>
@@ -170,7 +199,7 @@ export default function CreateTrip() {
                   <Label htmlFor="create-destination-location">Destination</Label>
                   <PlacesAutocomplete
                       id="create-destination-location"
-                      value={tripData.destinationPoint.placeAddress}
+                      value={tripData.destinationAddress.placeAddress || ''}
                       onChange={handleDestinationChange}
                       placeholder="Enter destination"
                       required
@@ -189,26 +218,38 @@ export default function CreateTrip() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="datetime">Trip Start Time *</Label>
                   <Input
                     id="datetime"
                     type="datetime-local"
-                    value={tripData.tripStartTime}
-                    onChange={(e) => setTripData({...tripData, tripStartTime: e.target.value})}
+                    value={tripData.tripStartDateTime}
+                    onChange={(e) => setTripData({...tripData, tripStartDateTime: e.target.value})}
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="seats">Offered Seats *</Label>
+                  <Label htmlFor="seats">Total Seats *</Label>
                   <Input
                     id="seats"
                     type="number"
                     min="1"
                     max="8"
-                    value={tripData.offeredSeats}
-                    onChange={(e) => setTripData({...tripData, offeredSeats: parseInt(e.target.value)})}
+                    value={tripData.totalSeats}
+                    onChange={(e) => setTripData({...tripData, totalSeats: parseInt(e.target.value)})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="price">Price Per Seat (€) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={tripData.pricePerSeat}
+                    onChange={(e) => setTripData({...tripData, pricePerSeat: parseFloat(e.target.value)})}
                     required
                   />
                 </div>
@@ -217,9 +258,8 @@ export default function CreateTrip() {
               <div>
                 <Label htmlFor="vehicle">Select Vehicle *</Label>
                 <Select
-
                   value={tripData.vehicleNumber}
-                  onValueChange={(value) => setTripData({...tripData, vehicleNumber: value})}
+                  onValueChange={handleVehicleChange}
                   required
                 >
                   <SelectTrigger>
@@ -230,7 +270,7 @@ export default function CreateTrip() {
                       <SelectItem key={vehicle.value} value={vehicle.value}>
                         <div className="flex items-center space-x-2">
                           <Car className="h-4 w-4" />
-                          <span>{vehicle.text} ({vehicle.value})</span>
+                          <span>{vehicle.text} ({vehicle.value}) {vehicle.seatingCapacity ? `- ${vehicle.seatingCapacity} seats` : ''}</span>
                         </div>
                       </SelectItem>
                     ))}

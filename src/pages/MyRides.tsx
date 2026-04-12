@@ -112,11 +112,11 @@ export default function MyRides() {
 
   const RideCard = ({ ride, showCancelButton = false }: { ride: RideBasicInfoDTO; showCancelButton?: boolean }) => {
     const [showMap, setShowMap] = useState(false);
-    const mapMarkers = [
+    const markers = [
       {
         position: { lat: ride.pickupPoint.latitude, lng: ride.pickupPoint.longitude },
-        title: 'Pickup',
-        info: `<strong>Pickup</strong><br/>${ride.pickupPoint.placeAddress ?? ''}`,
+        title: 'Departure',
+        info: `<strong>Departure</strong><br/>${ride.pickupPoint.placeAddress ?? ''}`,
       },
       {
         position: { lat: ride.destinationPoint.latitude, lng: ride.destinationPoint.longitude },

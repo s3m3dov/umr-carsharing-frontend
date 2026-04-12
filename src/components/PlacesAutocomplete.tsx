@@ -9,6 +9,7 @@ interface PlacesAutocompleteProps {
   className?: string;
   id?: string;
   required?: boolean;
+  countries?: string | string[];
 }
 
 declare global {
@@ -23,7 +24,8 @@ export default function PlacesAutocomplete({
                                              placeholder,
                                              className,
                                              id,
-                                             required
+                                             required,
+                                             countries
                                            }: PlacesAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -85,7 +87,7 @@ export default function PlacesAutocomplete({
       // Create autocomplete instance
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         types: ['geocode', 'establishment'],
-        componentRestrictions: { country: 'in' }
+        ...(countries ? { componentRestrictions: { country: countries } } : {})
       });
 
       // Listen for place selection
@@ -103,7 +105,7 @@ export default function PlacesAutocomplete({
         }
       });
     }
-  }, [isLoaded, onChange]);
+  }, [isLoaded, onChange, countries]);
 
   // Handle direct input changes (when typing but not selecting from dropdown)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -228,10 +228,11 @@ export interface CancelRideResponseDTO {
 // Trip Creation Types
 export interface OfferRideDTO {
   vehicleNumber: string;
-  pickupPoint: Points;
-  destinationPoint: Points;
-  tripStartTime: string;
-  offeredSeats: number;
+  sourceAddress: Points;
+  destinationAddress: Points;
+  tripStartDateTime: string;
+  totalSeats: number;
+  pricePerSeat: number;
 }
 
 export interface CreateTripResponseDTO {
