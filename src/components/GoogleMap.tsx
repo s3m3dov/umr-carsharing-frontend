@@ -25,8 +25,8 @@ declare global {
 }
 
 export default function GoogleMap({
-  center = { lat: 28.6139, lng: 77.2090 }, // Default to Delhi
-  zoom = 10,
+  center = { lat: 0, lng: 0 },
+  zoom = 2,
   markers = [],
   routeGeometry,
   className = "w-full h-64"

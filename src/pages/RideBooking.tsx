@@ -28,12 +28,35 @@ export default function RideBooking() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [pickupPoint, setPickupPoint] = useState<Points | null>(null);
-  const [destinationPoint, setDestinationPoint] = useState<Points | null>(null);
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [destinationAddress, setDestinationAddress] = useState('');
-  const [rideStartTime, setRideStartTime] = useState('');
-  const [requestedSeats, setRequestedSeats] = useState(1);
+  // Calculate tomorrow at 12:00 for default value
+  const getTomorrowAtNoon = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    date.setHours(12, 0, 0, 0);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const [pickupPoint, setPickupPoint] = useState<Points | null>({
+    latitude: 50.8093,
+    longitude: 8.7707,
+    placeAddress: 'Philipps University of Marburg'
+  });
+  const [destinationPoint, setDestinationPoint] = useState<Points | null>({
+    latitude: 50.1272,
+    longitude: 8.6654,
+    placeAddress: 'Goethe University Frankfurt'
+  });
+  const [pickupAddress, setPickupAddress] = useState('Philipps University of Marburg');
+  const [destinationAddress, setDestinationAddress] = useState('Goethe University Frankfurt');
+  const [rideStartTime, setRideStartTime] = useState(getTomorrowAtNoon());
+  const [requestedSeats, setRequestedSeats] = useState(4);
   const [availableRides, setAvailableRides] = useState<TripBasicInfoDTO[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isJoining, setIsJoining] = useState<string | null>(null);
@@ -139,11 +162,11 @@ export default function RideBooking() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="pickup">Pickup Location</Label>
+                <Label htmlFor="pickup">Departure Location</Label>
                 <PlacesAutocomplete
                   value={pickupAddress}
                   onChange={handlePickupChange}
-                  placeholder="Enter pickup location"
+                  placeholder="Enter departure location"
                 />
               </div>
               <div>
@@ -219,16 +242,15 @@ export default function RideBooking() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4 text-green-600" />
-                      <div>
-                        <p className="text-sm font-medium">Pickup</p>
-                        <p className="text-sm text-muted-foreground">
-                          {trip.pickupPoint.placeAddress || `${trip.pickupPoint.latitude}, ${trip.pickupPoint.longitude}`}
-                        </p>
-                      </div>
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-green-600" />
+                    <div>
+                      <p className="text-sm font-medium">Departure</p>
+                      <p className="text-sm text-muted-foreground">
+                        {trip.pickupPoint.placeAddress || `${trip.pickupPoint.latitude}, ${trip.pickupPoint.longitude}`}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-2">
+                  </div>                    <div className="flex items-center space-x-2">
                       <MapPin className="h-4 w-4 text-red-600" />
                       <div>
                         <p className="text-sm font-medium">Destination</p>
