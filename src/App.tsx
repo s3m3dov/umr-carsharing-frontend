@@ -21,10 +21,10 @@ import FindRides from './pages/FindRides';
 import RideOffering from './pages/RideOffering';
 import CreateTrip from './pages/CreateTrip';
 import Vehicles from './pages/Vehicles';
-import RideTracking from './pages/RideTracking';
 
 // Feature pages — shared
 import MyRides from './pages/MyRides';
+import RideDetail from './pages/RideDetail';
 import Profile from './pages/Profile';
 import Reviews from './pages/Reviews';
 
@@ -135,10 +135,10 @@ function App() {
               <Route path="/offer-ride"  element={<RoleRouteGuard requiredRole="DRIVER"><RideOffering /></RoleRouteGuard>} />
               <Route path="/create-trip" element={<RoleRouteGuard requiredRole="DRIVER"><CreateTrip /></RoleRouteGuard>} />
               <Route path="/vehicles"    element={<RoleRouteGuard requiredRole="DRIVER"><Vehicles /></RoleRouteGuard>} />
-              <Route path="/track-ride"  element={<RoleRouteGuard requiredRole="DRIVER"><RideTracking /></RoleRouteGuard>} />
 
               {/* Shared feature pages (any authenticated user) */}
               <Route path="/my-rides" element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
+              <Route path="/my-rides/:id" element={<ProtectedRoute><RideDetail /></ProtectedRoute>} />
               <Route path="/profile"  element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/reviews"  element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
             </Routes>

@@ -44,7 +44,6 @@ const driverNav = [
   { name: 'My Rides',   href: '/my-rides',    icon: Calendar },
   { name: 'Reviews',    href: '/reviews',     icon: Star },
   { name: 'Vehicles',   href: '/vehicles',    icon: Car },
-  { name: 'Track Ride', href: '/track-ride',  icon: Navigation },
   { name: 'Profile',    href: '/profile',     icon: User },
 ];
 

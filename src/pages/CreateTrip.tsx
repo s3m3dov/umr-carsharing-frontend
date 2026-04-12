@@ -166,27 +166,35 @@ export default function CreateTrip() {
 
   return (
     <Layout>
-      <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Create Trip</h1>
-          <p className="text-muted-foreground">Offer a ride to help others reach their destination</p>
+      <div className="p-6 max-w-6xl mx-auto space-y-8">
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground">
+            {new Date().toLocaleDateString(undefined, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+          <h1 className="text-2xl font-bold">Create Trip</h1>
+          <p className="text-sm text-muted-foreground">Offer a ride to help others reach their destination</p>
         </div>
 
-        <Card>
+        <Card className="rounded-xl border shadow-none">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-lg">
               <Plus className="h-5 w-5" />
               <span>Trip Details</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs">
               Fill in the details of your trip to make it available for others to join
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create-pickup-location">Departure Location</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="create-pickup-location" className="text-xs">Departure Location</Label>
                   <PlacesAutocomplete
                       id="create-pickup-location"
                       value={tripData.sourceAddress.placeAddress || ''}
@@ -195,8 +203,8 @@ export default function CreateTrip() {
                       required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="create-destination-location">Destination</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="create-destination-location" className="text-xs">Destination</Label>
                   <PlacesAutocomplete
                       id="create-destination-location"
                       value={tripData.destinationAddress.placeAddress || ''}
@@ -210,27 +218,30 @@ export default function CreateTrip() {
               {/* Map View */}
               {mapMarkers.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Route Preview</Label>
-                  <GoogleMap
-                    markers={mapMarkers}
-                    className="w-full h-64 rounded-lg border"
-                  />
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Route Preview</Label>
+                  <div className="rounded-xl overflow-hidden border">
+                    <GoogleMap
+                      markers={mapMarkers}
+                      className="w-full h-64"
+                    />
+                  </div>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="datetime">Trip Start Time *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="datetime" className="text-xs">Trip Start Time *</Label>
                   <Input
                     id="datetime"
                     type="datetime-local"
                     value={tripData.tripStartDateTime}
                     onChange={(e) => setTripData({...tripData, tripStartDateTime: e.target.value})}
                     required
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="seats">Total Seats *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="seats" className="text-xs">Total Seats *</Label>
                   <Input
                     id="seats"
                     type="number"
@@ -239,10 +250,11 @@ export default function CreateTrip() {
                     value={tripData.totalSeats}
                     onChange={(e) => setTripData({...tripData, totalSeats: parseInt(e.target.value)})}
                     required
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="price">Price Per Seat (€) *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="price" className="text-xs">Price Per Seat (€) *</Label>
                   <Input
                     id="price"
                     type="number"
@@ -251,18 +263,19 @@ export default function CreateTrip() {
                     value={tripData.pricePerSeat}
                     onChange={(e) => setTripData({...tripData, pricePerSeat: parseFloat(e.target.value)})}
                     required
+                    className="rounded-lg"
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="vehicle">Select Vehicle *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="vehicle" className="text-xs">Select Vehicle *</Label>
                 <Select
                   value={tripData.vehicleNumber}
                   onValueChange={handleVehicleChange}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-lg">
                     <SelectValue placeholder="Choose your vehicle" />
                   </SelectTrigger>
                   <SelectContent>
@@ -277,7 +290,7 @@ export default function CreateTrip() {
                   </SelectContent>
                 </Select>
                 {vehiclesData.length === 0 && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs text-amber-600 mt-1">
                     No vehicles found. Please add a vehicle first.
                   </p>
                 )}
@@ -286,7 +299,7 @@ export default function CreateTrip() {
               <Button 
                 type="submit" 
                 disabled={createTripMutation.isPending || vehiclesData.length === 0}
-                className="w-full"
+                className="w-full bg-primary hover:bg-primary/90 py-4 rounded-xl font-bold"
               >
                 {createTripMutation.isPending ? 'Creating Trip...' : 'Create Trip'}
               </Button>

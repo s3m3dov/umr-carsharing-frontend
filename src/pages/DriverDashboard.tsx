@@ -27,7 +27,7 @@ const modules = [
     to: '/my-rides',
     label: 'My Rides',
     icon: Calendar,
-    description: 'View upcoming, active, and completed rides',
+    description: 'View and track your offered rides',
     color: 'bg-sky-500/10 text-sky-600',
   },
   {
@@ -36,13 +36,6 @@ const modules = [
     icon: Car,
     description: 'Manage your registered vehicles',
     color: 'bg-orange-500/10 text-orange-600',
-  },
-  {
-    to: '/track-ride',
-    label: 'Track Ride',
-    icon: Navigation,
-    description: 'Track active trips in real time',
-    color: 'bg-indigo-500/10 text-indigo-600',
   },
   {
     to: '/profile',
