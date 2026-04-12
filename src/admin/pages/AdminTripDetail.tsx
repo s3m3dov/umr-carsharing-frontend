@@ -179,7 +179,7 @@ export default function AdminTripDetail() {
             <DetailRow label="Total Seats" value={trip.totalSeats} />
             <DetailRow label="Booked Seats" value={trip.bookedSeats} />
             <DetailRow label="Available Seats" value={trip.availableSeats} />
-            <DetailRow label="Price / Seat" value={`$${trip.pricePerSeat.toFixed(2)}`} />
+            <DetailRow label="Price / Seat" value={`$${(trip.pricePerSeat ?? 0).toFixed(2)}`} />
             <Separator />
             <DetailRow
               label="Route Distance"

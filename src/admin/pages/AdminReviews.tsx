@@ -100,7 +100,8 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-function truncate(text: string, maxLen: number) {
+function truncate(text: string | null | undefined, maxLen: number) {
+  if (!text) return '—';
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen) + '…';
 }

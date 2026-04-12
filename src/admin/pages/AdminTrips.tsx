@@ -104,7 +104,6 @@ export default function AdminTrips() {
   const [tab, setTab] = useState<TabKey>('all');
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<TripStatus | 'ALL'>('ALL');
-  const [driverIdSearch, setDriverIdSearch] = useState('');
   const [cancelTrip, setCancelTrip] = useState<AdminTripResponse | null>(null);
 
   function handleTabChange(key: TabKey) {
@@ -114,7 +113,6 @@ export default function AdminTrips() {
 
   function clearFilters() {
     setStatusFilter('ALL');
-    setDriverIdSearch('');
     setPage(0);
   }
 
@@ -125,7 +123,6 @@ export default function AdminTrips() {
       page,
       size: PAGE_SIZE,
       status: statusFilter === 'ALL' ? undefined : statusFilter,
-      driverId: driverIdSearch || undefined,
     };
     if (tab === 'upcoming') return tripsApi.upcoming(params);
     if (tab === 'history') return tripsApi.history(params);
@@ -133,7 +130,7 @@ export default function AdminTrips() {
   }
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin', 'trips', tab, page, statusFilter, driverIdSearch],
+    queryKey: ['admin', 'trips', tab, page, statusFilter],
     queryFn,
   });
 
@@ -191,7 +188,7 @@ export default function AdminTrips() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar onClear={statusFilter !== 'ALL' || driverIdSearch ? clearFilters : undefined}>
+      <FilterBar onClear={statusFilter !== 'ALL' ? clearFilters : undefined}>
         <Select
           value={statusFilter}
           onValueChange={(v) => { setStatusFilter(v as TripStatus | 'ALL'); setPage(0); }}
@@ -205,16 +202,6 @@ export default function AdminTrips() {
             ))}
           </SelectContent>
         </Select>
-
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Driver ID..."
-            className="pl-9"
-            value={driverIdSearch}
-            onChange={(e) => { setDriverIdSearch(e.target.value); setPage(0); }}
-          />
-        </div>
       </FilterBar>
 
       {/* Table */}
@@ -299,7 +286,7 @@ export default function AdminTrips() {
                         {trip.bookedSeats}/{trip.totalSeats}
                       </TableCell>
                       <TableCell className="text-sm">
-                        ${trip.pricePerSeat.toFixed(2)}
+                        ${(trip.pricePerSeat ?? 0).toFixed(2)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                         {new Date(trip.tripStartDateTimeUTC).toLocaleString()}

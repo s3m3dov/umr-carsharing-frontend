@@ -13,6 +13,28 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+## [v0.3.6] – Admin Refinement & Bug Fixes (2026-04-12)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Fixed
+
+- **TypeError in Admin Bookings** — Resolved a crash in `AdminBookings.tsx` when `estimatedPrice` was `undefined`.
+- **Admin Data Safety** — Hardened list views and detail pages (`AdminBookings`, `AdminTrips`, `AdminAuditLogs`, `AdminPassengers`) with optional chaining and nullish coalescing for IDs, dates, and numeric values to prevent similar runtime crashes.
+- **Update Dialog Reliability** — Improved `UpdateBookingDialog` with proper React `key` handling to ensure state resets correctly when switching between bookings.
+- **Helper Robustness** — Updated common `truncate` and `format` helpers to safely handle `null` or `undefined` input strings and numbers.
+
+### Removed
+
+- **Admin Search Functionality** — Removed Driver ID search from `AdminTrips` and Passenger/Trip ID search from `AdminBookings` to simplify the interface.
+- **Enforced Server-Side Sorting** — Removed default `desc(createdAt)` and `desc(timestamp)` sorting parameters from all Admin Dashboard API list endpoints.
+
+### Changed
+
+- **Admin API Cleanup** — Refactored `admin-api.ts` to remove hardcoded sort query parameters.
+
+---
+
 ## [v0.3.5] – Documentation Cleanup & Legacy Removal (2026-04-12)
 
 **Author:** s3m3dov (Hikmat Samadov)

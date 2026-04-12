@@ -122,8 +122,8 @@ function UpdateBookingDialog({ booking, open, onOpenChange }: UpdateDialogProps)
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const [status, setStatus] = useState<BookingStatus>(booking.status);
-  const [seats, setSeats] = useState<string>(String(booking.requestedSeats));
+  const [status, setStatus] = useState<BookingStatus>(booking.status || 'REQUESTED');
+  const [seats, setSeats] = useState<string>(String(booking.requestedSeats ?? 1));
 
   const mutation = useMutation({
     mutationFn: (body: UpdateBookingRequest) => bookingsApi.update(booking.bookingId, body),
@@ -204,25 +204,19 @@ export default function AdminBookings() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'ALL'>('ALL');
-  const [passengerIdSearch, setPassengerIdSearch] = useState('');
-  const [tripIdSearch, setTripIdSearch] = useState('');
   const [editingBooking, setEditingBooking] = useState<BookingResponse | null>(null);
 
   function clearFilters() {
     setStatusFilter('ALL');
-    setPassengerIdSearch('');
-    setTripIdSearch('');
     setPage(0);
   }
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['admin', 'bookings', page, statusFilter, passengerIdSearch, tripIdSearch],
+    queryKey: ['admin', 'bookings', page, statusFilter],
     queryFn: () => bookingsApi.list({
       page,
       size: PAGE_SIZE,
       status: statusFilter === 'ALL' ? undefined : statusFilter,
-      passengerId: passengerIdSearch || undefined,
-      tripId: tripIdSearch || undefined,
     }),
   });
 
@@ -257,7 +251,7 @@ export default function AdminBookings() {
       </div>
 
       {/* Filter Bar */}
-      <FilterBar onClear={statusFilter !== 'ALL' || passengerIdSearch || tripIdSearch ? clearFilters : undefined}>
+      <FilterBar onClear={statusFilter !== 'ALL' ? clearFilters : undefined}>
         <Select
           value={statusFilter}
           onValueChange={(v) => { setStatusFilter(v as BookingStatus | 'ALL'); setPage(0); }}
@@ -271,26 +265,6 @@ export default function AdminBookings() {
             ))}
           </SelectContent>
         </Select>
-
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Passenger ID..."
-            className="pl-9"
-            value={passengerIdSearch}
-            onChange={(e) => { setPassengerIdSearch(e.target.value); setPage(0); }}
-          />
-        </div>
-
-        <div className="relative w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search Trip ID..."
-            className="pl-9"
-            value={tripIdSearch}
-            onChange={(e) => { setTripIdSearch(e.target.value); setPage(0); }}
-          />
-        </div>
       </FilterBar>
 
       {/* Table */}
@@ -337,7 +311,7 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-help">{booking.bookingId.slice(0, 8)}...</span>
+                          <span className="cursor-help">{booking.bookingId?.slice(0, 8) ?? 'N/A'}...</span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.bookingId}</TooltipContent>
                         </Tooltip>
@@ -345,7 +319,7 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-help">{booking.passengerId.slice(0, 8)}...</span>
+                          <span className="cursor-help">{booking.passengerId?.slice(0, 8) ?? 'N/A'}...</span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.passengerId}</TooltipContent>
                         </Tooltip>
@@ -353,22 +327,22 @@ export default function AdminBookings() {
                     <TableCell className="font-mono text-xs">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                          <span className="cursor-help">{booking.tripId.slice(0, 8)}...</span>
+                          <span className="cursor-help">{booking.tripId?.slice(0, 8) ?? 'N/A'}...</span>
                           </TooltipTrigger>
                           <TooltipContent>{booking.tripId}</TooltipContent>
                         </Tooltip>
                     </TableCell>
-                    <TableCell className="text-sm">{booking.vehicleNumber}</TableCell>
-                    <TableCell className="text-sm">{booking.requestedSeats}</TableCell>
+                    <TableCell className="text-sm">{booking.vehicleNumber ?? 'N/A'}</TableCell>
+                    <TableCell className="text-sm">{booking.requestedSeats ?? 0}</TableCell>
                     <TableCell>{bookingStatusBadge(booking.status)}</TableCell>
                     <TableCell className="text-sm tabular-nums">
-                      €{booking.estimatedPrice.toFixed(2)}
+                      €{(booking.estimatedPrice ?? 0).toFixed(2)}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {new Date(booking.rideStartTimeUTC).toLocaleDateString()}
+                      {booking.rideStartTimeUTC ? new Date(booking.rideStartTimeUTC).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {new Date(booking.createdAt).toLocaleDateString()}
+                      {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -398,7 +372,7 @@ export default function AdminBookings() {
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span className="font-mono cursor-help">
-                                        {booking.bookingId.slice(0, 8)}...
+                                        {booking.bookingId?.slice(0, 8) ?? 'N/A'}...
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent>{booking.bookingId}</TooltipContent>
@@ -460,14 +434,14 @@ export default function AdminBookings() {
       {/* Update Dialog */}
       {editingBooking && (
         <UpdateBookingDialog
+          key={editingBooking.bookingId}
           booking={editingBooking}
           open={!!editingBooking}
           onOpenChange={(open) => {
             if (!open) setEditingBooking(null);
           }}
         />
-      )}
-      </div>
+      )}      </div>
     </TooltipProvider>
   );
 }
