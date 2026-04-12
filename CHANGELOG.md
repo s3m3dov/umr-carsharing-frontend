@@ -17,6 +17,10 @@ and this project adheres to **Semantic Versioning**
 
 **Author:** Gemini CLI
 
+### Features
+
+- **Admin API Filtering** — Added filtering capabilities to `tripsApi` (by status, driverId) and `bookingsApi` (by status, passengerId, tripId) in the shared admin API layer.
+
 ### Added
 
 - **OpenGraph image** — Custom SVG-based branding image for social sharing previews (`/og-image.svg`).
