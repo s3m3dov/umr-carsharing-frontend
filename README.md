@@ -4,10 +4,9 @@ Admin-first React frontend for the UMR Carsharing platform.
 
 ## Overview
 
-This application is the web client for the carsharing system. It is currently in an admin-first transition state:
+This application is the web client for the carsharing system.
 
 - Primary surface: `/admin/*`
-- Legacy surface (temporary): `/legacy/*`
 - Root redirect goes to `/dashboard`
 
 ## Documentation
@@ -21,16 +20,7 @@ Comprehensive frontend documentation now lives under `.docs/`.
 - Admin modules: [`.docs/technical/crucial/admin-modules.md`](.docs/technical/crucial/admin-modules.md)
 - Environment and deployment: [`.docs/technical/devops/environment-and-deployment.md`](.docs/technical/devops/environment-and-deployment.md)
 - Testing guide: [`.docs/technical/testing/testing.md`](.docs/technical/testing/testing.md)
-- Product roadmap: [`.docs/product/roadmap.md`](.docs/product/roadmap.md)
 - User flows: [`.docs/product/user-flows.md`](.docs/product/user-flows.md)
-- Backlog tasks: [`.docs/product/tasks.md`](.docs/product/tasks.md)
-
-Additional transition planning artifacts:
-
-- [`.docs/product/execution-plan.md`](.docs/product/execution-plan.md)
-- [`.docs/product/legacy-deprecation-policy.md`](.docs/product/legacy-deprecation-policy.md)
-- [`.docs/services/backend-open-questions.md`](.docs/services/backend-open-questions.md)
-- [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Tech Stack
 
@@ -46,10 +36,9 @@ Additional transition planning artifacts:
 ```text
 src/
   admin/            # Admin routes, pages, API, shared components
-  legacy/           # Legacy route namespace and deprecation wrappers
   shared/           # Shared API and auth utilities
   contexts/         # Auth context
-  pages/            # Auth pages + legacy page components
+  pages/            # Auth pages + user-facing page components
   components/       # Reusable UI and wrappers
 ```
 
@@ -58,7 +47,7 @@ src/
 Use `.env.example` as the base.
 
 - `VITE_API_BASE_URL` - API gateway base URL
-- `VITE_GOOGLE_MAPS_API_KEY` - required for map/places legacy pages
+- `VITE_GOOGLE_MAPS_API_KEY` - required for map/places pages
 
 ## Getting Started
 
@@ -97,8 +86,10 @@ npm run build
 ## Current Notes
 
 - Login/admin flows use the shared API client (`src/shared/api/*`).
-- Some legacy flows still depend on old client code in `src/services/api.ts`.
-- Transition and cleanup plan is documented in `.docs/product/tasks.md`.
+- Role-based navigation is implemented:
+    - `ADMIN` -> `/admin`
+    - `DRIVER` -> `/driver`
+    - `PASSENGER` -> `/passenger`
 
 ## Contributors
 

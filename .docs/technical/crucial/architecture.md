@@ -15,11 +15,10 @@ The frontend is a React + TypeScript SPA that integrates with the carsharing bac
 
 ## 2. High-Level App Shape
 
-The app is currently admin-first with a legacy transition area.
+The app is built with an admin-first focus while supporting core user flows for drivers and passengers.
 
 - Canonical admin namespace: `/admin/*`
-- Legacy namespace: `/legacy/*`
-- Legacy short paths remain as redirects for one transition cycle
+- User-facing routes: `/driver`, `/passenger`, `/find-rides`, `/offer-ride`, etc.
 
 ## 3. Directory Structure
 
@@ -53,10 +52,6 @@ src/
       ActionButton.tsx
       StatusBadge.tsx
 
-  legacy/
-    routes.tsx                 # Legacy route declarations
-    DeprecationBanner.tsx      # Banner wrapper for legacy pages
-
   shared/
     api/
       client.ts                # Base request logic + auth header injection
@@ -72,7 +67,9 @@ src/
     Login.tsx
     Signup.tsx
     Forbidden.tsx
-    Dashboard.tsx              # Legacy pages
+    DriverDashboard.tsx
+    PassengerDashboard.tsx
+    FindRides.tsx
     RideBooking.tsx
     RideOffering.tsx
     RideTracking.tsx
@@ -81,7 +78,8 @@ src/
     Profile.tsx
 
   components/
-    ProtectedRoute.tsx         # Auth-only guard used by legacy area
+    ProtectedRoute.tsx         # Auth-only guard
+    RoleRouteGuard.tsx         # Role-specific guard (DRIVER, PASSENGER)
     ui/*                       # shadcn/ui components
 
   App.tsx                      # Main route composition
@@ -91,10 +89,11 @@ src/
 
 The app uses layered guards:
 
-1. `ProtectedRoute` for authenticated legacy pages
-2. `AdminRouteGuard` for authenticated + ADMIN role pages
+1. `ProtectedRoute` for authenticated pages
+2. `RoleRouteGuard` for role-specific user pages
+3. `AdminRouteGuard` for authenticated + ADMIN role pages
 
-Approved role-forwarding policy for dashboard entry points:
+Role-forwarding policy for dashboard entry points:
 
 - `ADMIN` users are forwarded to `/admin`
 - `DRIVER` users are forwarded to `/driver`
@@ -102,25 +101,19 @@ Approved role-forwarding policy for dashboard entry points:
 - Any unsupported role value must route to `/forbidden` with message:
   `Only PASSENGER, DRIVER, and ADMIN roles are supported.`
 
-Flow for admin route access:
-
-- No session token: redirect to `/login`
-- Session role not `ADMIN`: redirect to `/forbidden`
-- Valid `ADMIN` session: render `AdminLayout` and child page
-
 ## 5. Data and API Flow
 
 Request path:
 
 1. UI action triggers TanStack Query query or mutation
-2. Feature API (`src/admin/api.ts`) builds URL and params
+2. Feature API builds URL and params
 3. Shared client (`src/shared/api/client.ts`) attaches JSON headers and bearer token
 4. Request is sent to `${VITE_API_BASE_URL}${gatewayRelativePath}`
 5. `parseResponse` unwraps success envelope (`data`) or throws `ApiError`
 
 Response handling model:
 
-- Success: `ApiResponseWrapper<T>` -> returns `data`
+- Success: returns `data`
 - Service error body: extracts `error.message` or fallback message
 - Gateway empty-body error (for example 403): synthesizes status-based message
 - 401: clears session and redirects to `/login`
@@ -147,7 +140,6 @@ Auth context derives:
 Logout behavior:
 
 - Removes session key
-- Clears legacy `localStorage` keys (`carpoolUserId`, `carpoolUser`)
 
 ## 7. UI Layer Composition
 
@@ -171,34 +163,8 @@ Common admin pages implemented:
 - Compliance: audit logs
 - Runtime checks: service status
 
-## 8. Legacy Transition Layer
+## 8. Development Constraints
 
-Legacy pages are still present under `/legacy/*` and wrapped with `DeprecationBanner`.
-
-Short route redirects retained:
-
-- `/dashboard` -> `/legacy/dashboard`
-- `/book-ride` -> `/legacy/book-ride`
-- `/find-rides` -> `/legacy/find-rides`
-- `/offer-ride` -> `/legacy/offer-ride`
-- `/create-trip` -> `/legacy/create-trip`
-- `/track-ride` -> `/legacy/track-ride`
-- `/my-rides` -> `/legacy/my-rides`
-- `/vehicles` -> `/legacy/vehicles`
-- `/profile` -> `/legacy/profile`
-
-## 9. Mobile Shell Note
-
-`src/MobileApp.tsx` still exists for legacy mobile route composition, but the current web app entry is `src/App.tsx`.
-
-Treat `MobileApp.tsx` as transition scope unless mobile-specific requirements are reactivated.
-
-## 10. Architecture Constraints
-
-Known constraints worth tracking:
-
-- Signup currently uses legacy client code in `src/services/api.ts`, unlike login/admin flow
-- No automated test suite is wired in `package.json` yet
-- Legacy area still depends on old DTO model and API assumptions
-
-These are tracked in product/task docs under `.docs/product/`.
+- TypeScript strict mode is enabled.
+- ESLint is used for code quality.
+- The project uses a shared API client for all new integrations.

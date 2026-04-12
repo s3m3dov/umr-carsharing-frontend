@@ -15,7 +15,8 @@ Public routes:
 Protected namespaces:
 
 - `/admin/*` (admin-only)
-- `/legacy/*` (authenticated legacy user flows)
+- `/driver/*` (driver-only)
+- `/passenger/*` (passenger-only)
 
 ## 2. Admin Route Tree
 
@@ -34,46 +35,20 @@ Child pages:
 - `/admin/audit-logs`
 - `/admin/status`
 
-## 4. Legacy Route Tree
+## 3. User Route Tree
 
-Legacy child routes are produced by `legacyRoutes()` in `src/legacy/routes.tsx`.
+User-facing pages are wrapped by either `ProtectedRoute`, `RoleRouteGuard`, or `AdminRouteGuard`.
 
-Mounted under `/legacy`:
+- `/driver`: `RoleRouteGuard` (DRIVER)
+- `/passenger`: `RoleRouteGuard` (PASSENGER)
+- `/find-rides`: `RoleRouteGuard` (PASSENGER)
+- `/offer-ride`: `RoleRouteGuard` (DRIVER)
+- `/my-rides`: `ProtectedRoute` (Auth)
+- `/profile`: `ProtectedRoute` (Auth)
 
-- `/legacy/dashboard`
-- `/legacy/book-ride`
-- `/legacy/find-rides`
-- `/legacy/offer-ride`
-- `/legacy/create-trip`
-- `/legacy/track-ride`
-- `/legacy/my-rides`
-- `/legacy/vehicles`
-- `/legacy/profile`
+## 4. Guard Behavior
 
-Each legacy element is wrapped with:
-
-1. `ProtectedRoute` (auth required)
-2. `DeprecationBanner`
-
-## 5. Legacy Short-Path Redirects
-
-Legacy short paths are still accepted and redirected:
-
-- `/dashboard` -> `/legacy/dashboard`
-- `/book-ride` -> `/legacy/book-ride`
-- `/find-rides` -> `/legacy/find-rides`
-- `/offer-ride` -> `/legacy/offer-ride`
-- `/create-trip` -> `/legacy/create-trip`
-- `/track-ride` -> `/legacy/track-ride`
-- `/my-rides` -> `/legacy/my-rides`
-- `/vehicles` -> `/legacy/vehicles`
-- `/profile` -> `/legacy/profile`
-
-This avoids broken bookmarks and stale external links during transition.
-
-## 6. Guard Behavior
-
-### 6.1 `ProtectedRoute`
+### 4.1 `ProtectedRoute`
 
 File: `src/components/ProtectedRoute.tsx`
 
@@ -82,9 +57,17 @@ Rule:
 - If `isAuthenticated === false`: redirect to `/login`
 - Else: render children
 
-Used for legacy area and mobile shell paths.
+### 4.2 `RoleRouteGuard`
 
-### 6.2 `AdminRouteGuard`
+File: `src/components/RoleRouteGuard.tsx`
+
+Rule:
+
+- If not authenticated: redirect to `/login`
+- If authenticated but role does not match `requiredRole`: redirect to `/forbidden`
+- Else: render children
+
+### 4.3 `AdminRouteGuard`
 
 File: `src/admin/guards/AdminRouteGuard.tsx`
 
@@ -94,9 +77,7 @@ Rules:
 - If authenticated but `isAdmin === false`: redirect to `/forbidden`
 - Else: render children
 
-This ensures admin routes are role-protected, not only session-protected.
-
-## 7. Forbidden UX
+## 5. Forbidden UX
 
 File: `src/pages/Forbidden.tsx`
 
@@ -105,36 +86,12 @@ Purpose:
 - Explicit user feedback when role does not have access
 - Action path back to `/login`
 
-### 7.1 Unsupported Role Policy (Approved)
-
-If the frontend receives an authenticated user role that is not one of the supported
-application roles, the user must be redirected to `/forbidden`.
-
 Supported roles are:
 
 - `ADMIN`
 - `DRIVER`
 - `PASSENGER`
 
-Required message on forbidden screen for this case:
+Message shown for unsupported roles or restricted access:
 
 - `Only PASSENGER, DRIVER, and ADMIN roles are supported.`
-
-## 8. Deprecation Banner Variants
-
-File: `src/legacy/DeprecationBanner.tsx`
-
-Supported variants:
-
-- `deprecated`: page still works and is scheduled for removal
-- `unavailable`: page is non-functional and scheduled for removal
-
-Default variant is currently `deprecated`.
-
-## 9. Current Gaps to Track
-
-- `/signup` still posts through legacy API client instead of shared API client
-- There is no catch-all `NotFound` route in `src/App.tsx` for unknown paths
-- Guard unit tests are not yet present in repository tooling
-
-Track closure in `.docs/product/tasks.md`.

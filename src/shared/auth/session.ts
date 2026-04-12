@@ -23,13 +23,8 @@ export function getToken(): string | null {
 
 export function saveSession(session: Session): void {
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  // Clear stale keys from the old AuthContext implementation
-  localStorage.removeItem('carpoolUserId');
-  localStorage.removeItem('carpoolUser');
 }
 
 export function clearSession(): void {
   sessionStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem('carpoolUserId');
-  localStorage.removeItem('carpoolUser');
 }
