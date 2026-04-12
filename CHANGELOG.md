@@ -20,6 +20,7 @@ and this project adheres to **Semantic Versioning**
 ### Features
 
 - **Admin API Filtering** — Added filtering capabilities to `tripsApi` (by status, driverId) and `bookingsApi` (by status, passengerId, tripId) in the shared admin API layer.
+- **Admin Filtering UI** — Implemented filter bars in `AdminTrips` and `AdminBookings` pages, allowing searching by status, driver ID, passenger ID, and trip ID.
 
 ### Added
 
