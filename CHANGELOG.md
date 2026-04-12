@@ -13,6 +13,20 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+## [v0.6.2] – Branding & SEO Update (2026-04-12)
+
+**Author:** Gemini CLI
+
+### Added
+
+- **OpenGraph image** — Custom SVG-based branding image for social sharing previews (`/og-image.svg`).
+
+### Changed
+
+- **SEO & Social Metadata** — Updated `index.html` to replace default boilerplate "Lovable" metadata with "Kamilli Ride" branding across title, author, OpenGraph, and Twitter tags.
+
+---
+
 ## [v0.6.1] – Admin Sorting & Feature Polish (2026-04-11)
 
 **Author:** s3m3dov (Hikmat Samadov)
