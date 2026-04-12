@@ -156,7 +156,7 @@ export default function AdminPassengers() {
                     <TableCell>{passenger.phoneNumber}</TableCell>
                     <TableCell>{passenger.age}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {new Date(passenger.createdAt).toLocaleDateString()}
+                      {passenger.createdAt ? new Date(passenger.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

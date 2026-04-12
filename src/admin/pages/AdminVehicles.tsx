@@ -93,7 +93,8 @@ function formatOwnerName(firstName: string, lastName: string) {
   return name || 'Unnamed user';
 }
 
-function truncate(str: string, len = 8) {
+function truncate(str: string | null | undefined, len = 8) {
+  if (!str) return '—';
   if (str.length <= len) return str;
   return str.slice(0, len) + '…';
 }

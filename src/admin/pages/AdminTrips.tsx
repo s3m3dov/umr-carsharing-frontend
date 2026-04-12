@@ -286,7 +286,7 @@ export default function AdminTrips() {
                         {trip.bookedSeats}/{trip.totalSeats}
                       </TableCell>
                       <TableCell className="text-sm">
-                        ${trip.pricePerSeat.toFixed(2)}
+                        ${(trip.pricePerSeat ?? 0).toFixed(2)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                         {new Date(trip.tripStartDateTimeUTC).toLocaleString()}
