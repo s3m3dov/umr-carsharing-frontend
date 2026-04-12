@@ -24,6 +24,8 @@ import type {
   ReviewStatus,
   AuditAction,
   EntityType,
+  TripStatus,
+  BookingStatus,
 } from '@/admin/types';
 
 const r = ROUTES.admin;
