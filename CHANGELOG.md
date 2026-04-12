@@ -13,9 +13,9 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.6.2] – Branding & SEO Update (2026-04-12)
+## [v0.3.5] – Branding & SEO Update (2026-04-12)
 
-**Author:** Gemini CLI
+**Author:** s3m3dov (Hikmat Samadov)
 
 ### Features
 
@@ -32,7 +32,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.6.1] – Admin Sorting & Feature Polish (2026-04-11)
+## [v0.3.4] – Admin Sorting & Feature Polish (2026-04-11)
 
 **Author:** s3m3dov (Hikmat Samadov)
 
@@ -59,7 +59,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.6.0] – Trip Maps, Dashboard Polish & Branding (2026-04-11)
+## [v0.3.2] – Trip Maps, Dashboard Polish & Branding (2026-04-11)
 
 **Author:** s3m3dov (Hikmat Samadov)
 
@@ -94,7 +94,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.5.0] – Admin Panel, Legacy Migration & UI Polish (2026-04-08 to 2026-04-09)
+## [v0.3.1] – Admin Panel, Legacy Migration & UI Polish (2026-04-08 to 2026-04-09)
 
 **Author:** s3m3dov (Hikmat Samadov)
 
@@ -139,7 +139,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.4.0] – Admin Foundation & API Client (2026-04-07 to 2026-04-08)
+## [v0.3.0] – Admin Foundation & API Client (2026-04-07 to 2026-04-08)
 
 **Author:** s3m3dov (Hikmat Samadov)
 
@@ -161,7 +161,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.3.0] – Core User Features & Driver Dashboard (2025-06-13 to 2025-06-16)
+## [v0.2.0] – Core User Features & Driver Dashboard (2025-06-13 to 2025-06-16)
 
 **Author:** VipulSingh-10
 
@@ -183,7 +183,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.2.0] – Backend Integration & Styling (2025-06-12 to 2025-06-13)
+## [v0.1.1] – Backend Integration & Styling (2025-06-12 to 2025-06-13)
 
 **Author:** gpt-engineer-app[bot] (Lovable)
 
