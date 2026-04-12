@@ -13,6 +13,21 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+## [v0.3.6] – Admin Feature Refinement (2026-04-12)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Removed
+
+- **Admin Search Functionality** — Removed Driver ID search from `AdminTrips` and Passenger/Trip ID search from `AdminBookings` to simplify the interface.
+- **Enforced Server-Side Sorting** — Removed default `desc(createdAt)` and `desc(timestamp)` sorting parameters from all Admin Dashboard API list endpoints.
+
+### Changed
+
+- **Admin API Cleanup** — Refactored `admin-api.ts` to remove hardcoded sort query parameters.
+
+---
+
 ## [v0.3.5] – Documentation Cleanup & Legacy Removal (2026-04-12)
 
 **Author:** s3m3dov (Hikmat Samadov)

@@ -38,7 +38,6 @@ export const driversApi = {
     if (params?.status) q.set('status', params.status);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<DriverResponse>>(`${r.drivers}?${q}`);
   },
   get: (id: string) => apiClient.get<DriverResponse>(`${r.drivers}/${id}`),
@@ -60,7 +59,6 @@ export const passengersApi = {
     const q = new URLSearchParams();
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<PassengerResponse>>(`${r.passengers}?${q}`);
   },
   get: (id: string) => apiClient.get<PassengerResponse>(`${r.passengers}/${id}`),
@@ -78,7 +76,6 @@ export const vehiclesApi = {
     const q = new URLSearchParams();
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<AdminVehicleResponse>>(`${r.vehicles}?${q}`);
   },
   get: (id: string) => apiClient.get<AdminVehicleResponse>(`${r.vehicles}/${id}`),
@@ -103,21 +100,18 @@ export const tripsApi = {
     if (params?.driverId) q.set('driverId', params.driverId);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<AdminTripResponse>>(`${r.trips}?${q}`);
   },
   upcoming: (params?: { page?: number; size?: number }) => {
     const q = new URLSearchParams();
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<AdminTripResponse>>(`${r.trips}/upcoming?${q}`);
   },
   history: (params?: { page?: number; size?: number }) => {
     const q = new URLSearchParams();
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<AdminTripResponse>>(`${r.trips}/history?${q}`);
   },
   get: (id: string) => apiClient.get<AdminTripResponse>(`${r.trips}/${id}`),
@@ -140,7 +134,6 @@ export const bookingsApi = {
     if (params?.tripId) q.set('tripId', params.tripId);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<BookingResponse>>(`${r.bookings}?${q}`);
   },
   get: (id: string) => apiClient.get<BookingResponse>(`${r.bookings}/${id}`),
@@ -151,7 +144,6 @@ export const bookingsApi = {
     const q = new URLSearchParams();
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<BookingResponse>>(`${r.bookings}/passenger/${passengerId}?${q}`);
   },
 };
@@ -164,7 +156,6 @@ export const reviewsApi = {
     if (params?.status) q.set('status', params.status);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'createdAt,desc');
     return apiClient.get<Page<ReviewResponse>>(`${r.reviews}?${q}`);
   },
   get: (id: string) => apiClient.get<ReviewResponse>(`${r.reviews}/${id}`),
@@ -202,7 +193,6 @@ export const auditLogsApi = {
     if (params?.to) q.set('to', params.to);
     q.set('page', String(params?.page ?? 0));
     q.set('size', String(params?.size ?? 20));
-    q.set('sort', 'timestamp,desc');
     // Audit logs are served from the reports controller path
     return apiClient.get<Page<AuditLogResponse>>(`${r.reports}/audit-logs?${q}`);
   },
