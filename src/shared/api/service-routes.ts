@@ -51,7 +51,6 @@ export const ROUTES = {
     bookRideWithApproval: '/trip-service/api/rides/book/new',
     cancelRide: '/trip-service/api/rides/cancel',
     searchRoutes: '/trip-service/api/trips/search/matching-route',
-    searchRoutesLegacy: '/trip-service/api/rides/find-ride',
     // Review endpoints
     reviewsReceived: (passengerId: string) => `/review-service/api/reviews/passenger/${passengerId}`,
     reviewsGiven: (passengerId: string) => `/review-service/api/reviews/reviewer/${passengerId}`,

@@ -77,13 +77,6 @@ function buildRideSearchParams(criteria: RideDTO): URLSearchParams {
   return params;
 }
 
-function shouldFallbackToLegacySearch(error: unknown): boolean {
-  if (!(error instanceof ApiError)) {
-    return false;
-  }
-  return [400, 404, 405].includes(error.status);
-}
-
 function normalizePassengerRide(ride: PassengerRideResponse): RideBasicInfoDTO {
   return {
     userId: ride.driverId,
@@ -114,16 +107,8 @@ export const passengerApi = {
       .get<PassengerRideResponse[]>(ROUTES.passenger.rideHistory(passengerId))
       .then((rides) => rides.map(normalizePassengerRide)),
 
-  joinTrip: async (_userId: string, data: RideDTO) => {
-    try {
-      return await apiClient.post<string>(ROUTES.passenger.bookRideWithApproval, data);
-    } catch (error) {
-      if (!(error instanceof ApiError) || ![400, 404, 405].includes(error.status)) {
-        throw error;
-      }
-      return apiClient.post<string>(ROUTES.passenger.bookRide, data);
-    }
-  },
+  joinTrip: (_userId: string, data: RideDTO) =>
+    apiClient.post<string>(ROUTES.passenger.bookRideWithApproval, data),
 
   bookRide: (data: object) =>
     apiClient.post<string>(ROUTES.passenger.bookRide, data),
@@ -134,20 +119,11 @@ export const passengerApi = {
   cancelRide: (_userId: string, data: CancelRideRequestDTO & { rideId?: string }) =>
     apiClient.post<string>(ROUTES.passenger.cancelRide, data),
 
-  findRides: async (criteria: RideDTO) => {
+  findRides: (criteria: RideDTO) => {
     const searchParams = buildRideSearchParams(criteria);
-    try {
-      return await apiClient.get<TripBasicInfoDTO[]>(
-        `${ROUTES.passenger.searchRoutes}?${searchParams}`,
-      );
-    } catch (error) {
-      if (!shouldFallbackToLegacySearch(error)) {
-        throw error;
-      }
-      return apiClient.get<TripBasicInfoDTO[]>(
-        `${ROUTES.passenger.searchRoutesLegacy}?${searchParams}`,
-      );
-    }
+    return apiClient.get<TripBasicInfoDTO[]>(
+      `${ROUTES.passenger.searchRoutes}?${searchParams}`,
+    );
   },
 
   // Review endpoints

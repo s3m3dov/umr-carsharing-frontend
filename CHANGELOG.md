@@ -13,7 +13,24 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.3.5] – Branding & SEO Update (2026-04-12)
+## [v0.3.5] – Documentation Cleanup & Legacy Removal (2026-04-12)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Removed
+
+- **Legacy Documentation** — Deleted all "in-progress" and transition-related planning documents (`roadmap.md`, `tasks.md`, `execution-plan.md`, etc.).
+- **Unused Source Files** — Deleted unused mobile-related and test scaffold files (`MobileApp.tsx`, `mobile.css`, `MobileDashboard.tsx`, `TestMapPage.tsx`).
+- **Legacy Fallbacks** — Removed legacy API endpoint fallbacks from `passengerApi` and unused search route constants.
+
+### Changed
+
+- **Documentation Refresh** — Rewrote `README.md`, `INDEX.md`, and core technical docs to reflect a stable, admin-first architecture without "transition" terminology.
+- **Session Management** — Simplified `session.ts` by removing legacy `localStorage` cleanup logic.
+
+---
+
+## [v0.3.4] – Branding & SEO Update (2026-04-12)
 
 **Author:** s3m3dov (Hikmat Samadov)
 
@@ -32,7 +49,7 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
-## [v0.3.4] – Admin Sorting & Feature Polish (2026-04-11)
+## [v0.3.3] – Admin Sorting & Feature Polish (2026-04-11)
 
 **Author:** s3m3dov (Hikmat Samadov)
 
