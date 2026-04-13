@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, MessageSquare, Star } from 'lucide-react';
 
@@ -182,34 +183,28 @@ export default function Reviews() {
     <Layout>
       <div className="p-6 space-y-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold">Reviews</h1>
-          <p className="text-muted-foreground">Read feedback and submit new reviews after completed rides.</p>
+          <h1 className="text-2xl font-bold">Reviews</h1>
+          <p className="text-sm text-muted-foreground">Read feedback and submit new reviews after completed rides.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Received Reviews</p>
-              <p className="text-2xl font-bold">{loadingReviews ? '—' : reviews.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Average Rating</p>
-              <p className="text-2xl font-bold">{averageRating > 0 ? averageRating.toFixed(1) : '—'}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Stars</p>
-              <p className="text-xl text-amber-500">{averageRating > 0 ? renderStars(averageRating) : '☆☆☆☆☆'}</p>
-            </CardContent>
-          </Card>
+          <div className="rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Received Reviews</p>
+            <p className="text-2xl font-bold">{loadingReviews ? '—' : reviews.length}</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Average Rating</p>
+            <p className="text-2xl font-bold">{averageRating > 0 ? averageRating.toFixed(1) : '—'}</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Stars</p>
+            <p className="text-xl text-amber-500">{averageRating > 0 ? renderStars(averageRating) : '☆☆☆☆☆'}</p>
+          </div>
         </div>
 
-        <Card>
+        <Card className="rounded-xl shadow-none">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="h-5 w-5" />
               Leave a Review
             </CardTitle>
@@ -240,35 +235,33 @@ export default function Reviews() {
             {!loadingReviewHistory && !loadingHistoryRides && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="eligible-booking">Booking ID</Label>
-                  <select
-                    id="eligible-booking"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  <Label htmlFor="eligible-booking" className="text-xs">Booking ID</Label>
+                  <Select
                     value={bookingId}
-                    onChange={(event) => {
-                      const nextBookingId = event.target.value;
+                    onValueChange={(nextBookingId) => {
                       setBookingId(nextBookingId);
                       const selected = bookingOptions.find((option) => option.bookingId === nextBookingId);
                       setTripId(selected?.tripId ?? '');
                     }}
                   >
-                    <option value="">Select booking ID</option>
-                    {bookingOptions.map((option) => (
-                      <option key={option.bookingId} value={option.bookingId}>
-                        {option.bookingId}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="eligible-booking" className="rounded-lg">
+                      <SelectValue placeholder="Select booking ID" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {bookingOptions.map((option) => (
+                        <SelectItem key={option.bookingId} value={option.bookingId}>
+                          {option.bookingId}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="eligible-trip">Trip ID</Label>
-                  <select
-                    id="eligible-trip"
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  <Label htmlFor="eligible-trip" className="text-xs">Trip ID</Label>
+                  <Select
                     value={tripId}
-                    onChange={(event) => {
-                      const nextTripId = event.target.value;
+                    onValueChange={(nextTripId) => {
                       setTripId(nextTripId);
                       const selected = bookingOptions.find((option) => option.tripId === nextTripId);
                       if (selected) {
@@ -276,13 +269,17 @@ export default function Reviews() {
                       }
                     }}
                   >
-                    <option value="">Select trip ID</option>
-                    {tripOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="eligible-trip" className="rounded-lg">
+                      <SelectValue placeholder="Select trip ID" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tripOptions.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}
@@ -300,7 +297,7 @@ export default function Reviews() {
             )}
 
             <div className="space-y-1.5">
-              <Label htmlFor="rating">Rating (1-5)</Label>
+              <Label htmlFor="rating" className="text-xs">Rating (1-5)</Label>
               <Input
                 id="rating"
                 type="number"
@@ -318,7 +315,7 @@ export default function Reviews() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="comment">Comment</Label>
+              <Label htmlFor="comment" className="text-xs">Comment</Label>
               <Textarea
                 id="comment"
                 value={form.comment}
@@ -343,9 +340,9 @@ export default function Reviews() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-xl shadow-none">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <Star className="h-5 w-5" />
               Recent Received Reviews
             </CardTitle>
