@@ -70,12 +70,22 @@ export default function FindRides() {
     if (!userId) return;
 
     try {
-      const rideData: RideDTO = {
-        ...searchParams,
-        tripId: trip.tripId
+      const rideData = {
+        tripId: trip.tripId,
+        driverId: trip.userId, // userId in TripBasicInfoDTO is the driver's email/ID
+        pickupPoint: {
+          latitude: trip.pickupPoint.latitude,
+          longitude: trip.pickupPoint.longitude,
+        },
+        destinationPoint: {
+          latitude: trip.destinationPoint.latitude,
+          longitude: trip.destinationPoint.longitude,
+        },
+        rideStartTime: trip.tripStartTime,
+        requestedSeats: searchParams.requestedSeats,
       };
       
-      await userApi.joinTrip(userId!, rideData);
+      await userApi.bookRide(rideData);
       toast({ title: 'Success!', description: 'You have successfully joined the ride.' });
       handleSearch();
     } catch (error) {

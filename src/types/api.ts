@@ -308,3 +308,18 @@ export interface MatchingTripResponse {
   updatedAt: string;
   version?: number | null;
 }
+
+export interface BookRideRequestDTO {
+  tripId: string;
+  driverId: string;
+  pickupPoint: {
+    latitude: number;
+    longitude: number;
+  };
+  destinationPoint: {
+    latitude: number;
+    longitude: number;
+  };
+  rideStartTime: string;
+  requestedSeats: number;
+}
