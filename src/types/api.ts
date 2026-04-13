@@ -121,6 +121,7 @@ export interface RideBasicInfoDTO {
   tripStatus: string;
   vehicleNumber: string;
   routeGeometry?: RouteGeometry | null;
+  pricePerSeat?: number;
   passengers?: Array<{
     userId: string;
     bookedSeats: number;
@@ -172,7 +173,6 @@ export interface PassengerRideResponse {
   rideDistanceInKm: number | null;
   rideDurationInMinutes: number | null;
   pricePerSeat: number | null;
-  estimatedFare: number | null;
   routeGeometry?: RouteGeometry | null;
   driverDetails: {
     name: string;

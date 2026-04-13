@@ -69,13 +69,20 @@ function normalizePassengerRide(ride: PassengerRideResponse): RideBasicInfoDTO {
     userId: ride.driverId,
     tripId: ride.tripId,
     rideId: ride.rideId,
-    pickupPoint: ride.pickupLocation,
-    destinationPoint: ride.dropoffLocation,
+    pickupPoint: {
+      ...ride.pickupLocation,
+      placeAddress: ride.pickupLocation.placeAddress ?? null,
+    },
+    destinationPoint: {
+      ...ride.dropoffLocation,
+      placeAddress: ride.dropoffLocation.placeAddress ?? null,
+    },
     rideStartTime: ride.tripStartDateTime,
     seats: `${ride.bookedSeats}`,
     tripStatus: ride.rideStatus,
     vehicleNumber: ride.vehicleNumber ?? '',
     routeGeometry: ride.routeGeometry ?? null,
+    pricePerSeat: ride.pricePerSeat ?? 0,
   };
 }
 
