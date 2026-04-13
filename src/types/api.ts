@@ -121,6 +121,12 @@ export interface RideBasicInfoDTO {
   tripStatus: string;
   vehicleNumber: string;
   routeGeometry?: RouteGeometry | null;
+  passengers?: Array<{
+    userId: string;
+    bookedSeats: number;
+    pickupLocation: Points;
+    dropoffLocation: Points;
+  }>;
 }
 
 // --- New backend DTOs ---
