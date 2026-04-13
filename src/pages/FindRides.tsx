@@ -110,11 +110,32 @@ export default function FindRides() {
 
 
   // Prepare map markers for found rides
-  const mapMarkers = rides.map(ride => ({
-    position: { lat: ride.pickupPoint.latitude, lng: ride.pickupPoint.longitude },
-    title: `${ride.fullName}'s Trip`,
-    info: `${ride.pickupPoint.placeAddress} → ${ride.destinationPoint.placeAddress}`,
-  }));
+  const mapMarkers = [
+    // Current search criteria
+    {
+      position: { lat: searchParams.pickupPoint.latitude, lng: searchParams.pickupPoint.longitude },
+      title: 'Your Requested Pickup',
+      info: 'Your search start point',
+    },
+    {
+      position: { lat: searchParams.destinationPoint.latitude, lng: searchParams.destinationPoint.longitude },
+      title: 'Your Requested Destination',
+      info: 'Your search end point',
+    },
+    // Found rides
+    ...rides.flatMap(ride => [
+      {
+        position: { lat: ride.pickupPoint.latitude, lng: ride.pickupPoint.longitude },
+        title: `${ride.fullName}'s Pickup`,
+        info: `Pickup: ${ride.pickupPoint.placeAddress}`,
+      },
+      {
+        position: { lat: ride.destinationPoint.latitude, lng: ride.destinationPoint.longitude },
+        title: `${ride.fullName}'s Destination`,
+        info: `Destination: ${ride.destinationPoint.placeAddress}`,
+      }
+    ])
+  ];
 
   return (
     <Layout>
@@ -188,7 +209,7 @@ export default function FindRides() {
         </Card>
 
         {/* Map View of Found Rides */}
-        {rides.length > 0 && mapMarkers.length > 0 && (
+        {mapMarkers.length > 0 && (
           <Card className="rounded-xl shadow-none">
             <CardHeader>
               <CardTitle className="text-lg">Available Rides Map</CardTitle>
@@ -196,7 +217,8 @@ export default function FindRides() {
             <CardContent>
               <GoogleMap
                 markers={mapMarkers}
-                className="w-full h-64 rounded-lg border"
+                routeGeometry={rides.length > 0 ? rides[0].routeGeometry : null}
+                className="w-full h-96 rounded-lg border"
               />
             </CardContent>
           </Card>

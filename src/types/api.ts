@@ -105,6 +105,7 @@ export interface TripBasicInfoDTO {
   availableSeats: number;
   phoneNumber: string;
   requestedSeats: number;
+  routeGeometry?: RouteGeometry | null;
 }
 
 export interface RideBasicInfoDTO {
@@ -266,4 +267,44 @@ export interface VehicleRegisterRequestDTO {
   vehicleType: string;
   vehicleColor: string;
   seatingCapacity?: string;
+}
+
+export interface TripSearchCriteriaDTO {
+  sourceLatitude: number;
+  sourceLongitude: number;
+  sourceRadiusKm?: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
+  destinationRadiusKm?: number;
+  earliestDepartureTime?: string;
+  latestDepartureTime?: string;
+  requestedSeats?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  carType?: string;
+  minAvailableSeats?: number;
+}
+
+export interface MatchingTripResponse {
+  tripId: string;
+  tripStatus: string;
+  vehicleNumber: string;
+  carType: string;
+  driverId: string;
+  sourceAddress: Points;
+  destinationAddress: Points;
+  sourceLocation: { x: number; y: number };
+  destinationLocation: { x: number; y: number };
+  totalSeats: number;
+  bookedSeats: number;
+  tripStartDateTimeUTC: string;
+  tripTimezone: string;
+  routeGeometry: RouteGeometry;
+  routeDistance: number;
+  routeDuration: number;
+  pricePerSeat: number;
+  joinedBookingIds: string[] | null;
+  createdAt: string;
+  updatedAt: string;
+  version?: number | null;
 }

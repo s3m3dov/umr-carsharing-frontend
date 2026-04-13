@@ -130,15 +130,24 @@ export default function GoogleMap({
       });
 
       // Adjust map bounds to include markers and polyline points
-      if (markers.length > 0) {
+      const hasRoute = routeGeometry?.type === 'LineString' && routeGeometry.coordinates.length >= 2;
+      if (markers.length > 0 || hasRoute) {
         const bounds = new window.google.maps.LatLngBounds();
-        markers.forEach(marker => bounds.extend(marker.position));
-
-        if (routeGeometry?.type === 'LineString' && routeGeometry.coordinates.length >= 2) {
-          routeGeometry.coordinates.forEach(([lng, lat]) => bounds.extend({ lat, lng }));
+        
+        if (markers.length > 0) {
+          markers.forEach(markerData => bounds.extend(markerData.position));
         }
 
-        mapInstanceRef.current.fitBounds(bounds);
+        if (hasRoute) {
+          routeGeometry!.coordinates.forEach(([lng, lat]) => bounds.extend({ lat, lng }));
+        }
+
+        mapInstanceRef.current.fitBounds(bounds, {
+          top: 50,
+          right: 50,
+          bottom: 50,
+          left: 50,
+        });
       }
     }
   }, [markers, isLoaded, routeGeometry]);
@@ -168,10 +177,16 @@ export default function GoogleMap({
 
   useEffect(() => {
     if (mapInstanceRef.current && isLoaded) {
-      mapInstanceRef.current.setCenter(center);
-      mapInstanceRef.current.setZoom(zoom);
+      // If we have markers or route, fitBounds will handle the view.
+      // Only manually set center/zoom if no data is provided or if they were explicitly changed from defaults.
+      const hasData = markers.length > 0 || (routeGeometry?.type === 'LineString' && routeGeometry.coordinates.length >= 2);
+      
+      if (!hasData || (center.lat !== 0 || center.lng !== 0 || zoom !== 2)) {
+        mapInstanceRef.current.setCenter(center);
+        mapInstanceRef.current.setZoom(zoom);
+      }
     }
-  }, [center, zoom, isLoaded]);
+  }, [center, zoom, isLoaded, markers.length, routeGeometry]);
 
   // Cleanup on unmount
   useEffect(() => {

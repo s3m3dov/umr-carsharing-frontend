@@ -10,6 +10,8 @@ import type {
   TripBasicInfoDTO,
   ReviewResponse,
   ReviewRequestDTO,
+  TripSearchCriteriaDTO,
+  MatchingTripResponse,
 } from '@/types/api';
 
 function toOptionalString(value: unknown): string | null {
@@ -24,54 +26,38 @@ function toOptionalString(value: unknown): string | null {
   return null;
 }
 
-function buildRideSearchParams(criteria: RideDTO): URLSearchParams {
+function buildAdvancedRideSearchParams(criteria: RideDTO | TripSearchCriteriaDTO): URLSearchParams {
   const params = new URLSearchParams();
 
-  const pickupLat = toOptionalString(criteria.pickupPoint?.latitude);
-  const pickupLng = toOptionalString(criteria.pickupPoint?.longitude);
-  const pickupAddress = toOptionalString(criteria.pickupPoint?.placeAddress);
-  const destinationLat = toOptionalString(criteria.destinationPoint?.latitude);
-  const destinationLng = toOptionalString(criteria.destinationPoint?.longitude);
-  const destinationAddress = toOptionalString(criteria.destinationPoint?.placeAddress);
-  const requestedSeats = toOptionalString(criteria.requestedSeats);
-  const rideStartTime = toOptionalString(criteria.rideStartTime);
-
-  if (pickupLat) {
-    params.set('pickupPoint.latitude', pickupLat);
-    params.set('pickupLatitude', pickupLat);
-  }
-  if (pickupLng) {
-    params.set('pickupPoint.longitude', pickupLng);
-    params.set('pickupLongitude', pickupLng);
-  }
-  if (pickupAddress) {
-    params.set('pickupPoint.placeAddress', pickupAddress);
-    params.set('pickupAddress', pickupAddress);
-  }
-
-  if (destinationLat) {
-    params.set('destinationPoint.latitude', destinationLat);
-    params.set('destinationLatitude', destinationLat);
-  }
-  if (destinationLng) {
-    params.set('destinationPoint.longitude', destinationLng);
-    params.set('destinationLongitude', destinationLng);
-  }
-  if (destinationAddress) {
-    params.set('destinationPoint.placeAddress', destinationAddress);
-    params.set('destinationAddress', destinationAddress);
-  }
-
-  if (requestedSeats) {
-    params.set('requestedSeats', requestedSeats);
-  }
-  if (rideStartTime) {
-    params.set('rideStartTime', rideStartTime);
-  }
-
-  const tripId = toOptionalString(criteria.tripId);
-  if (tripId) {
-    params.set('tripId', tripId);
+  if ('pickupPoint' in criteria) {
+    // Handling RideDTO
+    if (criteria.pickupPoint?.latitude) params.set('sourceLatitude', criteria.pickupPoint.latitude.toString());
+    if (criteria.pickupPoint?.longitude) params.set('sourceLongitude', criteria.pickupPoint.longitude.toString());
+    if (criteria.destinationPoint?.latitude) params.set('destinationLatitude', criteria.destinationPoint.latitude.toString());
+    if (criteria.destinationPoint?.longitude) params.set('destinationLongitude', criteria.destinationPoint.longitude.toString());
+    
+    if (criteria.rideStartTime) {
+      params.set('earliestDepartureTime', criteria.rideStartTime);
+    }
+    if (criteria.requestedSeats) {
+      params.set('requestedSeats', criteria.requestedSeats.toString());
+      params.set('minAvailableSeats', criteria.requestedSeats.toString());
+    }
+  } else {
+    // Handling TripSearchCriteriaDTO
+    if (criteria.sourceLatitude) params.set('sourceLatitude', criteria.sourceLatitude.toString());
+    if (criteria.sourceLongitude) params.set('sourceLongitude', criteria.sourceLongitude.toString());
+    if (criteria.sourceRadiusKm) params.set('sourceRadiusKm', criteria.sourceRadiusKm.toString());
+    if (criteria.destinationLatitude) params.set('destinationLatitude', criteria.destinationLatitude.toString());
+    if (criteria.destinationLongitude) params.set('destinationLongitude', criteria.destinationLongitude.toString());
+    if (criteria.destinationRadiusKm) params.set('destinationRadiusKm', criteria.destinationRadiusKm.toString());
+    if (criteria.earliestDepartureTime) params.set('earliestDepartureTime', criteria.earliestDepartureTime);
+    if (criteria.latestDepartureTime) params.set('latestDepartureTime', criteria.latestDepartureTime);
+    if (criteria.requestedSeats) params.set('requestedSeats', criteria.requestedSeats.toString());
+    if (criteria.minPrice) params.set('minPrice', criteria.minPrice.toString());
+    if (criteria.maxPrice) params.set('maxPrice', criteria.maxPrice.toString());
+    if (criteria.carType) params.set('carType', criteria.carType);
+    if (criteria.minAvailableSeats) params.set('minAvailableSeats', criteria.minAvailableSeats.toString());
   }
 
   return params;
@@ -89,6 +75,22 @@ function normalizePassengerRide(ride: PassengerRideResponse): RideBasicInfoDTO {
     tripStatus: ride.rideStatus,
     vehicleNumber: ride.vehicleNumber ?? '',
     routeGeometry: ride.routeGeometry ?? null,
+  };
+}
+
+function normalizeMatchingTrip(trip: MatchingTripResponse): TripBasicInfoDTO {
+  return {
+    userId: trip.driverId,
+    tripId: trip.tripId,
+    fullName: trip.driverId.split('@')[0], // Fallback if name is missing
+    vehicleNumber: trip.vehicleNumber,
+    pickupPoint: trip.sourceAddress,
+    destinationPoint: trip.destinationAddress,
+    tripStartTime: trip.tripStartDateTimeUTC,
+    availableSeats: trip.totalSeats - trip.bookedSeats,
+    phoneNumber: '', // Not provided in search result
+    requestedSeats: 1, // Default placeholder
+    routeGeometry: trip.routeGeometry ?? null,
   };
 }
 
@@ -119,11 +121,11 @@ export const passengerApi = {
   cancelRide: (_userId: string, data: CancelRideRequestDTO & { rideId?: string }) =>
     apiClient.post<string>(ROUTES.passenger.cancelRide, data),
 
-  findRides: (criteria: RideDTO) => {
-    const searchParams = buildRideSearchParams(criteria);
-    return apiClient.get<TripBasicInfoDTO[]>(
-      `${ROUTES.passenger.searchRoutes}?${searchParams}`,
-    );
+  findRides: (criteria: RideDTO | TripSearchCriteriaDTO) => {
+    const searchParams = buildAdvancedRideSearchParams(criteria);
+    return apiClient
+      .get<MatchingTripResponse[]>(`${ROUTES.passenger.searchRoutes}?${searchParams}`)
+      .then((trips) => trips.map(normalizeMatchingTrip));
   },
 
   // Review endpoints
