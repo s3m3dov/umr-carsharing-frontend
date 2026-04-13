@@ -13,6 +13,7 @@ import type {
   TripSearchCriteriaDTO,
   MatchingTripResponse,
   BookRideRequestDTO,
+  PassengerProfileResponse,
 } from '@/types/api';
 
 function toOptionalString(value: unknown): string | null {
@@ -115,9 +116,20 @@ function normalizeMatchingTrip(trip: MatchingTripResponse): TripBasicInfoDTO {
   };
 }
 
+function normalizePassengerProfile(profile: PassengerProfileResponse): UserInfoDTO {
+  return {
+    userId: profile.userId,
+    fullName: `${profile.firstName} ${profile.lastName}`,
+    emailId: profile.email,
+    phoneNumber: profile.phoneNumber,
+    age: profile.age,
+  };
+}
+
 export const passengerApi = {
   getProfile: (userId: string) =>
-    apiClient.get<UserInfoDTO>(ROUTES.user.passengerProfile(userId)),
+    apiClient.get<PassengerProfileResponse>(ROUTES.user.passengerProfile(userId))
+      .then(normalizePassengerProfile),
 
   // Rides — normalised to RideBasicInfoDTO for MyRides compatibility
   getUpcomingRides: (passengerId: string) =>

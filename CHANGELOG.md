@@ -13,6 +13,38 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+## [v0.3.8] – Full Platform Polish & Visual Depth (2026-04-13)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Added
+
+- **Interactive Selection Logic** — Implemented a persistent selection state in `FindRides`; selecting a trip instantly updates the map view and route geometry.
+- **Enhanced Map Visualization** — Added destination markers and user-search-point markers to provide a complete visual comparison of trips.
+- **Smart Address Fallbacks** — Implemented a resilient normalization layer that automatically falls back to formatted coordinates if human-readable place names are missing in the API response.
+- **Driver-Passenger Transparency** — Drivers can now see a dedicated list of passengers (including full names and seat counts) for any given trip.
+
+### Changed
+
+- **Global Visual Identity** — Transitioned from plain white to a professional off-white (`zinc-50`) background, creating better visual hierarchy and reducing eye strain.
+- **Brand Consolidation** — Fully migrated all internal and external references from "Kamilli Ride" to **"Kamili Ride"**.
+- **Split-Pane UI Architecture** — Overhauled the primary passenger and driver workflows into a side-by-side layout, maximizing screen real estate for map-heavy tasks.
+- **Role-Centric Profiles** — Re-engineered profile fetching to hit specific `/api/passengers` and `/api/drivers` endpoints based on user context.
+- **Booking Data Quality** — Updated the booking workflow to explicitly send `placeAddress` strings, ensuring high-quality location data for future trip history.
+
+### Fixed
+
+- **Map Viewport Issues** — Resolved issues where maps would initialize at (0,0); implemented auto-fitting bounds with consistent internal padding.
+- **Form Component Balance** — Fixed the "right-heavy" native calendar inputs by adding a custom left-aligned icon and adjusting internal padding.
+- **Price Consistency** — Replaced hardcoded pricing with dynamic `pricePerSeat` data across the dashboard and search results.
+
+### Removed
+
+- **Ride Tracking Feature** — Deprecated and removed the ride tracking module to focus on the core booking and offering flows.
+- **Legacy Components** — Deleted `RideBooking.tsx` and `CreateTrip.tsx` to simplify the codebase and reduce bundle size.
+
+---
+
 ## [v0.3.7] – UI Modernization & Advanced Search (2026-04-13)
 
 **Author:** s3m3dov (Hikmat Samadov)

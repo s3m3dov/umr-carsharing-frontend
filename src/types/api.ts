@@ -222,6 +222,17 @@ export interface DriverProfileResponse {
   updatedAt: string;
 }
 
+export interface PassengerProfileResponse {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  age: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface JoinRideResponseDTO {
   rideJoined: boolean;
   errMsg?: string;
