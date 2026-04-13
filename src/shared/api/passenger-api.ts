@@ -12,6 +12,7 @@ import type {
   ReviewRequestDTO,
   TripSearchCriteriaDTO,
   MatchingTripResponse,
+  BookRideRequestDTO,
 } from '@/types/api';
 
 function toOptionalString(value: unknown): string | null {
@@ -109,10 +110,7 @@ export const passengerApi = {
       .get<PassengerRideResponse[]>(ROUTES.passenger.rideHistory(passengerId))
       .then((rides) => rides.map(normalizePassengerRide)),
 
-  joinTrip: (_userId: string, data: RideDTO) =>
-    apiClient.post<string>(ROUTES.passenger.bookRideWithApproval, data),
-
-  bookRide: (data: object) =>
+  bookRide: (data: BookRideRequestDTO) =>
     apiClient.post<string>(ROUTES.passenger.bookRide, data),
 
   bookRideWithApproval: (data: object) =>

@@ -120,15 +120,22 @@ export default function RideBooking() {
 
     setIsJoining(trip.tripId);
     try {
-      const rideData: RideDTO = {
+      const rideData = {
         tripId: trip.tripId,
-        pickupPoint,
-        destinationPoint,
-        rideStartTime: new Date(rideStartTime).toISOString(),
-        requestedSeats,
+        driverId: trip.userId,
+        pickupPoint: {
+          latitude: trip.pickupPoint.latitude,
+          longitude: trip.pickupPoint.longitude,
+        },
+        destinationPoint: {
+          latitude: trip.destinationPoint.latitude,
+          longitude: trip.destinationPoint.longitude,
+        },
+        rideStartTime: trip.tripStartTime,
+        requestedSeats: requestedSeats,
       };
 
-      await userApi.joinTrip(userId!, rideData);
+      await userApi.bookRide(rideData);
       toast({ title: 'Ride Booked!', description: 'You have successfully joined the ride.' });
       navigate('/my-rides');
     } catch (error) {
