@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { passengerApi as userApi } from '@/shared/api/passenger-api';
 import { RideDTO, TripBasicInfoDTO } from '@/types/api';
@@ -7,30 +7,23 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
-import { Search, Users, Car } from 'lucide-react';
+import { Search, Users, Car, MapPin, Clock, Calendar, ChevronRight } from 'lucide-react';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import GoogleMap from '@/components/GoogleMap';
+import { cn } from '@/lib/utils';
 
 export default function FindRides() {
   const { userId } = useAuth();
   const { toast } = useToast();
 
-  // Calculate tomorrow at 12:00 for default value
   const getTomorrowAtNoon = () => {
     const date = new Date();
     date.setDate(date.getDate() + 1);
     date.setHours(12, 0, 0, 0);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return date.toISOString().slice(0, 16);
   };
 
   const [searchParams, setSearchParams] = useState<RideDTO>({
@@ -45,20 +38,25 @@ export default function FindRides() {
       placeAddress: 'Goethe University Frankfurt'
     },
     rideStartTime: new Date(getTomorrowAtNoon()).toISOString(),
-    requestedSeats: 4
+    requestedSeats: 1
   });
+
   const [rides, setRides] = useState<TripBasicInfoDTO[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
 
   const handleSearch = async () => {
     if (!userId) return;
     
     setIsSearching(true);
+    setSelectedTripId(null);
     try {
       const result = await userApi.findRides(searchParams);
       setRides(result);
       if (result.length === 0) {
         toast({ title: 'No rides found', description: 'Try adjusting your search criteria.' });
+      } else {
+        setSelectedTripId(result[0].tripId);
       }
     } catch (error) {
       const message = getBackendErrorMessage(error, 'Failed to search for rides.');
@@ -68,13 +66,13 @@ export default function FindRides() {
     }
   };
 
-  const handleJoinRide = async (tripId: string) => {
+  const handleJoinRide = async (trip: TripBasicInfoDTO) => {
     if (!userId) return;
 
     try {
       const rideData: RideDTO = {
         ...searchParams,
-        tripId
+        tripId: trip.tripId
       };
       
       await userApi.joinTrip(userId!, rideData);
@@ -86,212 +84,247 @@ export default function FindRides() {
     }
   };
 
-  const handlePickupChange = (address: string, lat?: number, lng?: number) => {
-    setSearchParams(prevParams => ({
-      ...prevParams,
-      pickupPoint: {
-        latitude: lat || 0,
-        longitude: lng || 0,
-        placeAddress: address,
-      }
-    }));
-  };
+  const selectedTrip = useMemo(() => 
+    rides.find(r => r.tripId === selectedTripId) || null
+  , [rides, selectedTripId]);
 
-  const handleDestinationChange = (address: string, lat?: number, lng?: number) => {
-    setSearchParams(prevParams => ({
-      ...prevParams,
-      destinationPoint: {
-        latitude: lat || 0,
-        longitude: lng || 0,
-        placeAddress: address,
-      }
-    }));
-  };
-
-
-  // Prepare map markers for found rides
-  const mapMarkers = [
-    // Current search criteria
-    {
-      position: { lat: searchParams.pickupPoint.latitude, lng: searchParams.pickupPoint.longitude },
-      title: 'Your Requested Pickup',
-      info: 'Your search start point',
-    },
-    {
-      position: { lat: searchParams.destinationPoint.latitude, lng: searchParams.destinationPoint.longitude },
-      title: 'Your Requested Destination',
-      info: 'Your search end point',
-    },
-    // Found rides
-    ...rides.flatMap(ride => [
+  const mapMarkers = useMemo(() => {
+    if (selectedTrip) {
+      return [
+        {
+          position: { lat: selectedTrip.pickupPoint.latitude, lng: selectedTrip.pickupPoint.longitude },
+          title: 'Pickup',
+          info: `<strong>Pickup:</strong> ${selectedTrip.pickupPoint.placeAddress}`,
+        },
+        {
+          position: { lat: selectedTrip.destinationPoint.latitude, lng: selectedTrip.destinationPoint.longitude },
+          title: 'Destination',
+          info: `<strong>Destination:</strong> ${selectedTrip.destinationPoint.placeAddress}`,
+        }
+      ];
+    }
+    return [
       {
-        position: { lat: ride.pickupPoint.latitude, lng: ride.pickupPoint.longitude },
-        title: `${ride.fullName}'s Pickup`,
-        info: `Pickup: ${ride.pickupPoint.placeAddress}`,
+        position: { lat: searchParams.pickupPoint.latitude, lng: searchParams.pickupPoint.longitude },
+        title: 'Search Pickup',
       },
       {
-        position: { lat: ride.destinationPoint.latitude, lng: ride.destinationPoint.longitude },
-        title: `${ride.fullName}'s Destination`,
-        info: `Destination: ${ride.destinationPoint.placeAddress}`,
+        position: { lat: searchParams.destinationPoint.latitude, lng: searchParams.destinationPoint.longitude },
+        title: 'Search Destination',
       }
-    ])
-  ];
+    ];
+  }, [selectedTrip, searchParams]);
 
   return (
     <Layout>
-      <div className="p-6 space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Find Rides</h1>
-          <p className="text-sm text-muted-foreground">Search for available carpool rides</p>
-        </div>
-
-        <Card className="rounded-xl shadow-none">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Search className="h-5 w-5" />
-              Search Criteria
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="pickup-location" className="text-xs">Departure Location</Label>
-                <PlacesAutocomplete
-                    id="pickup-location"
-                    value={searchParams.pickupPoint.placeAddress}
-                    onChange={handlePickupChange}
-                    placeholder="Enter departure location"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="destination-location" className="text-xs">Destination</Label>
-                <PlacesAutocomplete
-                    id="destination-location"
-                    value={searchParams.destinationPoint.placeAddress}
-                    onChange={handleDestinationChange}
-                    placeholder="Enter destination"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="datetime" className="text-xs">Departure Time</Label>
-                <Input
-                  id="datetime"
-                  type="datetime-local"
-                  value={searchParams.rideStartTime.slice(0, 16)}
-                  onChange={(e) => setSearchParams({
-                    ...searchParams,
-                    rideStartTime: new Date(e.target.value).toISOString()
-                  })}
-                  className="rounded-lg"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="seats" className="text-xs">Seats Required</Label>
-                <Input
-                  id="seats"
-                  type="number"
-                  min="1"
-                  max="4"
-                  value={searchParams.requestedSeats}
-                  onChange={(e) => setSearchParams({
-                    ...searchParams,
-                    requestedSeats: parseInt(e.target.value) || 1
-                  })}
-                  className="rounded-lg"
-                />
-              </div>
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden bg-background">
+        
+        {/* Left Side: Search & Results */}
+        <div className="w-full lg:w-[480px] flex flex-col border-r overflow-y-auto">
+          <div className="p-6 space-y-6">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight">Find a Ride</h1>
+              <p className="text-sm text-muted-foreground">Enter your details to see available carpools</p>
             </div>
-            <Button onClick={handleSearch} disabled={isSearching} className="w-full bg-primary hover:bg-primary/90 py-4 rounded-xl font-bold">
-              <Search className="h-4 w-4 mr-2" />
-              {isSearching ? 'Searching...' : 'Search Rides'}
-            </Button>
-          </CardContent>
-        </Card>
 
-        {/* Map View of Found Rides */}
-        {mapMarkers.length > 0 && (
-          <Card className="rounded-xl shadow-none">
-            <CardHeader>
-              <CardTitle className="text-lg">Available Rides Map</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <GoogleMap
-                markers={mapMarkers}
-                routeGeometry={rides.length > 0 ? rides[0].routeGeometry : null}
-                className="w-full h-96 rounded-lg border"
-              />
-            </CardContent>
-          </Card>
-        )}
+            <div className="space-y-4 p-4 rounded-xl border bg-muted/30">
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Departure</Label>
+                  <PlacesAutocomplete
+                    value={searchParams.pickupPoint.placeAddress}
+                    onChange={(addr, lat, lng) => setSearchParams(p => ({
+                      ...p, pickupPoint: { latitude: lat || 0, longitude: lng || 0, placeAddress: addr }
+                    }))}
+                    placeholder="Where from?"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Destination</Label>
+                  <PlacesAutocomplete
+                    value={searchParams.destinationPoint.placeAddress}
+                    onChange={(addr, lat, lng) => setSearchParams(p => ({
+                      ...p, destinationPoint: { latitude: lat || 0, longitude: lng || 0, placeAddress: addr }
+                    }))}
+                    placeholder="Where to?"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Time</Label>
+                    <Input
+                      type="datetime-local"
+                      value={searchParams.rideStartTime.slice(0, 16)}
+                      onChange={(e) => setSearchParams(p => ({ ...p, rideStartTime: new Date(e.target.value).toISOString() }))}
+                      className="h-10 bg-background"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Seats</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={searchParams.requestedSeats}
+                      onChange={(e) => setSearchParams(p => ({ ...p, requestedSeats: parseInt(e.target.value) || 1 }))}
+                      className="h-10 bg-background"
+                    />
+                  </div>
+                </div>
+              </div>
+              <Button 
+                onClick={handleSearch} 
+                disabled={isSearching} 
+                className="w-full h-11 font-semibold rounded-lg shadow-sm transition-all"
+              >
+                {isSearching ? 'Searching...' : 'Search Rides'}
+              </Button>
+            </div>
 
-        {rides.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Available Rides</h2>
-            {rides.map((ride) => (
-              <Card key={ride.tripId} className="group rounded-xl shadow-none hover:shadow-md hover:-translate-y-px hover:border-border/80 transition-all duration-150">
-                <CardContent className="p-0">
-                  <div className="flex flex-col md:flex-row md:items-stretch">
-                    {/* Date/Time Sidebar */}
-                    <div className="bg-muted/30 md:w-28 p-4 flex md:flex-col justify-between md:justify-center items-center border-b md:border-b-0 md:border-r text-center gap-1">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-                        {new Date(ride.tripStartTime).toLocaleDateString(undefined, { month: 'short' })}
-                      </div>
-                      <div className="text-xl font-bold text-foreground">
-                        {new Date(ride.tripStartTime).getDate()}
-                      </div>
-                      <div className="text-[10px] font-medium text-muted-foreground">
-                        {new Date(ride.tripStartTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-
-                    {/* Main Content */}
-                    <div className="flex-1 p-4 space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Car className="h-3.5 w-3.5" />
-                            <span>{ride.vehicleNumber}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
-                            <span>{ride.availableSeats} seats available</span>
+            {rides.length > 0 ? (
+              <div className="space-y-3">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+                  Found {rides.length} matching rides
+                </h2>
+                {rides.map((ride) => (
+                  <Card 
+                    key={ride.tripId} 
+                    className={cn(
+                      "cursor-pointer transition-all duration-200 border-2",
+                      selectedTripId === ride.tripId 
+                        ? "border-primary bg-primary/5 shadow-md" 
+                        : "border-transparent hover:border-muted-foreground/20 hover:bg-muted/20 shadow-none"
+                    )}
+                    onClick={() => setSelectedTripId(ride.tripId)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="space-y-1">
+                          <p className="font-bold text-sm">{ride.fullName}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                            <span className="flex items-center gap-1"><Car className="h-3 w-3" /> {ride.vehicleNumber}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {ride.availableSeats} left</span>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          onClick={() => handleJoinRide(ride.tripId)}
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-primary">€10</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-medium">per seat</p>
+                        </div>
+                      </div>
+
+                      <div className="relative pl-4 space-y-3 border-l-2 border-dashed border-muted-foreground/30 ml-1">
+                        <div className="relative">
+                          <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background" />
+                          <p className="text-[11px] font-semibold leading-none truncate">{ride.pickupPoint.placeAddress}</p>
+                          <p className="text-[9px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                            <Clock className="h-2.5 w-2.5" /> 
+                            {new Date(ride.tripStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        <div className="relative">
+                          <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-rose-500 border-2 border-background" />
+                          <p className="text-[11px] font-semibold leading-none truncate">{ride.destinationPoint.placeAddress}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 text-[11px] px-3 font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTripId(ride.tripId);
+                          }}
+                        >
+                          View Route
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="h-8 text-[11px] px-4 font-bold"
                           disabled={ride.availableSeats < searchParams.requestedSeats}
-                          className="font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleJoinRide(ride);
+                          }}
                         >
                           Join Ride
                         </Button>
                       </div>
-
-                      <div className="relative pl-5 space-y-3">
-                        <div className="absolute left-[4px] top-[6px] bottom-[6px] w-0.5 bg-border" />
-                        <div className="relative">
-                          <div className="absolute -left-[23px] top-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-background" />
-                          <p className="text-sm font-semibold leading-tight line-clamp-1">{ride.pickupPoint.placeAddress}</p>
-                        </div>
-                        <div className="relative">
-                          <div className="absolute -left-[23px] top-1 w-2 h-2 rounded-full bg-rose-500 ring-4 ring-background" />
-                          <p className="text-sm font-semibold leading-tight line-clamp-1">{ride.destinationPoint.placeAddress}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                        <span className="font-medium text-foreground">{ride.fullName}</span>
-                        <span>·</span>
-                        <span>{ride.phoneNumber}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : !isSearching && rides.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 bg-muted/10 rounded-2xl border border-dashed">
+                <div className="p-3 bg-muted rounded-full">
+                  <Search className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold">No rides found yet</p>
+                  <p className="text-xs text-muted-foreground max-w-[200px]">
+                    Adjust your filters or locations to see available trips.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Right Side: Map */}
+        <div className="flex-1 relative bg-muted/5">
+          <GoogleMap
+            markers={mapMarkers}
+            routeGeometry={selectedTrip?.routeGeometry}
+            className="w-full h-full"
+          />
+          
+          {/* Floating selection summary mobile only or overlay */}
+          {selectedTrip && (
+            <div className="absolute bottom-6 left-6 right-6 lg:left-auto lg:right-6 lg:w-80 bg-background/95 backdrop-blur shadow-2xl rounded-2xl border p-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-none text-[9px] uppercase tracking-wider font-bold">Selected Ride</Badge>
+                  <h3 className="font-bold text-sm">{selectedTrip.fullName}'s Trip</h3>
+                </div>
+                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => setSelectedTripId(null)}>
+                  <ChevronRight className="h-4 w-4 rotate-90" />
+                </Button>
+              </div>
+              <Separator className="my-3" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-[11px]">
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{new Date(selectedTrip.tripStartTime).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+                </div>
+                <div className="flex items-center gap-3 text-[11px]">
+                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>{selectedTrip.availableSeats} seats available</span>
+                </div>
+                <Button className="w-full h-9 text-xs font-bold mt-2" onClick={() => handleJoinRide(selectedTrip)}>
+                  Book This Ride Now
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
+  );
+}
+
+function Separator({ className }: { className?: string }) {
+  return <div className={cn("h-px bg-border w-full", className)} />;
+}
+
+function Badge({ children, variant, className }: { children: React.ReactNode, variant?: 'secondary', className?: string }) {
+  return (
+    <span className={cn(
+      "px-2 py-0.5 rounded text-[10px] font-medium border",
+      variant === 'secondary' ? "bg-secondary text-secondary-foreground border-transparent" : "bg-background text-foreground border-border",
+      className
+    )}>
+      {children}
+    </span>
   );
 }
