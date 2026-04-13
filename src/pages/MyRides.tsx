@@ -144,7 +144,7 @@ export default function MyRides() {
 
         <Tabs defaultValue="upcoming" className="space-y-6">
           <TabsList className="bg-muted/50 p-1">
-            <TabsTrigger value="upcoming" className="px-6 text-xs font-semibold">Upcoming</TabsTrigger>
+            <TabsTrigger value="upcoming" className="px-6 text-xs font-semibold">Active</TabsTrigger>
             <TabsTrigger value="history" className="px-6 text-xs font-semibold">History</TabsTrigger>
           </TabsList>
 
@@ -163,7 +163,7 @@ export default function MyRides() {
             ) : (
               <div className="text-center py-12 border-2 border-dashed rounded-xl bg-muted/5">
                 <Car className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">No upcoming rides found.</p>
+                <p className="text-sm text-muted-foreground">No active rides found.</p>
               </div>
             )}
           </TabsContent>

@@ -124,6 +124,8 @@ export interface RideBasicInfoDTO {
   pricePerSeat?: number;
   passengers?: Array<{
     userId: string;
+    firstName?: string;
+    lastName?: string;
     bookedSeats: number;
     pickupLocation: Points;
     dropoffLocation: Points;
@@ -147,6 +149,8 @@ export interface DriverTripResponse {
   bookedSeats: number;
   passengers: Array<{
     userId: string;
+    firstName?: string;
+    lastName?: string;
     bookedSeats: number;
     pickupLocation: Points;
     dropoffLocation: Points;
