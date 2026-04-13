@@ -16,7 +16,8 @@ import {
   MapPin, 
   Car,
   Euro,
-  Info
+  Info,
+  Calendar,
 } from 'lucide-react';
 import { Points, OfferRideDTO } from '@/types/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -177,12 +178,15 @@ export default function RideOffering() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Date & Time</Label>
-                      <Input
-                        type="datetime-local"
-                        value={form.departureTime}
-                        onChange={(e) => setForm(f => ({ ...f, departureTime: e.target.value }))}
-                        className="h-11 rounded-lg border-2"
-                      />
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="datetime-local"
+                          value={form.departureTime}
+                          onChange={(e) => setForm(f => ({ ...f, departureTime: e.target.value }))}
+                          className="h-11 pl-9 rounded-lg border-2"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Seats Available</Label>

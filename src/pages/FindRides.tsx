@@ -162,12 +162,15 @@ export default function FindRides() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Time</Label>
-                    <Input
-                      type="datetime-local"
-                      value={searchParams.rideStartTime.slice(0, 16)}
-                      onChange={(e) => setSearchParams(p => ({ ...p, rideStartTime: new Date(e.target.value).toISOString() }))}
-                      className="h-10 bg-background"
-                    />
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="datetime-local"
+                        value={searchParams.rideStartTime.slice(0, 16)}
+                        onChange={(e) => setSearchParams(p => ({ ...p, rideStartTime: new Date(e.target.value).toISOString() }))}
+                        className="h-10 pl-9 bg-background"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Seats</Label>
