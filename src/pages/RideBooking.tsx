@@ -98,7 +98,7 @@ export default function RideBooking() {
       const rideData: RideDTO = {
         pickupPoint,
         destinationPoint,
-        rideStartTime,
+        rideStartTime: new Date(rideStartTime).toISOString(),
         requestedSeats,
       };
 
@@ -124,7 +124,7 @@ export default function RideBooking() {
         tripId: trip.tripId,
         pickupPoint,
         destinationPoint,
-        rideStartTime,
+        rideStartTime: new Date(rideStartTime).toISOString(),
         requestedSeats,
       };
 
