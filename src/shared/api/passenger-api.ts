@@ -91,6 +91,7 @@ function normalizeMatchingTrip(trip: MatchingTripResponse): TripBasicInfoDTO {
     availableSeats: trip.totalSeats - trip.bookedSeats,
     phoneNumber: '', // Not provided in search result
     requestedSeats: 1, // Default placeholder
+    pricePerSeat: trip.pricePerSeat,
     routeGeometry: trip.routeGeometry ?? null,
   };
 }

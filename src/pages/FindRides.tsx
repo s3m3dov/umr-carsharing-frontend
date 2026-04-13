@@ -217,7 +217,7 @@ export default function FindRides() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-primary">€10</p>
+                          <p className="text-sm font-bold text-primary">€{ride.pricePerSeat || '10'}</p>
                           <p className="text-[10px] text-muted-foreground uppercase font-medium">per seat</p>
                         </div>
                       </div>

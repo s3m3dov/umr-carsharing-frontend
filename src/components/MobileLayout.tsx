@@ -41,7 +41,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
 
   const navigation = [
     { name: 'Home', href: '/dashboard', icon: Home },
-    { name: 'Book Ride', href: '/book-ride', icon: Search },
+    { name: 'Find Ride', href: '/find-rides', icon: Search },
     { name: 'Offer Ride', href: '/offer-ride', icon: Plus },
     { name: 'My Rides', href: '/my-rides', icon: Calendar },
     { name: 'Vehicles', href: '/vehicles', icon: Car },
