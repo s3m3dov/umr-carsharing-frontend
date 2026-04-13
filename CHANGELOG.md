@@ -13,6 +13,38 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+## [v0.3.7] – UI Modernization & Advanced Search (2026-04-13)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Added
+
+- **Advanced Trip Search** — Migrated passenger search to the new `matching-route` endpoint supporting geographic radii, time filters, and seat availability.
+- **Interactive Trip Selection** — In `FindRides`, clicking a trip result now automatically pans and zooms the persistent map to highlight that specific route.
+- **Driver's Passenger List** — Drivers can now view a simplified list of all passengers (Names and Emails) who have booked seats on their trips in the `RideDetail` view.
+- **Coordinate Fallbacks** — Implemented automatic coordinate display fallback for pickup/destination points when human-readable addresses are missing in API responses.
+
+### Changed
+
+- **Brand Refresh** — Renamed the application from "Kamilli Ride" to **"Kamili Ride"** across all UI, metadata, and configuration files.
+- **Modernized Find Rides UI** — Overhauled the passenger search experience with a professional split-pane layout, featuring a searchable sidebar and a full-screen interactive map.
+- **Modernized Offer Ride UI** — Redesigned the driver's ride-offering flow with a split-pane layout and live map preview of the selected route.
+- **Role-Aware Profiles** — Refactored profile fetching to use role-specific backend endpoints (`/api/drivers` and `/api/passengers`) for accurate data retrieval.
+- **Enhanced Booking Workflow** — Updated the ride booking process to send full `placeAddress` data to the backend, ensuring better data quality for future trip views.
+- **Professional Labeling** — Added prominent, high-contrast "DEPARTURE" and "DESTINATION" labels across `MyRides` and `RideDetail` pages.
+
+### Fixed
+
+- **UI Crash Recovery** — Resolved a major "blank screen" crash in the search results by implementing a resilient normalization layer for backend trip data.
+- **Map Fitting Logic** — Fixed an issue where the Google Map would default to coordinates (0,0); it now correctly fits bounds to markers and routes with appropriate padding.
+- **Input Visual Balance** — Balanced the "Date & Time" inputs by adding a custom calendar icon on the left side, mirroring the pricing field's style.
+
+### Removed
+
+- **Legacy Redundancy** — Deleted `RideBooking.tsx` and consolidated all "Offer a Ride" logic into a single modernized `RideOffering.tsx` component, removing the redundant `/create-trip` route.
+
+---
+
 ## [v0.3.6] – Admin Refinement & Bug Fixes (2026-04-12)
 
 **Author:** s3m3dov (Hikmat Samadov)
@@ -67,7 +99,7 @@ and this project adheres to **Semantic Versioning**
 
 ### Changed
 
-- **SEO & Social Metadata** — Updated `index.html` to replace default boilerplate "Lovable" metadata with "Kamilli Ride" branding across title, author, OpenGraph, and Twitter tags.
+- **SEO & Social Metadata** — Updated `index.html` to replace default boilerplate "Lovable" metadata with "Kamili Ride" branding across title, author, OpenGraph, and Twitter tags.
 
 ---
 
@@ -111,7 +143,7 @@ and this project adheres to **Semantic Versioning**
 - **Route geometry DTOs** — `routeGeometry` field added to ride and admin trip DTOs for polyline rendering
 - **Health check & KPI stats** — `useAdminHealth` hook with 5-minute stale time; `useKpiStats` query for Admin Dashboard; error boundary wrapping
 - **Actuator proxy** — `/actuator/health` proxied to API Gateway for service health monitoring
-- **Kamilli Ride branding** — app shell title and branding updated across the application
+- **Kamili Ride branding** — app shell title and branding updated across the application
 
 ### Changed
 

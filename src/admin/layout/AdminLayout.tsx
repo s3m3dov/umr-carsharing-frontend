@@ -56,7 +56,7 @@ export default function AdminLayout() {
             <BrandIcon className="h-7 w-7 rounded-lg" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Kamilli Ride
+                Kamili Ride
               </p>
               <p className="text-base font-bold">Admin Panel</p>
             </div>

@@ -69,7 +69,7 @@ export default function Layout({ children }: LayoutProps) {
             <BrandIcon className="h-7 w-7 rounded-lg" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground leading-none">
-                Kamilli Ride
+                Kamili Ride
               </p>
               <p className="text-base font-bold leading-tight">{panelLabel}</p>
             </div>
@@ -97,7 +97,7 @@ export default function Layout({ children }: LayoutProps) {
             <BrandIcon className="h-7 w-7 rounded-lg" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Kamilli Ride
+                Kamili Ride
               </p>
               <p className="text-base font-bold">{panelLabel}</p>
             </div>

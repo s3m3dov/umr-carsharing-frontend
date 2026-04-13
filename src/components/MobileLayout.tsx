@@ -51,12 +51,12 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
       {/* Mobile Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50 px-4 py-3">
+      <header className="bg-card/95 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <BrandIcon className="h-10 w-10 shadow-lg" />
             <div>
-              <h1 className="text-xl font-bold text-primary">Kamilli Ride</h1>
+              <h1 className="text-xl font-bold text-primary">Kamili Ride</h1>
               <p className="text-xs text-muted-foreground">Share every journey</p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 top-[73px]">
-          <div className="bg-white/95 backdrop-blur-sm w-full h-full pt-6">
+          <div className="bg-card/95 backdrop-blur-sm w-full h-full pt-6">
             <nav className="px-4 space-y-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
@@ -150,7 +150,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border/50 px-4 py-2 z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border/50 px-4 py-2 z-30">
         <div className="flex justify-around items-center">
           {navigation.slice(0, 5).map((item) => {
             const Icon = item.icon;

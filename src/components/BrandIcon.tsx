@@ -5,7 +5,7 @@ interface BrandIconProps {
   alt?: string;
 }
 
-export default function BrandIcon({ className, alt = 'Kamilli Ride' }: BrandIconProps) {
+export default function BrandIcon({ className, alt = 'Kamili Ride' }: BrandIconProps) {
   return (
     <img
       src="/carsharing-favicon.svg"

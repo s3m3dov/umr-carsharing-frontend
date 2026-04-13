@@ -131,12 +131,12 @@ export default function FindRides() {
         pickupPoint: {
           latitude: trip.pickupPoint.latitude,
           longitude: trip.pickupPoint.longitude,
-          placeAddress: trip.pickupPoint.placeAddress,
+          placeAddress: trip.pickupPoint.placeAddress || searchParams.pickupAddress,
         },
         destinationPoint: {
           latitude: trip.destinationPoint.latitude,
           longitude: trip.destinationPoint.longitude,
-          placeAddress: trip.destinationPoint.placeAddress,
+          placeAddress: trip.destinationPoint.placeAddress || searchParams.destinationAddress,
         },
         rideStartTime: trip.tripStartTime,
         requestedSeats: searchParams.requestedSeats || 1,
