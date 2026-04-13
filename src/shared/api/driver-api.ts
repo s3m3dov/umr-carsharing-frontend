@@ -29,9 +29,20 @@ function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
   };
 }
 
+function normalizeDriverProfile(profile: DriverProfileResponse): UserInfoDTO {
+  return {
+    userId: profile.userId,
+    fullName: `${profile.firstName} ${profile.lastName}`,
+    emailId: profile.email,
+    phoneNumber: profile.phoneNumber,
+    age: profile.age,
+  };
+}
+
 export const driverApi = {
   getProfile: (userId: string) =>
-    apiClient.get<UserInfoDTO>(ROUTES.user.profile(userId)),
+    apiClient.get<DriverProfileResponse>(ROUTES.user.driverProfile(userId))
+      .then(normalizeDriverProfile),
 
   getDriverProfile: (userId: string) =>
     apiClient.get<DriverProfileResponse>(ROUTES.user.driverProfile(userId)),
