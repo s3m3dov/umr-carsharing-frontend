@@ -105,6 +105,7 @@ export interface TripBasicInfoDTO {
   availableSeats: number;
   phoneNumber: string;
   requestedSeats: number;
+  pricePerSeat?: number;
   routeGeometry?: RouteGeometry | null;
 }
 

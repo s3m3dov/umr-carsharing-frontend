@@ -19,7 +19,6 @@ import FindRides from './pages/FindRides';
 
 // Feature pages — driver
 import RideOffering from './pages/RideOffering';
-import CreateTrip from './pages/CreateTrip';
 import Vehicles from './pages/Vehicles';
 
 // Feature pages — shared
@@ -133,7 +132,6 @@ function App() {
 
               {/* Driver-only feature pages */}
               <Route path="/offer-ride"  element={<RoleRouteGuard requiredRole="DRIVER"><RideOffering /></RoleRouteGuard>} />
-              <Route path="/create-trip" element={<RoleRouteGuard requiredRole="DRIVER"><CreateTrip /></RoleRouteGuard>} />
               <Route path="/vehicles"    element={<RoleRouteGuard requiredRole="DRIVER"><Vehicles /></RoleRouteGuard>} />
 
               {/* Shared feature pages (any authenticated user) */}

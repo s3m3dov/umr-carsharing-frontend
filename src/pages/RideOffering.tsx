@@ -1,9 +1,9 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { driverApi as userApi } from '@/shared/api/driver-api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,299 +13,271 @@ import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import Layout from '@/components/Layout';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { 
-  Plus, 
   MapPin, 
-  Clock, 
-  Users, 
   Car,
-  CheckCircle
+  Euro,
+  Info
 } from 'lucide-react';
-import { Points, OfferRideDTO, VehicleResponseDTO } from '@/types/api';
-import { useQuery } from '@tanstack/react-query';
+import { Points, OfferRideDTO } from '@/types/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import GoogleMap from '@/components/GoogleMap';
+import { cn } from '@/lib/utils';
 
 export default function RideOffering() {
   const { userId } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Calculate tomorrow at 12:00 for default value
   const getTomorrowAtNoon = () => {
     const date = new Date();
     date.setDate(date.getDate() + 1);
     date.setHours(12, 0, 0, 0);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return date.toISOString().slice(0, 16);
   };
 
-  const [sourceAddress, setSourceAddress] = useState<Points | null>({
-    latitude: 50.8093,
-    longitude: 8.7707,
-    placeAddress: 'Philipps University of Marburg'
+  const [form, setForm] = useState({
+    source: {
+      latitude: 50.8093,
+      longitude: 8.7707,
+      placeAddress: 'Philipps University of Marburg'
+    } as Points,
+    destination: {
+      latitude: 50.1272,
+      longitude: 8.6654,
+      placeAddress: 'Goethe University Frankfurt'
+    } as Points,
+    departureTime: getTomorrowAtNoon(),
+    seats: 4,
+    price: 10,
+    vehicleNumber: ''
   });
-  const [destinationAddress, setDestinationAddress] = useState<Points | null>({
-    latitude: 50.1272,
-    longitude: 8.6654,
-    placeAddress: 'Goethe University Frankfurt'
-  });
-  const [sourceAddressStr, setSourceAddressStr] = useState('Philipps University of Marburg');
-  const [destinationAddressStr, setDestinationAddressStr] = useState('Goethe University Frankfurt');
-  const [tripStartDateTime, setTripStartDateTime] = useState(getTomorrowAtNoon());
-  const [totalSeats, setTotalSeats] = useState(4);
-  const [pricePerSeat, setPricePerSeat] = useState(5);
-  const [selectedVehicle, setSelectedVehicle] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
 
-  // Fetch user vehicles
-  const { data: vehiclesResponse } = useQuery({
+  const { data: vehicles = [] } = useQuery({
     queryKey: ['vehicles', userId],
     queryFn: () => userApi.getVehicles(userId!),
     enabled: !!userId,
   });
 
-  const vehicles = vehiclesResponse || [];
+  const createTripMutation = useMutation({
+    mutationFn: (data: OfferRideDTO) => userApi.createTrip(userId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
+      toast({ title: 'Trip created!', description: 'Your ride is now available for booking.' });
+      navigate('/my-rides');
+    },
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to create trip.');
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+    },
+  });
 
   const handleVehicleChange = (value: string) => {
-    setSelectedVehicle(value);
-    const vehicle = vehicles.find(v => v.value === value);
-    if (vehicle?.seatingCapacity) {
-      const capacity = parseInt(vehicle.seatingCapacity);
-      setTotalSeats(capacity);
-    }
+    const v = vehicles.find(v => v.value === value);
+    setForm(prev => ({
+      ...prev,
+      vehicleNumber: value,
+      seats: v?.seatingCapacity ? parseInt(v.seatingCapacity) : prev.seats
+    }));
   };
 
-  const handleSourceChange = (address: string, lat?: number, lng?: number) => {
-    setSourceAddressStr(address);
-    if (lat !== undefined && lng !== undefined) {
-      setSourceAddress({
-        latitude: lat,
-        longitude: lng,
-        placeAddress: address
-      });
-    }
-  };
-
-  const handleDestinationChange = (address: string, lat?: number, lng?: number) => {
-    setDestinationAddressStr(address);
-    if (lat !== undefined && lng !== undefined) {
-      setDestinationAddress({
-        latitude: lat,
-        longitude: lng,
-        placeAddress: address
-      });
-    }
-  };
-
-  const handleCreateTrip = async () => {
-    if (!sourceAddress || !destinationAddress || !tripStartDateTime || !selectedVehicle) {
-      toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive',
-      });
+  const handleSubmit = () => {
+    if (!form.vehicleNumber || !form.source.placeAddress || !form.destination.placeAddress) {
+      toast({ title: 'Missing Info', description: 'Please fill in all required fields.', variant: 'destructive' });
       return;
     }
 
-    setIsCreating(true);
-    try {
-      const tripData: OfferRideDTO = {
-        vehicleNumber: selectedVehicle,
-        sourceAddress,
-        destinationAddress,
-        tripStartDateTime: new Date(tripStartDateTime).toISOString(),
-        totalSeats,
-        pricePerSeat,
-      };
-
-      await userApi.createTrip(userId!, tripData);
-      toast({
-        title: 'Trip Created!',
-        description: 'Your ride has been successfully created and is now available for booking.',
-      });
-      navigate('/my-rides');
-    } catch (error) {
-      const message = getBackendErrorMessage(error, 'Failed to create trip.');
-      toast({
-        title: 'Creation Failed',
-        description: message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsCreating(false);
-    }
+    createTripMutation.mutate({
+      vehicleNumber: form.vehicleNumber,
+      sourceAddress: form.source,
+      destinationAddress: form.destination,
+      tripStartDateTime: new Date(form.departureTime).toISOString(),
+      totalSeats: form.seats,
+      pricePerSeat: form.price
+    });
   };
+
+  const mapMarkers = useMemo(() => [
+    { position: { lat: form.source.latitude, lng: form.source.longitude }, title: 'Pickup' },
+    { position: { lat: form.destination.latitude, lng: form.destination.longitude }, title: 'Destination' }
+  ], [form.source, form.destination]);
 
   return (
     <Layout>
-      <div className="p-6 space-y-8">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Offer a Ride</h1>
-          <p className="text-sm text-muted-foreground">Share your journey and help others get around</p>
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden bg-background">
+        
+        {/* Left Side: Form */}
+        <div className="w-full lg:w-[480px] flex flex-col border-r overflow-y-auto">
+          <div className="p-6 space-y-8">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight">Offer a Ride</h1>
+              <p className="text-sm text-muted-foreground">Share your journey and earn by helping others travel.</p>
+            </div>
+
+            <div className="space-y-6">
+              {/* Route Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
+                  <MapPin className="h-3 w-3" />
+                  Route Details
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">From</Label>
+                    <PlacesAutocomplete
+                      value={form.source.placeAddress}
+                      onChange={(addr, lat, lng) => setForm(f => ({ ...f, source: { latitude: lat || 0, longitude: lng || 0, placeAddress: addr } }))}
+                      placeholder="Departure city or address"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">To</Label>
+                    <PlacesAutocomplete
+                      value={form.destination.placeAddress}
+                      onChange={(addr, lat, lng) => setForm(f => ({ ...f, destination: { latitude: lat || 0, longitude: lng || 0, placeAddress: addr } }))}
+                      placeholder="Destination city or address"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle & Time Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
+                  <Car className="h-3 w-3" />
+                  Trip Specifications
+                </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Select Vehicle</Label>
+                    <Select value={form.vehicleNumber} onValueChange={handleVehicleChange}>
+                      <SelectTrigger className="h-11 rounded-lg border-2">
+                        <SelectValue placeholder="Which car are you driving?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vehicles.map((v) => (
+                          <SelectItem key={v.value} value={v.value}>
+                            <div className="flex items-center gap-2 font-medium">
+                              <Car className="h-3.5 w-3.5" />
+                              {v.text} <span className="text-[10px] text-muted-foreground">({v.value})</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {vehicles.length === 0 && (
+                      <Button variant="link" size="sm" className="h-auto p-0 text-[10px] text-primary" onClick={() => navigate('/vehicles')}>
+                        + Register a vehicle first
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Date & Time</Label>
+                      <Input
+                        type="datetime-local"
+                        value={form.departureTime}
+                        onChange={(e) => setForm(f => ({ ...f, departureTime: e.target.value }))}
+                        className="h-11 rounded-lg border-2"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Seats Available</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="8"
+                        value={form.seats}
+                        onChange={(e) => setForm(f => ({ ...f, seats: parseInt(e.target.value) || 1 }))}
+                        className="h-11 rounded-lg border-2 font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Price per seat (€)</Label>
+                    <div className="relative">
+                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={form.price}
+                        onChange={(e) => setForm(f => ({ ...f, price: parseFloat(e.target.value) || 0 }))}
+                        className="h-11 pl-9 rounded-lg border-2 font-bold text-lg text-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleSubmit} 
+                disabled={createTripMutation.isPending || vehicles.length === 0}
+                className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
+              >
+                {createTripMutation.isPending ? 'Publishing...' : 'Publish Trip Offer'}
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* Create Trip Form */}
-        <Card className="rounded-xl border shadow-none">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-lg">
-              <Plus className="h-5 w-5" />
-              <span>Create New Trip</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Route Information */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Route Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="pickup" className="text-xs">Departure Location</Label>
-                  <PlacesAutocomplete
-                    value={sourceAddressStr}
-                    onChange={handleSourceChange}
-                    placeholder="Enter departure location"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="destination" className="text-xs">Destination</Label>
-                  <PlacesAutocomplete
-                    value={destinationAddressStr || ''}
-                    onChange={handleDestinationChange}
-                    placeholder="Enter destination"
-                  />
+        {/* Right Side: Preview Map */}
+        <div className="flex-1 relative bg-muted/5">
+          <div className="absolute inset-0">
+            <GoogleMap
+              markers={mapMarkers}
+              className="w-full h-full"
+            />
+          </div>
+
+          {/* Floating Preview Card */}
+          <div className="absolute top-6 left-6 right-6 lg:left-auto lg:right-6 lg:w-80">
+            <Card className="bg-background/95 backdrop-blur shadow-2xl border-2 border-primary/10 rounded-2xl overflow-hidden text-card-foreground">
+              <div className="bg-primary p-3 text-primary-foreground flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest">Live Preview</p>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white/20 rounded-full text-[9px] font-bold">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  ACTIVE
                 </div>
               </div>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-center mt-1">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <div className="w-0.5 h-8 bg-border my-1" />
+                    <div className="w-2 h-2 rounded-full bg-rose-500" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <p className="text-xs font-bold truncate leading-none">{form.source.placeAddress || 'Enter pickup'}</p>
+                    <p className="text-xs font-bold truncate leading-none pt-1">{form.destination.placeAddress || 'Enter destination'}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <div className="p-2 rounded-lg bg-muted/50 border text-center space-y-0.5">
+                    <p className="text-[8px] text-muted-foreground uppercase font-bold">Departure</p>
+                    <p className="text-[10px] font-bold">{new Date(form.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/50 border text-center space-y-0.5">
+                    <p className="text-[8px] text-muted-foreground uppercase font-bold">Earnings</p>
+                    <p className="text-[10px] font-bold text-primary">€{(form.price * form.seats).toFixed(2)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+            <div className="flex items-center gap-2 px-4 py-2 bg-background/80 backdrop-blur rounded-full border shadow-sm text-[10px] font-medium text-muted-foreground whitespace-nowrap">
+              <Info className="h-3 w-3 text-primary" />
+              Adjust your route on the left to update the map view
             </div>
-
-            {/* Trip Details */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Trip Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="md:col-span-2 space-y-1.5">
-                  <Label htmlFor="datetime" className="text-xs">Departure Time</Label>
-                  <Input
-                    id="datetime"
-                    type="datetime-local"
-                    value={tripStartDateTime}
-                    onChange={(e) => setTripStartDateTime(e.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
-                    className="rounded-lg"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="seats" className="text-xs">Total Seats</Label>
-                  <Input
-                    id="seats"
-                    type="number"
-                    min="1"
-                    max="8"
-                    value={totalSeats}
-                    onChange={(e) => setTotalSeats(parseInt(e.target.value))}
-                    className="rounded-lg"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="price" className="text-xs">Price Per Seat (€)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    value={pricePerSeat}
-                    onChange={(e) => setPricePerSeat(parseFloat(e.target.value))}
-                    className="rounded-lg"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="vehicle" className="text-xs">Select Vehicle</Label>
-                <Select onValueChange={handleVehicleChange}>
-                  <SelectTrigger className="rounded-lg">
-                    <SelectValue placeholder="Choose your vehicle" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicles.map((vehicle) => (
-                      <SelectItem key={vehicle.value} value={vehicle.value}>
-                        <div className="flex items-center space-x-2">
-                          <Car className="h-4 w-4" />
-                          <span>{vehicle.text} ({vehicle.value}) {vehicle.seatingCapacity ? `- ${vehicle.seatingCapacity} seats` : ''}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Trip Preview */}
-            {sourceAddress && destinationAddress && tripStartDateTime && (
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Trip Preview</h3>
-                <Card className="rounded-xl border border-dashed bg-muted/5">
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-4 w-4 text-emerald-500" />
-                        <span className="text-sm font-medium">
-                          <span className="text-muted-foreground mr-1">From:</span> {sourceAddress.placeAddress || `${sourceAddress.latitude}, ${sourceAddress.longitude}`}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-4 w-4 text-rose-500" />
-                        <span className="text-sm font-medium">
-                          <span className="text-muted-foreground mr-1">To:</span> {destinationAddress.placeAddress || `${destinationAddress.latitude}, ${destinationAddress.longitude}`}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Clock className="h-4 w-4 text-sky-500" />
-                        <span className="text-sm font-medium">
-                          <span className="text-muted-foreground mr-1">When:</span> {new Date(tripStartDateTime).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Users className="h-4 w-4 text-amber-500" />
-                        <span className="text-sm font-medium">
-                          <span className="text-muted-foreground mr-1">Capacity:</span> {totalSeats} seats | €{pricePerSeat}/seat
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            <Button 
-              onClick={handleCreateTrip}
-              disabled={isCreating}
-              className="w-full bg-primary hover:bg-primary/90 py-4 rounded-xl font-bold"
-            >
-              {isCreating ? 'Creating Trip...' : 'Create Trip'}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* No Vehicles Warning */}
-        {vehicles.length === 0 && (
-          <Card className="rounded-xl border-amber-200 bg-amber-50/50 shadow-none">
-            <CardContent className="p-6 text-center">
-              <Car className="h-10 w-10 text-amber-600 mx-auto mb-3" />
-              <h3 className="font-bold text-amber-800 mb-1">No Vehicles Found</h3>
-              <p className="text-sm text-amber-700 mb-4">
-                You need to register a vehicle before you can offer rides.
-              </p>
-              <Button
-                onClick={() => navigate('/vehicles')}
-                variant="outline"
-                className="border-amber-600 text-amber-600 hover:bg-amber-100 rounded-lg"
-              >
-                Register Vehicle
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+          </div>
+        </div>
       </div>
     </Layout>
   );
