@@ -69,7 +69,7 @@ export default function Login() {
           <div className="flex justify-center mb-4">
             <BrandIcon className="h-12 w-12 rounded-2xl" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">Welcome to Kamilli Ride</h2>
+          <h2 className="text-3xl font-bold text-foreground">Welcome to Kamili Ride</h2>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 

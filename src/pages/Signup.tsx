@@ -77,7 +77,7 @@ export default function Signup() {
           <div className="flex justify-center mb-4">
             <BrandIcon className="h-12 w-12 rounded-2xl" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">Create your Kamilli Ride account</h2>
+          <h2 className="text-3xl font-bold text-foreground">Create your Kamili Ride account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign up as a passenger or a driver
           </p>
