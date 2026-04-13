@@ -272,28 +272,26 @@ export default function RideDetail() {
                     Passengers ({ride.passengers.length})
                   </h3>
                   <div className="space-y-3">
-                    {ride.passengers.map((p, idx) => (
-                      <Card key={idx} className="bg-muted/30 border-none shadow-none">
-                        <CardContent className="p-3 space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold truncate">{p.userId}</span>
-                            <Badge variant="secondary" className="text-[9px] h-5">
-                              {p.bookedSeats} {p.bookedSeats === 1 ? 'seat' : 'seats'}
-                            </Badge>
-                          </div>
-                          <div className="text-[10px] text-muted-foreground space-y-1">
-                            <p className="flex items-center gap-1.5">
-                              <MapPin className="h-2.5 w-2.5 text-emerald-500 shrink-0" />
-                              <span className="truncate">{p.pickupLocation.placeAddress}</span>
-                            </p>
-                            <p className="flex items-center gap-1.5">
-                              <MapPin className="h-2.5 w-2.5 text-rose-500 shrink-0" />
-                              <span className="truncate">{p.dropoffLocation.placeAddress}</span>
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    {ride.passengers.map((p, idx) => {
+                      const fullName = [p.firstName, p.lastName].filter(Boolean).join(' ');
+                      const displayName = fullName || p.userId.split('@')[0];
+                      
+                      return (
+                        <Card key={idx} className="bg-muted/30 border-none shadow-none">
+                          <CardContent className="p-3">
+                            <div className="flex justify-between items-center">
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold">{displayName}</span>
+                                <span className="text-[10px] text-muted-foreground">{p.userId}</span>
+                              </div>
+                              <Badge variant="secondary" className="text-[9px] h-5">
+                                {p.bookedSeats} {p.bookedSeats === 1 ? 'seat' : 'seats'}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
               </>
