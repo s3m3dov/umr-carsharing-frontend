@@ -16,15 +16,15 @@ function getRideStatusClass(status: string): string {
     case RideLifecycleStatus.ALLOTTED:
     case RideLifecycleStatus.CONFIRMED:
     case RideLifecycleStatus.AVAILABLE:
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-500/10 text-green-700 border-green-200';
     case RideLifecycleStatus.CANCELLED:
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-500/10 text-red-700 border-red-200';
     case RideLifecycleStatus.COMPLETED:
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-secondary text-secondary-foreground border-border';
     case RideLifecycleStatus.IN_PROGRESS:
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-blue-500/10 text-blue-700 border-blue-200';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-500/10 text-gray-700 border-gray-200';
   }
 }
 
@@ -125,7 +125,7 @@ export default function MyRides() {
 
   return (
     <Layout>
-      <div className="p-6 space-y-8 max-w-6xl mx-auto">
+      <div className="p-6 space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">My Rides</h1>

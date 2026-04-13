@@ -142,16 +142,8 @@ export default function RideOffering() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-6xl mx-auto space-y-8">
+      <div className="p-6 space-y-8">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
           <h1 className="text-2xl font-bold">Offer a Ride</h1>
           <p className="text-sm text-muted-foreground">Share your journey and help others get around</p>
         </div>

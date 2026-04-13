@@ -77,27 +77,30 @@ export default function Vehicles() {
   return (
     <Layout>
       <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">My Vehicles</h1>
-            <p className="text-muted-foreground">Manage your registered vehicles</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold">My Vehicles</h1>
+            <p className="text-sm text-muted-foreground">Manage your registered vehicles</p>
           </div>
-          <Button onClick={() => setShowAddForm(!showAddForm)}>
+          <Button variant="outline" size="sm" className="hidden sm:flex font-semibold" onClick={() => setShowAddForm(!showAddForm)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Vehicle
           </Button>
         </div>
 
         {showAddForm && (
-          <Card>
+          <Card className="rounded-xl shadow-none">
             <CardHeader>
-              <CardTitle>Add New Vehicle</CardTitle>
-              <CardDescription>Register a new vehicle for carpooling</CardDescription>
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <Plus className="h-5 w-5" />
+                <span>Add New Vehicle</span>
+              </CardTitle>
+              <CardDescription className="text-xs">Register a new vehicle for carpooling</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="vehicleName">Vehicle Name *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="vehicleName" className="text-xs">Vehicle Name *</Label>
                   <Input
                     id="vehicleName"
                     placeholder="e.g., Honda Civic"
@@ -106,10 +109,11 @@ export default function Vehicles() {
                       ...newVehicle,
                       vehicleName: e.target.value
                     })}
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="vehicleNumber">Vehicle Number *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="vehicleNumber" className="text-xs">Vehicle Number *</Label>
                   <Input
                     id="vehicleNumber"
                     placeholder="e.g., ABC-1234"
@@ -118,18 +122,19 @@ export default function Vehicles() {
                       ...newVehicle,
                       vehicleNumber: e.target.value.toUpperCase()
                     })}
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="vehicleType">Vehicle Type *</Label>
-                  <Select 
-                    value={newVehicle.vehicleType} 
+                <div className="space-y-1.5">
+                  <Label htmlFor="vehicleType" className="text-xs">Vehicle Type *</Label>
+                  <Select
+                    value={newVehicle.vehicleType}
                     onValueChange={(value) => setNewVehicle({
                       ...newVehicle,
                       vehicleType: value
                     })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="rounded-lg">
                       <SelectValue placeholder="Select vehicle type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -139,8 +144,8 @@ export default function Vehicles() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="vehicleColor">Color *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="vehicleColor" className="text-xs">Color *</Label>
                   <Input
                     id="vehicleColor"
                     placeholder="e.g., Red"
@@ -149,10 +154,11 @@ export default function Vehicles() {
                       ...newVehicle,
                       vehicleColor: e.target.value
                     })}
+                    className="rounded-lg"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="seatingCapacity">Seating Capacity</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="seatingCapacity" className="text-xs">Seating Capacity</Label>
                   <Input
                     id="seatingCapacity"
                     placeholder="e.g., 4"
@@ -161,18 +167,19 @@ export default function Vehicles() {
                       ...newVehicle,
                       seatingCapacity: e.target.value
                     })}
+                    className="rounded-lg"
                   />
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <Button 
+              <div className="flex items-center gap-2">
+                <Button
                   onClick={handleAddVehicle}
                   disabled={addVehicleMutation.isPending}
                 >
                   {addVehicleMutation.isPending ? 'Adding...' : 'Add Vehicle'}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowAddForm(false)}
                 >
                   Cancel
@@ -183,24 +190,24 @@ export default function Vehicles() {
         )}
 
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Registered Vehicles</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Registered Vehicles</h2>
           {isLoading ? (
-            <div className="text-center py-8">Loading vehicles...</div>
+            <div className="text-center py-8 text-sm text-muted-foreground">Loading vehicles...</div>
           ) : vehicles && vehicles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {vehicles.map((vehicle) => (
-                <Card key={vehicle.value}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary/10 rounded-full">
-                        <Car className="h-6 w-6 text-primary" />
+                <Card key={vehicle.value} className="rounded-xl shadow-none">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
+                        <Car className="h-4 w-4 text-orange-600" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{vehicle.text}</h3>
-                        <p className="text-sm text-muted-foreground">{vehicle.value}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{vehicle.text}</h3>
+                        <p className="text-xs text-muted-foreground">{vehicle.value}</p>
                         {vehicle.seatingCapacity && (
                           <p className="text-xs text-muted-foreground">
-                            Capacity: {vehicle.seatingCapacity} seats
+                            {vehicle.seatingCapacity} seats
                           </p>
                         )}
                       </div>
@@ -210,15 +217,13 @@ export default function Vehicles() {
               ))}
             </div>
           ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Car className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No vehicles registered yet.</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Add your first vehicle to start offering rides.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="text-center py-12 border-2 border-dashed rounded-xl bg-muted/5">
+              <Car className="h-10 w-10 text-muted-foreground/20 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No vehicles registered yet.</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add your first vehicle to start offering rides.
+              </p>
+            </div>
           )}
         </div>
       </div>
