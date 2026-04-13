@@ -105,7 +105,7 @@ function normalizeMatchingTrip(trip: MatchingTripResponse): TripBasicInfoDTO {
 
 export const passengerApi = {
   getProfile: (userId: string) =>
-    apiClient.get<UserInfoDTO>(ROUTES.user.profile(userId)),
+    apiClient.get<UserInfoDTO>(ROUTES.user.passengerProfile(userId)),
 
   // Rides — normalised to RideBasicInfoDTO for MyRides compatibility
   getUpcomingRides: (passengerId: string) =>

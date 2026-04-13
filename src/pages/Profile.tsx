@@ -1,16 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { passengerApi as userApi } from '@/shared/api/passenger-api';
+import { passengerApi } from '@/shared/api/passenger-api';
+import { driverApi } from '@/shared/api/driver-api';
+import { UserRole } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Mail, Phone, Building } from 'lucide-react';
 
 export default function Profile() {
-  const { userId } = useAuth();
+  const { userId, role } = useAuth();
 
   const { data: userInfo, isLoading } = useQuery({
-    queryKey: ['userInfo', userId],
-    queryFn: () => userApi.getProfile(userId!),
+    queryKey: ['userInfo', userId, role],
+    queryFn: () => {
+      if (role === UserRole.DRIVER) {
+        return driverApi.getProfile(userId!);
+      }
+      return passengerApi.getProfile(userId!);
+    },
     enabled: !!userId,
   });
 
