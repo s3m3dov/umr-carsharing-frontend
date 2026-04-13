@@ -262,6 +262,42 @@ export default function RideDetail() {
                 </div>
               </div>
             </div>
+
+            {role === UserRole.DRIVER && ride.passengers && ride.passengers.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Passengers ({ride.passengers.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {ride.passengers.map((p, idx) => (
+                      <Card key={idx} className="bg-muted/30 border-none shadow-none">
+                        <CardContent className="p-3 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold truncate">{p.userId}</span>
+                            <Badge variant="secondary" className="text-[9px] h-5">
+                              {p.bookedSeats} {p.bookedSeats === 1 ? 'seat' : 'seats'}
+                            </Badge>
+                          </div>
+                          <div className="text-[10px] text-muted-foreground space-y-1">
+                            <p className="flex items-center gap-1.5">
+                              <MapPin className="h-2.5 w-2.5 text-emerald-500 shrink-0" />
+                              <span className="truncate">{p.pickupLocation.placeAddress}</span>
+                            </p>
+                            <p className="flex items-center gap-1.5">
+                              <MapPin className="h-2.5 w-2.5 text-rose-500 shrink-0" />
+                              <span className="truncate">{p.dropoffLocation.placeAddress}</span>
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 

@@ -25,6 +25,7 @@ function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
     tripStatus: trip.tripStatus,
     vehicleNumber: trip.vehicleNumber ?? '',
     routeGeometry: trip.routeGeometry ?? null,
+    passengers: trip.passengers,
   };
 }
 
