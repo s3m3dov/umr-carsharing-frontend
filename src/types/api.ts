@@ -326,10 +326,12 @@ export interface BookRideRequestDTO {
   pickupPoint: {
     latitude: number;
     longitude: number;
+    placeAddress?: string;
   };
   destinationPoint: {
     latitude: number;
     longitude: number;
+    placeAddress?: string;
   };
   rideStartTime: string;
   requestedSeats: number;
