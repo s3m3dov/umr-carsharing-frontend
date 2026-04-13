@@ -219,8 +219,8 @@ export default function FindRides() {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2 space-y-1.5">
                     <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Time</Label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -228,18 +228,18 @@ export default function FindRides() {
                         type="datetime-local"
                         value={searchParams.earliestDepartureTime}
                         onChange={(e) => setSearchParams(p => ({ ...p, earliestDepartureTime: e.target.value }))}
-                        className="h-10 pl-9 bg-background"
+                        className="h-10 pl-9 bg-background text-sm"
                       />
                     </div>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="col-span-1 space-y-1.5">
                     <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Seats</Label>
                     <Input
                       type="number"
                       min="1"
                       value={searchParams.requestedSeats}
                       onChange={(e) => setSearchParams(p => ({ ...p, requestedSeats: parseInt(e.target.value) || 1 }))}
-                      className="h-10 bg-background"
+                      className="h-10 bg-background text-sm text-center"
                     />
                   </div>
                 </div>
