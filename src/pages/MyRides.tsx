@@ -103,14 +103,16 @@ export default function MyRides() {
                 <div className="absolute left-[4px] top-[6px] bottom-[6px] w-0.5 bg-border" />
                 <div className="relative">
                   <div className="absolute -left-[23px] top-1 w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-background" />
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider leading-none mb-1">Departure</p>
                   <p className="text-sm font-semibold leading-tight line-clamp-1">
-                    {ride.pickupPoint.placeAddress ?? `${ride.pickupPoint.latitude.toFixed(4)}, ${ride.pickupPoint.longitude.toFixed(4)}`}
+                    {ride.pickupPoint.placeAddress || `${ride.pickupPoint.latitude.toFixed(4)}, ${ride.pickupPoint.longitude.toFixed(4)}`}
                   </p>
                 </div>
                 <div className="relative">
                   <div className="absolute -left-[23px] top-1 w-2 h-2 rounded-full bg-rose-500 ring-4 ring-background" />
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider leading-none mb-1">Destination</p>
                   <p className="text-sm font-semibold leading-tight line-clamp-1">
-                    {ride.destinationPoint.placeAddress ?? `${ride.destinationPoint.latitude.toFixed(4)}, ${ride.destinationPoint.longitude.toFixed(4)}`}
+                    {ride.destinationPoint.placeAddress || `${ride.destinationPoint.latitude.toFixed(4)}, ${ride.destinationPoint.longitude.toFixed(4)}`}
                   </p>
                 </div>
               </div>

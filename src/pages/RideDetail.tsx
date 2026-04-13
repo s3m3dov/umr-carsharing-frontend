@@ -253,11 +253,15 @@ export default function RideDetail() {
                 <div className="flex-1 space-y-4">
                   <div>
                     <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Departure</span>
-                    <p className="text-sm font-medium leading-relaxed">{ride.pickupPoint.placeAddress}</p>
+                    <p className="text-sm font-medium leading-relaxed">
+                      {ride.pickupPoint.placeAddress || `${ride.pickupPoint.latitude.toFixed(4)}, ${ride.pickupPoint.longitude.toFixed(4)}`}
+                    </p>
                   </div>
                   <div>
                     <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Destination</span>
-                    <p className="text-sm font-medium leading-relaxed">{ride.destinationPoint.placeAddress}</p>
+                    <p className="text-sm font-medium leading-relaxed">
+                      {ride.destinationPoint.placeAddress || `${ride.destinationPoint.latitude.toFixed(4)}, ${ride.destinationPoint.longitude.toFixed(4)}`}
+                    </p>
                   </div>
                 </div>
               </div>
