@@ -65,17 +65,23 @@ function buildAdvancedRideSearchParams(criteria: RideDTO | TripSearchCriteriaDTO
 }
 
 function normalizePassengerRide(ride: PassengerRideResponse): RideBasicInfoDTO {
+  // Use pickupLocation but fallback to other possible field names if needed
+  const pickup = ride.pickupLocation || (ride as any).sourceAddress || (ride as any).source;
+  const dropoff = ride.dropoffLocation || (ride as any).destinationAddress || (ride as any).destination;
+
   return {
     userId: ride.driverId,
     tripId: ride.tripId,
     rideId: ride.rideId,
     pickupPoint: {
-      ...ride.pickupLocation,
-      placeAddress: ride.pickupLocation.placeAddress ?? null,
+      latitude: pickup?.latitude || 0,
+      longitude: pickup?.longitude || 0,
+      placeAddress: pickup?.placeAddress || (ride as any).pickupAddress || (ride as any).sourceAddressStr || null,
     },
     destinationPoint: {
-      ...ride.dropoffLocation,
-      placeAddress: ride.dropoffLocation.placeAddress ?? null,
+      latitude: dropoff?.latitude || 0,
+      longitude: dropoff?.longitude || 0,
+      placeAddress: dropoff?.placeAddress || (ride as any).dropoffAddress || (ride as any).destinationAddressStr || null,
     },
     rideStartTime: ride.tripStartDateTime,
     seats: `${ride.bookedSeats}`,
@@ -92,8 +98,14 @@ function normalizeMatchingTrip(trip: MatchingTripResponse): TripBasicInfoDTO {
     tripId: trip.tripId,
     fullName: trip.driverId.split('@')[0], // Fallback if name is missing
     vehicleNumber: trip.vehicleNumber,
-    pickupPoint: trip.sourceAddress,
-    destinationPoint: trip.destinationAddress,
+    pickupPoint: {
+      ...trip.sourceAddress,
+      placeAddress: trip.sourceAddress.placeAddress || (trip as any).pickupAddress || (trip as any).sourceAddressStr || null,
+    },
+    destinationPoint: {
+      ...trip.destinationAddress,
+      placeAddress: trip.destinationAddress.placeAddress || (trip as any).dropoffAddress || (trip as any).destinationAddressStr || null,
+    },
     tripStartTime: trip.tripStartDateTimeUTC,
     availableSeats: trip.totalSeats - trip.bookedSeats,
     phoneNumber: '', // Not provided in search result

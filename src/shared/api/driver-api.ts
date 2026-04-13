@@ -18,8 +18,14 @@ function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
   return {
     userId: trip.driverId,
     tripId: trip.tripId,
-    pickupPoint: trip.sourceAddress,
-    destinationPoint: trip.destinationAddress,
+    pickupPoint: {
+      ...trip.sourceAddress,
+      placeAddress: trip.sourceAddress.placeAddress || (trip as any).pickupAddress || (trip as any).sourceAddressStr || null,
+    },
+    destinationPoint: {
+      ...trip.destinationAddress,
+      placeAddress: trip.destinationAddress.placeAddress || (trip as any).dropoffAddress || (trip as any).destinationAddressStr || null,
+    },
     rideStartTime: trip.tripStartDateTime,
     seats: `${trip.bookedSeats}/${trip.totalSeats}`,
     tripStatus: trip.tripStatus,
