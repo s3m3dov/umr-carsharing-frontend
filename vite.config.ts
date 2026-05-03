@@ -14,12 +14,12 @@ export default defineConfig(({ mode }) => ({
     // Use this when VITE_API_BASE_URL is empty (same-origin requests, no CORS needed).
     // Target the gateway port — default is 8081 based on local dev setup.
     proxy: {
-      '/actuator':             { target: 'http://35.186.208.67', changeOrigin: true },
-      '/auth-service':         { target: 'http://35.186.208.67', changeOrigin: true },
-      '/user-service':         { target: 'http://35.186.208.67', changeOrigin: true },
-      '/trip-service':         { target: 'http://35.186.208.67', changeOrigin: true },
-      '/review-service':       { target: 'http://35.186.208.67', changeOrigin: true },
-      '/notification-service': { target: 'http://35.186.208.67', changeOrigin: true },
+      '/actuator':             { target: 'http://34.54.55.0', changeOrigin: true },
+      '/auth-service':         { target: 'http://34.54.55.0', changeOrigin: true },
+      '/user-service':         { target: 'http://34.54.55.0', changeOrigin: true },
+      '/trip-service':         { target: 'http://34.54.55.0', changeOrigin: true },
+      '/review-service':       { target: 'http://34.54.55.0', changeOrigin: true },
+      '/notification-service': { target: 'http://34.54.55.0', changeOrigin: true },
     },
   },
   plugins: [
