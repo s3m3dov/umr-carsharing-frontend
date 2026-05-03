@@ -18,7 +18,7 @@ Environment template: `.env.example`
 
 Examples:
 
-- Direct remote gateway: `http://35.186.208.67`
+- Direct remote gateway: `http://34.54.55.0`
 - Same-origin with Vite proxy: empty string
 - Production custom domain: `https://api.your-domain.com`
 
@@ -86,7 +86,7 @@ Session storage rule:
 
 ## 7. Current Configuration Caveat
 
-`vite.config.ts` proxy target currently points to a remote host (`http://35.186.208.67`) despite comments that mention local gateway setup.
+`vite.config.ts` proxy target currently points to a remote host (`http://34.54.55.0`) despite comments that mention local gateway setup.
 
 Recommendation:
 
