@@ -106,38 +106,63 @@ export default function Reviews() {
     [historyRides],
   );
 
-  const pendingReviewTargets = useMemo(() => {
-    const reviewedBookingIds = new Set(reviewHistory.map((review) => review.bookingId));
-    return finishedRides.filter((ride) => {
-      const bookingIdentifier = ride.rideId ?? ride.tripId;
-      return !!bookingIdentifier && !reviewedBookingIds.has(bookingIdentifier);
-    });
-  }, [finishedRides, reviewHistory]);
+  type PendingReviewTarget = {
+    tripId: string;
+    bookingId: string;
+    passengerName?: string;
+    destinationLabel?: string;
+    rideStartTime: string;
+  };
 
-  const bookingOptions = useMemo(
-    () => pendingReviewTargets.map((ride) => ({
-      bookingId: ride.rideId ?? ride.tripId,
-      tripId: ride.tripId,
-    })),
-    [pendingReviewTargets],
-  );
+  const pendingReviewTargets = useMemo<PendingReviewTarget[]>(() => {
+    const reviewedKeys = new Set(reviewHistory.map((r) => `${r.tripId}::${r.bookingId}`));
 
-  const tripOptions = useMemo(
-    () => Array.from(new Set(pendingReviewTargets.map((ride) => ride.tripId))),
-    [pendingReviewTargets],
-  );
+    if (isDriver) {
+      return finishedRides.flatMap((ride) =>
+        (ride.passengers ?? [])
+          .filter(
+            (p) =>
+              !!p.bookingId &&
+              (p.bookingStatus ?? '').toUpperCase() === RideLifecycleStatus.COMPLETED,
+          )
+          .filter((p) => !reviewedKeys.has(`${ride.tripId}::${p.bookingId}`))
+          .map((p) => ({
+            tripId: ride.tripId,
+            bookingId: p.bookingId!,
+            passengerName: [p.firstName, p.lastName].filter(Boolean).join(' ') || p.userId,
+            destinationLabel: ride.destinationPoint.placeAddress ?? undefined,
+            rideStartTime: ride.rideStartTime,
+          })),
+      );
+    }
 
-  const selectedRideForReview = useMemo(() => {
+    return finishedRides
+      .map<PendingReviewTarget | null>((ride) => {
+        const rideBookingId = ride.rideId ?? ride.tripId;
+        if (!rideBookingId) return null;
+        return {
+          tripId: ride.tripId,
+          bookingId: rideBookingId,
+          destinationLabel: ride.destinationPoint.placeAddress ?? undefined,
+          rideStartTime: ride.rideStartTime,
+        };
+      })
+      .filter(
+        (target): target is PendingReviewTarget =>
+          !!target && !reviewedKeys.has(`${target.tripId}::${target.bookingId}`),
+      );
+  }, [finishedRides, reviewHistory, isDriver]);
+
+  const targetKey = (t: { tripId: string; bookingId: string }) => `${t.tripId}::${t.bookingId}`;
+
+  const selectedTarget = useMemo(() => {
     const normalizedBookingId = bookingId.trim();
     const normalizedTripId = tripId.trim();
-    if (!normalizedBookingId && !normalizedTripId) return null;
+    if (!normalizedBookingId || !normalizedTripId) return null;
     return (
-      pendingReviewTargets.find((ride) => {
-        const rideBookingId = ride.rideId ?? ride.tripId;
-        const bookingMatches = !normalizedBookingId || rideBookingId === normalizedBookingId;
-        const tripMatches = !normalizedTripId || ride.tripId === normalizedTripId;
-        return bookingMatches && tripMatches;
-      }) ?? null
+      pendingReviewTargets.find(
+        (target) => target.tripId === normalizedTripId && target.bookingId === normalizedBookingId,
+      ) ?? null
     );
   }, [bookingId, tripId, pendingReviewTargets]);
 
@@ -237,55 +262,38 @@ export default function Reviews() {
               </Alert>
             )}
 
-            {!loadingReviewHistory && !loadingHistoryRides && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="eligible-booking" className="text-xs">Booking ID</Label>
-                  <Select
-                    value={bookingId}
-                    onValueChange={(nextBookingId) => {
-                      setBookingId(nextBookingId);
-                      const selected = bookingOptions.find((option) => option.bookingId === nextBookingId);
-                      setTripId(selected?.tripId ?? '');
-                    }}
-                  >
-                    <SelectTrigger id="eligible-booking" className="rounded-lg">
-                      <SelectValue placeholder="Select booking ID" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {bookingOptions.map((option) => (
-                        <SelectItem key={option.bookingId} value={option.bookingId}>
-                          {option.bookingId}
+            {!loadingReviewHistory && !loadingHistoryRides && pendingReviewTargets.length > 0 && (
+              <div className="space-y-1.5">
+                <Label htmlFor="pending-review" className="text-xs">
+                  {isDriver ? 'Passenger booking to review' : 'Ride to review'}
+                </Label>
+                <Select
+                  value={selectedTarget ? targetKey(selectedTarget) : ''}
+                  onValueChange={(nextKey) => {
+                    const [nextTripId, nextBookingId] = nextKey.split('::');
+                    setTripId(nextTripId ?? '');
+                    setBookingId(nextBookingId ?? '');
+                  }}
+                >
+                  <SelectTrigger id="pending-review" className="rounded-lg">
+                    <SelectValue placeholder={isDriver ? 'Select a passenger booking' : 'Select a ride'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pendingReviewTargets.map((target) => {
+                      const key = targetKey(target);
+                      const dateLabel = new Date(target.rideStartTime).toLocaleDateString();
+                      const destination = target.destinationLabel ?? 'Unknown destination';
+                      const label = isDriver
+                        ? `${target.passengerName ?? 'Passenger'} — ${destination} (${dateLabel})`
+                        : `${destination} — ${dateLabel}`;
+                      return (
+                        <SelectItem key={key} value={key}>
+                          {label}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="eligible-trip" className="text-xs">Trip ID</Label>
-                  <Select
-                    value={tripId}
-                    onValueChange={(nextTripId) => {
-                      setTripId(nextTripId);
-                      const selected = bookingOptions.find((option) => option.tripId === nextTripId);
-                      if (selected) {
-                        setBookingId(selected.bookingId);
-                      }
-                    }}
-                  >
-                    <SelectTrigger id="eligible-trip" className="rounded-lg">
-                      <SelectValue placeholder="Select trip ID" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tripOptions.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -295,9 +303,9 @@ export default function Reviews() {
               </p>
             )}
 
-            {bookingId.trim() && tripId.trim() && !selectedRideForReview && pendingReviewTargets.length > 0 && (
+            {bookingId.trim() && tripId.trim() && !selectedTarget && pendingReviewTargets.length > 0 && (
               <p className="text-xs text-destructive">
-                The selected booking/trip combination is not eligible (already reviewed or not finished).
+                The selected {isDriver ? 'passenger booking' : 'ride'} is not eligible (already reviewed or not finished).
               </p>
             )}
 
@@ -336,7 +344,7 @@ export default function Reviews() {
                 submitReviewMutation.isPending ||
                 !bookingId.trim() ||
                 !tripId.trim() ||
-                (pendingReviewTargets.length > 0 && !selectedRideForReview)
+                (pendingReviewTargets.length > 0 && !selectedTarget)
               }
             >
               {submitReviewMutation.isPending ? 'Submitting...' : 'Submit Review'}
