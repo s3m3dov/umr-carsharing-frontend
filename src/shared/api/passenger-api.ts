@@ -173,6 +173,6 @@ export const passengerApi = {
     }
   },
 
-  leaveReviewForDriver: (bookingId: string, reviewData: ReviewRequestDTO) =>
-    apiClient.post<void>(ROUTES.passenger.leaveReview(bookingId), reviewData),
+  leaveReviewForDriver: (reviewData: ReviewRequestDTO) =>
+    apiClient.post<void>(ROUTES.passenger.leaveReview, reviewData),
 };

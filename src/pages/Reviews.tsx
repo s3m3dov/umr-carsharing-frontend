@@ -36,7 +36,7 @@ export default function Reviews() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<ReviewRequestDTO>({ rating: 5, comment: '' });
+  const [form, setForm] = useState<Pick<ReviewRequestDTO, 'rating' | 'comment'>>({ rating: 5, comment: '' });
   const [bookingId, setBookingId] = useState(() => searchParams.get('bookingId') ?? '');
   const [tripId, setTripId] = useState(() => searchParams.get('tripId') ?? '');
 
@@ -155,10 +155,16 @@ export default function Reviews() {
       if (!normalizedTripId) {
         throw new Error('Trip ID is required.');
       }
+      const reviewData: ReviewRequestDTO = {
+        tripId: normalizedTripId,
+        bookingId: normalizedBookingId,
+        rating: form.rating,
+        comment: form.comment.trim() || undefined,
+      };
       if (isDriver) {
-        return driverApi.leaveReviewForPassenger(normalizedBookingId, form);
+        return driverApi.leaveReviewForPassenger(reviewData);
       }
-      return passengerApi.leaveReviewForDriver(normalizedBookingId, form);
+      return passengerApi.leaveReviewForDriver(reviewData);
     },
     onSuccess: () => {
       toast({
@@ -329,7 +335,6 @@ export default function Reviews() {
               onClick={() => submitReviewMutation.mutate()}
               disabled={
                 submitReviewMutation.isPending ||
-                !form.comment.trim() ||
                 !bookingId.trim() ||
                 !tripId.trim() ||
                 (pendingReviewTargets.length > 0 && !selectedRideForReview)

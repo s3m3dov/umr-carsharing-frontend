@@ -206,8 +206,10 @@ export interface ReviewResponse {
 }
 
 export interface ReviewRequestDTO {
+  tripId: string;
+  bookingId: string;
   rating: number;
-  comment: string;
+  comment?: string;
 }
 
 export interface DriverProfileResponse {
