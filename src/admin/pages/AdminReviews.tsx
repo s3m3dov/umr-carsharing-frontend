@@ -337,7 +337,7 @@ export default function AdminReviews() {
                       <StarRating rating={review.rating} />
                     </TableCell>
                     <TableCell className="max-w-[180px]">
-                      {review.comment.length > 60 ? (
+                      {(review.comment?.length ?? 0) > 60 ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                              <span className="cursor-help text-sm">
@@ -349,7 +349,7 @@ export default function AdminReviews() {
                           </TooltipContent>
                         </Tooltip>
                       ) : (
-                        <span className="text-sm">{review.comment}</span>
+                        <span className="text-sm">{review.comment || '—'}</span>
                       )}
                     </TableCell>
                     <TableCell>{reviewStatusBadge(review.status)}</TableCell>

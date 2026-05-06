@@ -124,7 +124,7 @@ export interface ReviewResponse {
   revieweeId: string;
   revieweeType: UserType;
   rating: number;
-  comment: string;
+  comment: string | null;
   status: ReviewStatus;
   createdAt: string;
   updatedAt: string;
