@@ -41,7 +41,7 @@ export const ROUTES = {
     // Review endpoints
     reviewsReceived: (driverId: string) => `/review-service/api/reviews/driver/${driverId}`,
     reviewsGiven: (driverId: string) => `/review-service/api/reviews/reviewer/${driverId}`,
-    leaveReview: (bookingId: string) => `/review-service/api/reviews/passenger/${bookingId}`,
+    leaveReview: '/review-service/api/reviews/passenger',
     rating: (driverId: string) => `/review-service/api/reviews/driver/${driverId}/average-rating`,
   },
   passenger: {
@@ -54,7 +54,7 @@ export const ROUTES = {
     // Review endpoints
     reviewsReceived: (passengerId: string) => `/review-service/api/reviews/passenger/${passengerId}`,
     reviewsGiven: (passengerId: string) => `/review-service/api/reviews/reviewer/${passengerId}`,
-    leaveReview: (bookingId: string) => `/review-service/api/reviews/driver/${bookingId}`,
+    leaveReview: '/review-service/api/reviews/driver',
     stats: (passengerId: string) => `/trip-service/api/passengers/${passengerId}/stats`,
   },
 } as const;

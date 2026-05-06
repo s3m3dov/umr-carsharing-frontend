@@ -108,8 +108,8 @@ export const driverApi = {
       throw error;
     }
   },
-  leaveReviewForPassenger: (bookingId: string, reviewData: ReviewRequestDTO) =>
-    apiClient.post<void>(ROUTES.driver.leaveReview(bookingId), reviewData),
+  leaveReviewForPassenger: (reviewData: ReviewRequestDTO) =>
+    apiClient.post<void>(ROUTES.driver.leaveReview, reviewData),
   getDriverRating: (driverId: string) =>
     apiClient.get<number>(ROUTES.driver.rating(driverId)),
 };
