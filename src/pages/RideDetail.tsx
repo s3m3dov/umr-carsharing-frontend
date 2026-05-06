@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { driverApi } from '@/shared/api/driver-api';
 import { passengerApi } from '@/shared/api/passenger-api';
-import { RideBasicInfoDTO, RideLifecycleStatus, UserRole, CancelRideRequestDTO } from '@/types/api';
+import { RideBasicInfoDTO, RideLifecycleStatus, UserRole, CancelRideRequestDTO, ReviewUserType } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +56,11 @@ function DetailRow({ label, value, icon: Icon }: { label: string; value: React.R
       <span className="text-sm font-medium">{value ?? '—'}</span>
     </div>
   );
+}
+
+function renderStars(rating: number): string {
+  const value = Math.max(1, Math.min(5, Math.round(rating)));
+  return `${'★'.repeat(value)}${'☆'.repeat(5 - value)}`;
 }
 
 function getCompletableBookingIds(ride: RideBasicInfoDTO): string[] {
@@ -228,11 +233,16 @@ export default function RideDetail() {
 
   const bookingIdentifier = ride.rideId ?? ride.tripId;
   const reviewedBookingIds = new Set(givenReviews.map((review) => review.bookingId));
+  const submittedReviewsForTrip = givenReviews
+    .filter((review) => review.tripId === ride.tripId)
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+  const hasSubmittedReview =
+    !!bookingIdentifier && reviewedBookingIds.has(bookingIdentifier);
   const canReview =
     ride.tripStatus.toUpperCase() === RideLifecycleStatus.COMPLETED &&
     !!bookingIdentifier &&
-    !reviewedBookingIds.has(bookingIdentifier);
-  
+    !hasSubmittedReview;
+
   const reviewLink = `/reviews?bookingId=${encodeURIComponent(ride.rideId ?? ride.tripId)}&tripId=${encodeURIComponent(ride.tripId)}`;
 
   const mapMarkers = [
@@ -383,7 +393,7 @@ export default function RideDetail() {
                     {ride.passengers.map((p, idx) => {
                       const fullName = [p.firstName, p.lastName].filter(Boolean).join(' ');
                       const displayName = fullName || p.userId.split('@')[0];
-                      
+
                       return (
                         <Card key={idx} className="bg-muted/30 border-none shadow-none">
                           <CardContent className="p-3">
@@ -401,6 +411,38 @@ export default function RideDetail() {
                       );
                     })}
                   </div>
+                </div>
+              </>
+            )}
+
+            {submittedReviewsForTrip.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-400" />
+                    Your Review{submittedReviewsForTrip.length > 1 ? 's' : ''}
+                  </h3>
+                  {submittedReviewsForTrip.map((review) => (
+                    <Card key={review.reviewId} className="bg-muted/30 border-none shadow-none">
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-[9px] h-5">
+                              For {review.revieweeType === ReviewUserType.DRIVER ? 'DRIVER' : 'PASSENGER'}
+                            </Badge>
+                            <span className="text-amber-500 text-sm">{renderStars(review.rating)}</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {review.comment && (
+                          <p className="text-xs text-foreground/90">{review.comment}</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </>
             )}

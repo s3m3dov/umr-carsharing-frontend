@@ -22,8 +22,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, MessageSquare, Star } from 'lucide-react';
+import { AlertTriangle, MessageSquare, Star, Send } from 'lucide-react';
 
 function renderStars(rating: number): string {
   const value = Math.max(1, Math.min(5, Math.round(rating)));
@@ -103,6 +104,11 @@ export default function Reviews() {
   const sortedReviews = useMemo(
     () => [...reviews].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
     [reviews],
+  );
+
+  const sortedGivenReviews = useMemo(
+    () => [...reviewHistory].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
+    [reviewHistory],
   );
 
   const finishedRides = useMemo(
@@ -193,10 +199,14 @@ export default function Reviews() {
           <p className="text-sm text-muted-foreground">Read feedback and submit new reviews after completed rides.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="rounded-xl border bg-card p-4">
             <p className="text-xs text-muted-foreground mb-1">Received Reviews</p>
             <p className="text-2xl font-bold">{loadingReviews ? '—' : reviews.length}</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-1">Submitted Reviews</p>
+            <p className="text-2xl font-bold">{loadingReviewHistory ? '—' : reviewHistory.length}</p>
           </div>
           <div className="rounded-xl border bg-card p-4">
             <p className="text-xs text-muted-foreground mb-1">Average Rating</p>
@@ -345,38 +355,95 @@ export default function Reviews() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl shadow-none">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Star className="h-5 w-5" />
-              Recent Received Reviews
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {loadingReviews ? (
-              <p className="text-sm text-muted-foreground">Loading reviews...</p>
-            ) : sortedReviews.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No reviews yet.</p>
-            ) : (
-              sortedReviews.map((review) => (
-                <div key={review.reviewId} className="rounded-lg border p-3 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {review.reviewerType === ReviewUserType.DRIVER ? 'DRIVER' : 'PASSENGER'}
-                      </Badge>
-                      <span className="text-amber-500 text-sm">{renderStars(review.rating)}</span>
+        <Tabs defaultValue="received" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="received" className="gap-2">
+              <Star className="h-4 w-4" />
+              Received ({reviews.length})
+            </TabsTrigger>
+            <TabsTrigger value="submitted" className="gap-2">
+              <Send className="h-4 w-4" />
+              Submitted ({reviewHistory.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="received">
+            <Card className="rounded-xl shadow-none">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Star className="h-5 w-5" />
+                  Reviews About You
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {loadingReviews ? (
+                  <p className="text-sm text-muted-foreground">Loading reviews...</p>
+                ) : sortedReviews.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No reviews yet.</p>
+                ) : (
+                  sortedReviews.map((review) => (
+                    <div key={review.reviewId} className="rounded-lg border p-3 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            From {review.reviewerType === ReviewUserType.DRIVER ? 'DRIVER' : 'PASSENGER'}
+                          </Badge>
+                          <span className="text-amber-500 text-sm">{renderStars(review.rating)}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {review.comment && <p className="text-sm">{review.comment}</p>}
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-sm">{review.comment}</p>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="submitted">
+            <Card className="rounded-xl shadow-none">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Send className="h-5 w-5" />
+                  Reviews You Submitted
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {loadingReviewHistory ? (
+                  <p className="text-sm text-muted-foreground">Loading reviews...</p>
+                ) : sortedGivenReviews.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    You haven't submitted any reviews yet.
+                  </p>
+                ) : (
+                  sortedGivenReviews.map((review) => (
+                    <div key={review.reviewId} className="rounded-lg border p-3 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            For {review.revieweeType === ReviewUserType.DRIVER ? 'DRIVER' : 'PASSENGER'}
+                          </Badge>
+                          <span className="text-amber-500 text-sm">{renderStars(review.rating)}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {review.comment && <p className="text-sm">{review.comment}</p>}
+                      <div className="flex items-center gap-2 pt-1 text-[10px] text-muted-foreground font-mono">
+                        <span>Trip: {review.tripId}</span>
+                        <span>•</span>
+                        <span>Booking: {review.bookingId}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
