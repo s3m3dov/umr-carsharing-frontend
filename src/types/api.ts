@@ -123,11 +123,14 @@ export interface RideBasicInfoDTO {
   vehicleNumber: string;
   routeGeometry?: RouteGeometry | null;
   pricePerSeat?: number;
+  bookingIds?: string[];
   passengers?: Array<{
+    bookingId?: string;
     userId: string;
     firstName?: string;
     lastName?: string;
     bookedSeats: number;
+    bookingStatus?: string;
     pickupLocation: Points;
     dropoffLocation: Points;
   }>;
@@ -148,11 +151,14 @@ export interface DriverTripResponse {
   totalSeats: number;
   availableSeats: number;
   bookedSeats: number;
+  joinedBookingIds?: string[] | null;
   passengers: Array<{
+    bookingId?: string;
     userId: string;
     firstName?: string;
     lastName?: string;
     bookedSeats: number;
+    bookingStatus?: string;
     pickupLocation: Points;
     dropoffLocation: Points;
   }>;

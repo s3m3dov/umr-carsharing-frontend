@@ -15,6 +15,17 @@ import type {
 } from '@/types/api';
 
 function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
+  const passengers = trip.passengers?.map((passenger) => ({
+    ...passenger,
+    bookingId: passenger.bookingId
+      ?? (passenger as any).rideId
+      ?? (passenger as any).id
+      ?? (passenger as any).booking?.bookingId,
+    bookingStatus: passenger.bookingStatus
+      ?? (passenger as any).status
+      ?? (passenger as any).booking?.status,
+  })) ?? [];
+
   return {
     userId: trip.driverId,
     tripId: trip.tripId,
@@ -31,7 +42,8 @@ function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
     tripStatus: trip.tripStatus,
     vehicleNumber: trip.vehicleNumber ?? '',
     routeGeometry: trip.routeGeometry ?? null,
-    passengers: trip.passengers,
+    bookingIds: trip.joinedBookingIds ?? (trip as any).bookingIds ?? [],
+    passengers,
   };
 }
 
