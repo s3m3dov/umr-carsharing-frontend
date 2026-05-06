@@ -23,7 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import GoogleMap from '@/components/GoogleMap';
-import { ArrowLeft, MapPin, XCircle, CheckCircle2, Clock, Car, Users, Star, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, XCircle, CheckCircle2, PlayCircle, Clock, Car, Users, Star, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 function getRideStatusClass(status: string): string {
@@ -32,7 +32,10 @@ function getRideStatusClass(status: string): string {
     case RideLifecycleStatus.CONFIRMED:
     case RideLifecycleStatus.AVAILABLE:
       return 'bg-green-500/10 text-green-700 border-green-200';
+    case RideLifecycleStatus.CREATED:
+      return 'bg-amber-500/10 text-amber-700 border-amber-200';
     case RideLifecycleStatus.CANCELLED:
+    case RideLifecycleStatus.REJECTED:
       return 'bg-red-500/10 text-red-700 border-red-200';
     case RideLifecycleStatus.COMPLETED:
       return 'bg-secondary text-secondary-foreground border-border';
@@ -63,6 +66,7 @@ export default function RideDetail() {
   const queryClient = useQueryClient();
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [confirmComplete, setConfirmComplete] = useState(false);
+  const [confirmStart, setConfirmStart] = useState(false);
 
   const userApi = role === UserRole.DRIVER ? driverApi : passengerApi;
 
@@ -93,6 +97,19 @@ export default function RideDetail() {
     const allRides = [...upcoming, ...history];
     return allRides.find(r => r.rideId === id || r.tripId === id);
   }, [upcoming, history, id]);
+
+  const startMutation = useMutation({
+    mutationFn: () => driverApi.startTrip(ride!.tripId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
+      setConfirmStart(false);
+      toast({ title: 'Trip started.', description: 'You are on the way — drive safely.' });
+    },
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to start trip.');
+      toast({ title: 'Failed to start trip.', description: message, variant: 'destructive' });
+    },
+  });
 
   const completeMutation = useMutation({
     mutationFn: () => driverApi.completeTrip(ride!.tripId),
@@ -154,11 +171,19 @@ export default function RideDetail() {
   }
 
   const normalizedStatus = ride.tripStatus.toUpperCase() as RideLifecycleStatus;
-  const isCancellable = ![RideLifecycleStatus.COMPLETED, RideLifecycleStatus.CANCELLED, RideLifecycleStatus.REJECTED].includes(
-    normalizedStatus,
-  );
+  const isTerminal = [
+    RideLifecycleStatus.COMPLETED,
+    RideLifecycleStatus.CANCELLED,
+    RideLifecycleStatus.REJECTED,
+  ].includes(normalizedStatus);
+  const isStartable =
+    role === UserRole.DRIVER &&
+    [RideLifecycleStatus.CREATED, RideLifecycleStatus.AVAILABLE].includes(normalizedStatus);
   const isCompletable =
     role === UserRole.DRIVER && normalizedStatus === RideLifecycleStatus.IN_PROGRESS;
+  // Drivers must Complete (not Cancel) once a trip is IN_PROGRESS.
+  const isCancellable =
+    !isTerminal && !(role === UserRole.DRIVER && normalizedStatus === RideLifecycleStatus.IN_PROGRESS);
 
   const bookingIdentifier = ride.rideId ?? ride.tripId;
   const reviewedBookingIds = new Set(givenReviews.map((review) => review.bookingId));
@@ -205,6 +230,16 @@ export default function RideDetail() {
                     <Star className="h-3.5 w-3.5 mr-1.5 fill-yellow-400 text-yellow-400" />
                     Review
                   </Link>
+                </Button>
+              )}
+              {isStartable && (
+                <Button
+                  size="sm"
+                  className="gap-1.5 bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={() => setConfirmStart(true)}
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Start Trip
                 </Button>
               )}
               {isCompletable && (
@@ -340,6 +375,32 @@ export default function RideDetail() {
           />
         </div>
       </div>
+
+      {/* Start trip confirmation */}
+      <AlertDialog open={confirmStart} onOpenChange={setConfirmStart}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start Trip</AlertDialogTitle>
+            <AlertDialogDescription>
+              Begin this trip now? Passengers will see it as in progress, and the trip can no
+              longer be cancelled — you'll need to complete it on arrival.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Not yet</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                startMutation.mutate();
+              }}
+              disabled={startMutation.isPending}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {startMutation.isPending ? 'Starting…' : 'Start Trip'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Complete trip confirmation */}
       <AlertDialog open={confirmComplete} onOpenChange={setConfirmComplete}>

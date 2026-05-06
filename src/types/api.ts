@@ -24,6 +24,7 @@ export enum UserRole {
 }
 
 export enum RideLifecycleStatus {
+  CREATED = 'CREATED',
   AVAILABLE = 'AVAILABLE',
   ALLOTTED = 'ALLOTTED',
   REQUESTED = 'REQUESTED',
