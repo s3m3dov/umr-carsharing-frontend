@@ -23,7 +23,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
 import GoogleMap from '@/components/GoogleMap';
-import { ArrowLeft, MapPin, XCircle, Clock, Car, Users, Star, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, XCircle, CheckCircle2, Clock, Car, Users, Star, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 function getRideStatusClass(status: string): string {
@@ -62,6 +62,7 @@ export default function RideDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmComplete, setConfirmComplete] = useState(false);
 
   const userApi = role === UserRole.DRIVER ? driverApi : passengerApi;
 
@@ -92,6 +93,20 @@ export default function RideDetail() {
     const allRides = [...upcoming, ...history];
     return allRides.find(r => r.rideId === id || r.tripId === id);
   }, [upcoming, history, id]);
+
+  const completeMutation = useMutation({
+    mutationFn: () => driverApi.completeTrip(ride!.tripId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
+      queryClient.invalidateQueries({ queryKey: ['historyRides', userId] });
+      setConfirmComplete(false);
+      toast({ title: 'Trip completed.', description: 'Passengers can now leave a review.' });
+    },
+    onError: (error) => {
+      const message = getBackendErrorMessage(error, 'Failed to complete trip.');
+      toast({ title: 'Failed to complete trip.', description: message, variant: 'destructive' });
+    },
+  });
 
   const cancelMutation = useMutation({
     mutationFn: () => {
@@ -138,9 +153,12 @@ export default function RideDetail() {
     );
   }
 
+  const normalizedStatus = ride.tripStatus.toUpperCase() as RideLifecycleStatus;
   const isCancellable = ![RideLifecycleStatus.COMPLETED, RideLifecycleStatus.CANCELLED, RideLifecycleStatus.REJECTED].includes(
-    ride.tripStatus.toUpperCase() as RideLifecycleStatus,
+    normalizedStatus,
   );
+  const isCompletable =
+    role === UserRole.DRIVER && normalizedStatus === RideLifecycleStatus.IN_PROGRESS;
 
   const bookingIdentifier = ride.rideId ?? ride.tripId;
   const reviewedBookingIds = new Set(givenReviews.map((review) => review.bookingId));
@@ -187,6 +205,16 @@ export default function RideDetail() {
                     <Star className="h-3.5 w-3.5 mr-1.5 fill-yellow-400 text-yellow-400" />
                     Review
                   </Link>
+                </Button>
+              )}
+              {isCompletable && (
+                <Button
+                  size="sm"
+                  className="gap-1.5 bg-green-600 text-white hover:bg-green-700"
+                  onClick={() => setConfirmComplete(true)}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Complete Trip
                 </Button>
               )}
               {isCancellable && (
@@ -312,6 +340,32 @@ export default function RideDetail() {
           />
         </div>
       </div>
+
+      {/* Complete trip confirmation */}
+      <AlertDialog open={confirmComplete} onOpenChange={setConfirmComplete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Trip</AlertDialogTitle>
+            <AlertDialogDescription>
+              Mark this trip as completed? Any remaining passengers will be auto-completed,
+              and reviews will become available for everyone on board. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Not yet</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                completeMutation.mutate();
+              }}
+              disabled={completeMutation.isPending}
+              className="bg-green-600 text-white hover:bg-green-700"
+            >
+              {completeMutation.isPending ? 'Completing…' : 'Complete Trip'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Cancel confirmation */}
       <AlertDialog open={confirmCancel} onOpenChange={setConfirmCancel}>
