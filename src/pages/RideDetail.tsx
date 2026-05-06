@@ -225,19 +225,30 @@ export default function RideDetail() {
   const isCancellable =
     !isTerminal && !(role === UserRole.DRIVER && normalizedStatus === RideLifecycleStatus.IN_PROGRESS);
 
+  const isDriver = role === UserRole.DRIVER;
   const bookingIdentifier = ride.rideId ?? ride.tripId;
   const reviewedBookingIds = new Set(givenReviews.map((review) => review.bookingId));
   const submittedReviewsForTrip = givenReviews
     .filter((review) => review.tripId === ride.tripId)
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+
+  const hasPendingDriverReview =
+    isDriver &&
+    (ride.passengers ?? []).some(
+      (p) =>
+        !!p.bookingId &&
+        (p.bookingStatus ?? '').toUpperCase() === RideLifecycleStatus.COMPLETED &&
+        !reviewedBookingIds.has(p.bookingId),
+    );
   const hasSubmittedReview =
-    !!bookingIdentifier && reviewedBookingIds.has(bookingIdentifier);
+    !isDriver && !!bookingIdentifier && reviewedBookingIds.has(bookingIdentifier);
   const canReview =
     ride.tripStatus.toUpperCase() === RideLifecycleStatus.COMPLETED &&
-    !!bookingIdentifier &&
-    !hasSubmittedReview;
+    (isDriver ? hasPendingDriverReview : !!bookingIdentifier && !hasSubmittedReview);
 
-  const reviewLink = `/reviews?bookingId=${encodeURIComponent(ride.rideId ?? ride.tripId)}&tripId=${encodeURIComponent(ride.tripId)}`;
+  const reviewLink = isDriver
+    ? `/reviews?tripId=${encodeURIComponent(ride.tripId)}`
+    : `/reviews?bookingId=${encodeURIComponent(ride.rideId ?? ride.tripId)}&tripId=${encodeURIComponent(ride.tripId)}`;
 
   const mapMarkers = [
     {
