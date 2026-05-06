@@ -218,6 +218,12 @@ export interface ReviewRequestDTO {
   comment?: string;
 }
 
+export interface AverageRatingResponse {
+  subjectId: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
 export interface DriverProfileResponse {
   userId: string;
   firstName: string;

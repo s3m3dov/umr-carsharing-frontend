@@ -5,13 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { driverApi } from '@/shared/api/driver-api';
 import { passengerApi } from '@/shared/api/passenger-api';
 import { getBackendErrorMessage } from '@/shared/api/error-toast';
+import { useSubmittedReviews } from '@/hooks/use-submitted-reviews';
 import {
   RideLifecycleStatus,
   ReviewUserType,
   UserRole,
   type ReviewRequestDTO,
   type ReviewResponse,
-  type RideBasicInfoDTO,
 } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,29 +44,16 @@ export default function Reviews() {
   const isDriver = role === UserRole.DRIVER;
   const reviewTargetLabel = isDriver ? 'passenger' : 'driver';
 
+  const subjectType = isDriver ? 'DRIVER' : 'PASSENGER';
+
   const { data: reviews = [], isLoading: loadingReviews } = useQuery({
-    queryKey: ['reviews', role, userId],
+    queryKey: ['reviews', 'received', subjectType, userId],
     queryFn: async () => {
       if (!userId) return [] as ReviewResponse[];
       return isDriver
         ? driverApi.getReviewsForDriver(userId)
         : passengerApi.getReviewsForPassenger(userId);
     },
-    enabled: !!userId,
-  });
-
-  const {
-    data: reviewHistory = [],
-    isLoading: loadingReviewHistory,
-    error: reviewHistoryError,
-    refetch: refetchReviewHistory,
-  } = useQuery({
-    queryKey: ['reviews', 'given', role, userId],
-    queryFn: () => (
-      isDriver
-        ? driverApi.getReviewsGivenByDriver(userId!)
-        : passengerApi.getReviewsGivenByPassenger(userId!)
-    ),
     enabled: !!userId,
   });
 
@@ -85,21 +72,24 @@ export default function Reviews() {
     enabled: !!userId,
   });
 
-  const { data: driverRating } = useQuery({
-    queryKey: ['driver-rating', userId],
-    queryFn: () => driverApi.getDriverRating(userId!),
-    enabled: !!userId && isDriver,
+  const {
+    data: reviewHistory,
+    isLoading: loadingReviewHistory,
+    error: reviewHistoryError,
+    refetch: refetchReviewHistory,
+  } = useSubmittedReviews(historyRides);
+
+  const { data: ratingData } = useQuery({
+    queryKey: ['user-rating', subjectType, userId],
+    queryFn: () => (
+      isDriver
+        ? driverApi.getDriverRating(userId!)
+        : passengerApi.getPassengerRating(userId!)
+    ),
+    enabled: !!userId,
   });
 
-  const averageRating = useMemo(() => {
-    if (isDriver && typeof driverRating === 'number') {
-      return driverRating;
-    }
-    if (!reviews.length) {
-      return 0;
-    }
-    return reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
-  }, [driverRating, isDriver, reviews]);
+  const averageRating = ratingData?.averageRating ?? 0;
 
   const sortedReviews = useMemo(
     () => [...reviews].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
@@ -180,10 +170,9 @@ export default function Reviews() {
       setForm({ rating: 5, comment: '' });
       setBookingId('');
       setTripId('');
-      queryClient.invalidateQueries({ queryKey: ['reviews', role, userId] });
-      queryClient.invalidateQueries({ queryKey: ['reviews', 'given', role, userId] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'received'] });
       queryClient.invalidateQueries({ queryKey: ['rides', 'history', role, userId] });
-      queryClient.invalidateQueries({ queryKey: ['driver-rating', userId] });
+      queryClient.invalidateQueries({ queryKey: ['user-rating'] });
     },
     onError: (error) => {
       const message = getBackendErrorMessage(error, 'Failed to submit review.');

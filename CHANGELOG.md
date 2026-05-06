@@ -13,6 +13,23 @@ and this project adheres to **Semantic Versioning**
 
 ---
 
+onl## [v0.3.9] – Trip Lifecycle & Review System (2026-05-06)
+
+**Author:** s3m3dov (Hikmat Samadov)
+
+### Added
+
+- **Full Trip Lifecycle Management** — Implemented end-to-end trip status transitions, including the ability for drivers to "Start Ride" and "Complete Trip".
+- **Booking Completion** — Added functionality to finalize individual bookings, ensuring accurate trip records.
+- **Enhanced Review System** — Introduced the ability for passengers to leave detailed reviews for both the trip and the driver upon arrival.
+- **Tabbed Review Interface** — Redesigned the Reviews page with a modern tabbed layout, separating "Received" and "Submitted" reviews for improved user experience.
+
+### Changed
+
+- **Infrastructure Update** — Updated API gateway IP addresses across configuration files to reflect recent backend server migrations.
+
+---
+
 ## [v0.3.8] – Full Platform Polish & Visual Depth (2026-04-13)
 
 **Author:** s3m3dov (Hikmat Samadov)

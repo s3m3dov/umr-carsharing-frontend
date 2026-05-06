@@ -1,6 +1,5 @@
 import { apiClient } from './client';
 import { ROUTES } from './service-routes';
-import { ApiError } from './error-parser';
 import type {
   UserInfoDTO,
   RideBasicInfoDTO,
@@ -12,6 +11,7 @@ import type {
   OfferRideDTO,
   ReviewResponse,
   ReviewRequestDTO,
+  AverageRatingResponse,
 } from '@/types/api';
 
 function normalizeDriverTrip(trip: DriverTripResponse): RideBasicInfoDTO {
@@ -110,18 +110,8 @@ export const driverApi = {
   // Review endpoints
   getReviewsForDriver: (driverId: string) =>
     apiClient.get<ReviewResponse[]>(ROUTES.driver.reviewsReceived(driverId)),
-  getReviewsGivenByDriver: async (driverId: string) => {
-    try {
-      return await apiClient.get<ReviewResponse[]>(ROUTES.driver.reviewsGiven(driverId));
-    } catch (error) {
-      if (error instanceof ApiError && [404, 405].includes(error.status)) {
-        return [];
-      }
-      throw error;
-    }
-  },
   leaveReviewForPassenger: (reviewData: ReviewRequestDTO) =>
     apiClient.post<void>(ROUTES.driver.leaveReview, reviewData),
   getDriverRating: (driverId: string) =>
-    apiClient.get<number>(ROUTES.driver.rating(driverId)),
+    apiClient.get<AverageRatingResponse>(ROUTES.driver.rating(driverId)),
 };
