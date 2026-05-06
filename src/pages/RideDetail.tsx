@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { driverApi } from '@/shared/api/driver-api';
 import { passengerApi } from '@/shared/api/passenger-api';
+import { useSubmittedReviews } from '@/hooks/use-submitted-reviews';
 import { RideBasicInfoDTO, RideLifecycleStatus, UserRole, CancelRideRequestDTO, ReviewUserType } from '@/types/api';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -119,20 +120,13 @@ export default function RideDetail() {
     enabled: !!userId,
   });
 
-  const { data: givenReviews = [] } = useQuery({
-    queryKey: ['reviews', 'given', role, userId],
-    queryFn: () => (
-      role === UserRole.DRIVER
-        ? driverApi.getReviewsGivenByDriver(userId!)
-        : passengerApi.getReviewsGivenByPassenger(userId!)
-    ),
-    enabled: !!userId,
-  });
-
   const ride = useMemo(() => {
     const allRides = [...upcoming, ...history];
     return allRides.find(r => r.rideId === id || r.tripId === id);
   }, [upcoming, history, id]);
+
+  const ridesForReviewLookup = useMemo(() => (ride ? [ride] : []), [ride]);
+  const { data: givenReviews = [] } = useSubmittedReviews(ridesForReviewLookup);
 
   const startMutation = useMutation({
     mutationFn: () => driverApi.startTrip(ride!.tripId),

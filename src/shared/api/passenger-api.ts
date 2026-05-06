@@ -1,6 +1,5 @@
 import { apiClient } from './client';
 import { ROUTES } from './service-routes';
-import { ApiError } from './error-parser';
 import type {
   UserInfoDTO,
   RideDTO,
@@ -14,6 +13,7 @@ import type {
   MatchingTripResponse,
   BookRideRequestDTO,
   PassengerProfileResponse,
+  AverageRatingResponse,
 } from '@/types/api';
 
 function toOptionalString(value: unknown): string | null {
@@ -162,17 +162,9 @@ export const passengerApi = {
   getReviewsForPassenger: (passengerId: string) =>
     apiClient.get<ReviewResponse[]>(ROUTES.passenger.reviewsReceived(passengerId)),
 
-  getReviewsGivenByPassenger: async (passengerId: string) => {
-    try {
-      return await apiClient.get<ReviewResponse[]>(ROUTES.passenger.reviewsGiven(passengerId));
-    } catch (error) {
-      if (error instanceof ApiError && [404, 405].includes(error.status)) {
-        return [];
-      }
-      throw error;
-    }
-  },
-
   leaveReviewForDriver: (reviewData: ReviewRequestDTO) =>
     apiClient.post<void>(ROUTES.passenger.leaveReview, reviewData),
+
+  getPassengerRating: (passengerId: string) =>
+    apiClient.get<AverageRatingResponse>(ROUTES.passenger.rating(passengerId)),
 };

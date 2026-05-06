@@ -82,8 +82,8 @@ export default function DriverDashboard() {
     enabled: !!userId,
   });
 
-  const { data: rating, isLoading: loadingRating } = useQuery({
-    queryKey: ['driver-rating', userId],
+  const { data: ratingData, isLoading: loadingRating } = useQuery({
+    queryKey: ['user-rating', 'DRIVER', userId],
     queryFn: () => driverApi.getDriverRating(userId!),
     enabled: !!userId,
   });
@@ -94,7 +94,11 @@ export default function DriverDashboard() {
 
   const upcomingCount = loadingUpcoming ? null : (upcomingRides?.length ?? 0);
   const completedCount = loadingHistory ? null : (historyRides?.length ?? 0);
-  const avgRating = loadingRating ? null : (typeof rating === 'number' ? rating.toFixed(1) : '—');
+  const avgRating = loadingRating
+    ? null
+    : typeof ratingData?.averageRating === 'number'
+      ? ratingData.averageRating.toFixed(1)
+      : '—';
 
   return (
     <Layout>

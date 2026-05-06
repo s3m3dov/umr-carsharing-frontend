@@ -40,7 +40,6 @@ export const ROUTES = {
     completeRide: (bookingId: string) => `/trip-service/api/bookings/${bookingId}/complete`,
     // Review endpoints
     reviewsReceived: (driverId: string) => `/review-service/api/reviews/driver/${driverId}`,
-    reviewsGiven: (driverId: string) => `/review-service/api/reviews/reviewer/${driverId}`,
     leaveReview: '/review-service/api/reviews/passenger',
     rating: (driverId: string) => `/review-service/api/reviews/driver/${driverId}/average-rating`,
   },
@@ -53,8 +52,8 @@ export const ROUTES = {
     searchRoutes: '/trip-service/api/trips/search/matching-route',
     // Review endpoints
     reviewsReceived: (passengerId: string) => `/review-service/api/reviews/passenger/${passengerId}`,
-    reviewsGiven: (passengerId: string) => `/review-service/api/reviews/reviewer/${passengerId}`,
     leaveReview: '/review-service/api/reviews/driver',
+    rating: (passengerId: string) => `/review-service/api/reviews/passenger/${passengerId}/average-rating`,
     stats: (passengerId: string) => `/trip-service/api/passengers/${passengerId}/stats`,
   },
 } as const;
