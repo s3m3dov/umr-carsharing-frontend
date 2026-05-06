@@ -58,6 +58,37 @@ function DetailRow({ label, value, icon: Icon }: { label: string; value: React.R
   );
 }
 
+function getCompletableBookingIds(ride: RideBasicInfoDTO): string[] {
+  const terminalBookingStatuses = new Set([
+    RideLifecycleStatus.COMPLETED,
+    RideLifecycleStatus.CANCELLED,
+    RideLifecycleStatus.REJECTED,
+  ]);
+
+  const bookingIds = new Set<string>();
+
+  ride.bookingIds?.forEach((bookingId) => {
+    if (bookingId) {
+      bookingIds.add(bookingId);
+    }
+  });
+
+  ride.passengers?.forEach((passenger) => {
+    const bookingStatus = passenger.bookingStatus?.toUpperCase();
+    if (bookingStatus && terminalBookingStatuses.has(bookingStatus as RideLifecycleStatus)) {
+      if (passenger.bookingId) {
+        bookingIds.delete(passenger.bookingId);
+      }
+      return;
+    }
+    if (passenger.bookingId) {
+      bookingIds.add(passenger.bookingId);
+    }
+  });
+
+  return Array.from(bookingIds);
+}
+
 export default function RideDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -112,12 +143,22 @@ export default function RideDetail() {
   });
 
   const completeMutation = useMutation({
-    mutationFn: () => driverApi.completeTrip(ride!.tripId),
+    mutationFn: async () => {
+      const currentRide = ride!;
+      const bookingIds = getCompletableBookingIds(currentRide);
+
+      if ((currentRide.passengers?.length ?? 0) > 0 && bookingIds.length === 0) {
+        throw new Error('No booking IDs were available to complete passenger rides.');
+      }
+
+      await Promise.all(bookingIds.map((bookingId) => driverApi.completeRide(bookingId)));
+      return driverApi.completeTrip(currentRide.tripId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['upcomingRides', userId] });
       queryClient.invalidateQueries({ queryKey: ['historyRides', userId] });
       setConfirmComplete(false);
-      toast({ title: 'Trip completed.', description: 'Passengers can now leave a review.' });
+      toast({ title: 'Trip completed.', description: 'Passenger rides were completed and reviews are now available.' });
     },
     onError: (error) => {
       const message = getBackendErrorMessage(error, 'Failed to complete trip.');
